@@ -1,0 +1,9 @@
+name: Kingdoms
+version: '${version}'
+main: io.github.fisher2911.kingdoms.Kingdoms
+api-version: 1.19
+authors: [ Fisher2911 ]
+commands:
+  kingdom:
+    description: test
+    aliases: ["k"]
