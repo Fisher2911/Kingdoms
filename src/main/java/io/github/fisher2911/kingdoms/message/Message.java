@@ -17,7 +17,11 @@ public enum Message {
     NO_KINGDOM_PERMISSION,
     ALREADY_CLAIMED,
     SUCCESSFUL_CHUNK_CLAIM,
-    NO_CLAIM_PERMISSION;
+    SUCCESSFUL_CHUNK_UNCLAIM,
+    NO_CLAIM_PERMISSION,
+    NOT_CLAIMED_BY_KINGDOM
+
+    ;
 
     public String getConfigPath() {
         return ALREADY_IN_KINGDOM.toString().toLowerCase().replace("_", "-");

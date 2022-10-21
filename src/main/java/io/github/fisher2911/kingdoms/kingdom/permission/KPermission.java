@@ -16,7 +16,10 @@ public enum KPermission {
     USE_PRESSURE_PLATE(PermissionContext.CLAIM),
     KILL_MOBS(PermissionContext.CLAIM),
     FARM_CROPS(PermissionContext.CLAIM),
-    CLAIM_LAND(PermissionContext.KINGDOM);
+    CLAIM_LAND(PermissionContext.KINGDOM),
+    UNCLAIM_LAND(PermissionContext.KINGDOM, PermissionContext.CLAIM)
+
+    ;
 
     private final Set<PermissionContext> permissionContextSet;
 

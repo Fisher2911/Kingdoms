@@ -60,7 +60,7 @@ public abstract class KCommand {
             return;
         }
         if (args.length == 0) {
-            this.execute(user, args, newPrevious);
+            this.execute(user, args, previousArgs);
             return;
         }
         final String first = args[0];

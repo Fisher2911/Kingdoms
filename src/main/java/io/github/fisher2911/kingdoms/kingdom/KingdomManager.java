@@ -56,4 +56,7 @@ public class KingdomManager {
         return Optional.ofNullable(this.kingdoms.get(id));
     }
 
+    public int countKingdoms() {
+        return this.kingdoms.size();
+    }
 }

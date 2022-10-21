@@ -23,6 +23,9 @@ public interface Kingdom extends KPermissible {
     PermissionContainer getPermissions();
     PermissionContainer getDefaultChunkPermissions();
     boolean hasPermission(User user, KPermission permission);
+    boolean hasPermission(User user, KPermission permission, ClaimedChunk chunk);
+    boolean hasPermission(Role role, KPermission permission);
+    boolean hasPermission(Role role, KPermission permission, ClaimedChunk chunk);
     Collection<ClaimedChunk> getClaimedChunks();
     void setRole(User user, Role role);
     void removeMember(User member);

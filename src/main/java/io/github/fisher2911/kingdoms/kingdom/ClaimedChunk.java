@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class ClaimedChunk implements Claim {
@@ -58,4 +59,16 @@ public class ClaimedChunk implements Claim {
         return permissions;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final ClaimedChunk that = (ClaimedChunk) o;
+        return Objects.equals(getChunk(), that.getChunk());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getChunk());
+    }
 }

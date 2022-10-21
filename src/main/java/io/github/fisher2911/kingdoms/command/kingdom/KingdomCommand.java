@@ -4,6 +4,7 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.ClaimCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.claim.UnclaimCommand;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
 import org.bukkit.command.Command;
@@ -13,7 +14,6 @@ import org.bukkit.command.TabExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +24,7 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         super(plugin, "kingdom", null, CommandSenderType.ANY, -1, -1, subCommands);
         this.addSubCommand(new CreateCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new ClaimCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new UnclaimCommand(this.plugin, new HashMap<>()));
     }
 
     @Override
@@ -34,12 +35,12 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
 
     @Override
     public void execute(User user, String[] args, String[] previous) {
-        MessageHandler.sendMessage(user, "test: " + Arrays.toString(args) + " - " + Arrays.toString(previous));
+        this.sendHelp(user, args, previous);
     }
 
     @Override
     public void sendHelp(User user, String[] args, String[] previous) {
-        MessageHandler.sendMessage(user, "/test: " + Arrays.toString(args) + " - " + Arrays.toString(previous));
+        MessageHandler.sendMessage(user, "/k");
     }
 
     @Override

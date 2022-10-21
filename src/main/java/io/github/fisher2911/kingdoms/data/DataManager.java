@@ -26,7 +26,7 @@ public class DataManager {
         final Role leader = this.roleManager.getLeader();
         final Kingdom kingdom = new KingdomImpl(
                 this.plugin,
-                1,// todo
+                this.plugin.getKingdomManager().countKingdoms(),
                 name,
                 new HashMap<>(),
                 new HashMap<>(),

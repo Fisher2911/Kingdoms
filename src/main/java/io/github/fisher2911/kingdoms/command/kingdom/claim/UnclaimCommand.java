@@ -13,13 +13,13 @@ import org.bukkit.Location;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ClaimCommand extends KCommand {
+public class UnclaimCommand extends KCommand {
 
     private final KingdomManager kingdomManager;
     private final ClaimManager claimManager;
 
-    public ClaimCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
-        super(plugin, "claim", null, CommandSenderType.PLAYER, 0, 2, subCommands);
+    public UnclaimCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
+        super(plugin, "unclaim", null, CommandSenderType.PLAYER, 0, 2, subCommands);
         this.kingdomManager = this.plugin.getKingdomManager();
         this.claimManager = this.plugin.getClaimManager();
         this.addSubCommand(new AutoSubCommand(this.plugin, new HashMap<>()));
@@ -34,13 +34,12 @@ public class ClaimCommand extends KCommand {
         this.kingdomManager.getKingdom(user.getKingdomId()).
                 ifPresentOrElse(kingdom -> {
                     final Location location = user.getPlayer().getLocation();
-                    this.claimManager.tryClaim(user, location);
+                    this.claimManager.tryUnClaim(user, location);
                 }, () -> MessageHandler.sendMessage(user, Message.KINGDOM_NOT_FOUND));
     }
 
     @Override
     public void sendHelp(User user, String[] args, String[] previous) {
-        MessageHandler.sendMessage(user, "/k claim [auto]");
+        MessageHandler.sendMessage(user, "/k unclaim [auto]");
     }
-
 }

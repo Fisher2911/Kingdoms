@@ -49,6 +49,18 @@ public class WorldManager {
         worldMap.setChunk(chunk);
     }
 
+    public void setToWilderness(KChunk at) {
+        final WorldMap worldMap = this.getWorldMap(at.world());
+        if (worldMap == null) return;
+        worldMap.setChunk(ClaimedChunk.wilderness(at));
+    }
+
+    public void setToWilderness(UUID world, int chunkX, int chunkZ) {
+        final WorldMap worldMap = this.getWorldMap(world);
+        if (worldMap == null) return;
+        worldMap.setChunk(ClaimedChunk.wilderness(KChunk.at(world, chunkX, chunkZ)));
+    }
+
     public void populate() {
         for (World world : Bukkit.getWorlds()) {
             this.worldMaps.put(world.getUID(), new WorldMap(this.plugin, world.getUID(), new HashMap<>()));

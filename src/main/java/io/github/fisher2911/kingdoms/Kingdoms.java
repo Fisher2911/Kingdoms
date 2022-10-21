@@ -7,6 +7,7 @@ import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
+import io.github.fisher2911.kingdoms.listener.ClaimEnterListener;
 import io.github.fisher2911.kingdoms.listener.PlayerJoinListener;
 import io.github.fisher2911.kingdoms.listener.ProtectionListener;
 import io.github.fisher2911.kingdoms.user.UserManager;
@@ -52,7 +53,8 @@ public final class Kingdoms extends JavaPlugin {
     private void registerListeners() {
         List.of(
                         new PlayerJoinListener(this),
-                        new ProtectionListener(this)
+                        new ProtectionListener(this),
+                        new ClaimEnterListener(this)
                 ).
                 forEach(this::registerListener);
     }

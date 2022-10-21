@@ -97,7 +97,23 @@ public class KingdomImpl implements Kingdom {
     public boolean hasPermission(User user, KPermission permission) {
         final Role role = this.getRole(user.getId());
         if (role == null) return false;
+        return this.hasPermission(role, permission);
+    }
+
+    @Override
+    public boolean hasPermission(User user, KPermission permission, ClaimedChunk chunk) {
+        final Role role = this.getRole(user.getId());
+        return chunk.getPermissions().hasPermission(role, permission) || this.hasPermission(role, permission);
+    }
+
+    @Override
+    public boolean hasPermission(Role role, KPermission permission) {
         return this.permissions.hasPermission(role, permission);
+    }
+
+    @Override
+    public boolean hasPermission(Role role, KPermission permission, ClaimedChunk chunk) {
+        return chunk.getPermissions().hasPermission(role, permission) || this.hasPermission(role, permission);
     }
 
     @Override
