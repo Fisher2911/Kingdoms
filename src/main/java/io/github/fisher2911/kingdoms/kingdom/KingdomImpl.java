@@ -90,7 +90,7 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public PermissionContainer getDefaultChunkPermissions() {
-        return this.defaultChunkPermissions;
+        return this.defaultChunkPermissions.copy();
     }
 
     @Override
@@ -103,7 +103,10 @@ public class KingdomImpl implements Kingdom {
     @Override
     public boolean hasPermission(User user, KPermission permission, ClaimedChunk chunk) {
         final Role role = this.getRole(user.getId());
-        return chunk.getPermissions().hasPermission(role, permission) || this.hasPermission(role, permission);
+        if (chunk.getPermissions().containsPermission(role, permission)) {
+            return chunk.getPermissions().hasPermission(role, permission);
+        }
+        return this.hasPermission(role, permission);
     }
 
     @Override
@@ -113,7 +116,10 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public boolean hasPermission(Role role, KPermission permission, ClaimedChunk chunk) {
-        return chunk.getPermissions().hasPermission(role, permission) || this.hasPermission(role, permission);
+        if (chunk.getPermissions().containsPermission(role, permission)) {
+            return chunk.getPermissions().hasPermission(role, permission);
+        }
+        return this.hasPermission(role, permission);
     }
 
     @Override

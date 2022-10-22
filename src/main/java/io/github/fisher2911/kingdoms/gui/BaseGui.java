@@ -10,6 +10,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -28,6 +29,10 @@ public abstract class BaseGui implements InventoryHolder {
         this.reset();
     }
 
+    public void open(HumanEntity human) {
+        human.openInventory(this.inventory);
+    }
+
     /**
      * clears the inventory then sets all items in {guiItemsMap} to the inventory
      */
@@ -40,7 +45,7 @@ public abstract class BaseGui implements InventoryHolder {
 
     public void refreshViewers() {
         for (HumanEntity viewer : this.inventory.getViewers()) {
-            viewer.openInventory(this.inventory);
+            this.open(viewer);
         }
     }
 
@@ -54,8 +59,21 @@ public abstract class BaseGui implements InventoryHolder {
         this.refreshViewers();
     }
 
+    public void refresh(int slot) {
+        final BaseGuiItem item = this.guiItemsMap.get(slot);
+        if (item == null) return;
+        this.inventory.setItem(slot, item.getItemStack());
+        this.refreshViewers();
+    }
+
     public void set(int slot, BaseGuiItem item) {
         this.guiItemsMap.put(slot, item);
+        if (item != null) this.inventory.setItem(slot, item.getItemStack());
+    }
+
+    @Nullable
+    public BaseGuiItem getItem(int slot) {
+        return this.guiItemsMap.get(slot);
     }
 
     public abstract void handleClick(InventoryClickEvent event);

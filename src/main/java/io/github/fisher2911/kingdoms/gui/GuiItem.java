@@ -1,40 +1,51 @@
 package io.github.fisher2911.kingdoms.gui;
 
-import org.bukkit.event.inventory.ClickType;
+import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class GuiItem extends BaseGuiItem {
 
-    private final Map<ClickType, Consumer<InventoryEventWrapper<InventoryClickEvent>>> clickHandlers;
+    private final Consumer<InventoryEventWrapper<InventoryClickEvent>> clickHandler;
     @Nullable
     private final Consumer<InventoryEventWrapper<InventoryDragEvent>> dragHandler;
 
     public GuiItem(
-            ItemStack itemStack,
-            Map<ClickType, Consumer<InventoryEventWrapper<InventoryClickEvent>>> clickHandlers,
-            @Nullable Consumer<InventoryEventWrapper<InventoryDragEvent>> dragHandler
+            ItemBuilder itemBuilder,
+            Map<Object, Object> metadata,
+            @Nullable Consumer<InventoryEventWrapper<InventoryClickEvent>> clickHandler,
+            @Nullable Consumer<InventoryEventWrapper<InventoryDragEvent>> dragHandler,
+            List<Supplier<Object>> placeholders
     ) {
-        super(itemStack);
-        this.clickHandlers = clickHandlers;
+        super(itemBuilder, metadata, placeholders);
+        this.clickHandler = clickHandler;
         this.dragHandler = dragHandler;
     }
 
     @Override
-    public BaseGuiItem withItemStack(ItemStack itemStack) {
-        return new GuiItem(itemStack, this.clickHandlers, this.dragHandler);
+    public BaseGuiItem withItem(ItemBuilder item) {
+        return new GuiItem(item, new HashMap<>(this.metadata), this.clickHandler, this.dragHandler, this.placeholders);
+    }
+
+    @Override
+    public BaseGuiItem withItem(ItemStack item) {
+        return this.withItem(ItemBuilder.from(item));
     }
 
     @Override
     public void handleClick(InventoryEventWrapper<InventoryClickEvent> event) {
-        final Consumer<InventoryEventWrapper<InventoryClickEvent>> handler = this.clickHandlers.get(event.event().getClick());
-        if (handler == null) return;
-        handler.accept(event);
+        if (this.clickHandler == null) return;
+        this.clickHandler.accept(event);
     }
 
     @Override
@@ -43,23 +54,34 @@ public class GuiItem extends BaseGuiItem {
         this.dragHandler.accept(event);
     }
 
+    public static Builder builder(ItemBuilder itemBuilder) {
+        return Builder.of(itemBuilder);
+    }
+
     public static class Builder {
 
-        private final ItemStack itemStack;
-        private Map<ClickType, Consumer<InventoryEventWrapper<InventoryClickEvent>>> clickHandlers;
+        private final ItemBuilder itemBuilder;
+        private Map<Object, Object> metadata;
+        private Consumer<InventoryEventWrapper<InventoryClickEvent>> clickHandler;
         @Nullable
         private Consumer<InventoryEventWrapper<InventoryDragEvent>> dragHandler;
+        private final List<Supplier<Object>> placeholders = new ArrayList<>();
 
-        private Builder(ItemStack itemStack) {
-            this.itemStack = itemStack;
+        private Builder(ItemBuilder itemBuilder) {
+            this.itemBuilder = itemBuilder;
         }
 
-        public static Builder of(ItemStack itemStack) {
-            return new Builder(itemStack);
+        private static Builder of(ItemBuilder itemBuilder) {
+            return new Builder(itemBuilder);
         }
 
-        public Builder clickHandler(ClickType clickType, Consumer<InventoryEventWrapper<InventoryClickEvent>> handler) {
-            this.clickHandlers.put(clickType, handler);
+        public Builder metadata(Map<Object, Object> metadata) {
+            this.metadata = metadata;
+            return this;
+        }
+
+        public Builder clickHandler(Consumer<InventoryEventWrapper<InventoryClickEvent>> handler) {
+            this.clickHandler = handler;
             return this;
         }
 
@@ -68,8 +90,19 @@ public class GuiItem extends BaseGuiItem {
             return this;
         }
 
+        public Builder placeholder(Supplier<Object> placeholder) {
+            this.placeholders.add(placeholder);
+            return this;
+        }
+
+        public Builder placeholders(Collection<Supplier<Object>> placeholders) {
+            this.placeholders.addAll(placeholders);
+            return this;
+        }
+
         public GuiItem build() {
-            return new GuiItem(this.itemStack, this.clickHandlers, this.dragHandler);
+            if (this.metadata == null) this.metadata = new HashMap<>();
+            return new GuiItem(this.itemBuilder, this.metadata, this.clickHandler, this.dragHandler, this.placeholders);
         }
     }
 }

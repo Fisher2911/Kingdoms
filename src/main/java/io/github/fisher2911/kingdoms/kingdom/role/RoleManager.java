@@ -4,6 +4,7 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.util.SortedList;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -39,5 +40,9 @@ public class RoleManager {
     public void addRole(Role role) {
         this.roles.put(role.id(), role);
         this.rolesByWeight.add(role);
+    }
+
+    public Collection<String> getAllRoleIds() {
+        return this.roles.keySet();
     }
 }

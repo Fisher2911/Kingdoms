@@ -89,6 +89,10 @@ public class Gui extends BaseGui {
         handler.accept(wrapper);
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static class Builder {
 
         private String name = "";

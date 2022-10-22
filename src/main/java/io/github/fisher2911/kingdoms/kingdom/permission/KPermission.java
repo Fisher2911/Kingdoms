@@ -1,27 +1,35 @@
 package io.github.fisher2911.kingdoms.kingdom.permission;
 
+import io.github.fisher2911.kingdoms.util.StringUtils;
+
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.Set;
 
 public enum KPermission {
 
-    MINE_BLOCK(PermissionContext.CLAIM),
-    PLACE_BLOCK(PermissionContext.CLAIM),
-    OPEN_CONTAINER(PermissionContext.CLAIM),
-    BREAK_CONTAINER(PermissionContext.CLAIM),
-    PLACE_CONTAINER(PermissionContext.CLAIM),
-    USE_LEVER(PermissionContext.CLAIM),
-    USE_BUTTON(PermissionContext.CLAIM),
-    USE_PRESSURE_PLATE(PermissionContext.CLAIM),
-    KILL_MOBS(PermissionContext.CLAIM),
-    FARM_CROPS(PermissionContext.CLAIM),
+    MINE_BLOCK(),
+    PLACE_BLOCK(),
+    OPEN_CONTAINER(),
+    BREAK_CONTAINER(),
+    PLACE_CONTAINER(),
+    USE_LEVER(),
+    USE_BUTTON(),
+    USE_PRESSURE_PLATE(),
+    KILL_MOBS(),
+    FARM_CROPS(),
     CLAIM_LAND(PermissionContext.KINGDOM),
-    UNCLAIM_LAND(PermissionContext.KINGDOM, PermissionContext.CLAIM)
+    UNCLAIM_LAND(),
+    EDIT_LOWER_ROLES_PERMISSIONS(PermissionContext.KINGDOM)
 
     ;
 
     private final Set<PermissionContext> permissionContextSet;
+
+    KPermission() {
+        this.permissionContextSet = EnumSet.allOf(PermissionContext.class);
+    }
 
     KPermission(PermissionContext... contexts) {
         this.permissionContextSet = EnumSet.copyOf(Arrays.asList(contexts));
@@ -29,5 +37,9 @@ public enum KPermission {
 
     public boolean hasContext(PermissionContext context) {
         return this.permissionContextSet.contains(context);
+    }
+
+    public String displayName() {
+        return StringUtils.capitalize(this.toString().replace("_", " ").toLowerCase(Locale.ROOT));
     }
 }

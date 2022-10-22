@@ -2,7 +2,6 @@ package io.github.fisher2911.kingdoms.kingdom.permission;
 
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.util.MapOfMaps;
-import org.bukkit.Bukkit;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,6 +34,10 @@ public class PermissionContainer {
         return this.permissions.getOrDefault(role, permission, false);
     }
 
+    public boolean containsPermission(Role role, KPermission permission) {
+        return this.permissions.getOrDefault(role, Collections.emptyMap()).containsKey(permission);
+    }
+
     public boolean ifPermissible(Role role, KPermission permission, Runnable runnable) {
         if (this.permissions.getOrDefault(role, permission, false)) {
             runnable.run();
@@ -62,5 +65,9 @@ public class PermissionContainer {
         return "PermissionContainer{" +
                 "permissions=" + permissions +
                 '}';
+    }
+
+    public PermissionContainer copy() {
+        return new PermissionContainer(new MapOfMaps<>(this.permissions));
     }
 }

@@ -1,8 +1,10 @@
 package io.github.fisher2911.kingdoms;
 
 import io.github.fisher2911.kingdoms.command.kingdom.KingdomCommand;
+import io.github.fisher2911.kingdoms.config.GuiDisplayItems;
 import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.economy.PriceManager;
+import io.github.fisher2911.kingdoms.gui.GuiListener;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
@@ -27,6 +29,7 @@ public final class Kingdoms extends JavaPlugin {
     private RoleManager roleManager;
     private WorldManager worldManager;
     private ClaimManager claimManager;
+    private GuiDisplayItems guiDisplayItems;
 
     @Override
     public void onEnable() {
@@ -37,13 +40,21 @@ public final class Kingdoms extends JavaPlugin {
         this.kingdomManager = new KingdomManager(this, new HashMap<>());
         this.worldManager = new WorldManager(this, new HashMap<>());
         this.claimManager = new ClaimManager(this);
+        this.guiDisplayItems = new GuiDisplayItems(this);
+
         this.registerListeners();
         this.registerCommands();
-        Bukkit.getScheduler().runTaskLater(this, this.worldManager::populate, 20);
+
+        this.load();
     }
 
     public void registerCommands() {
         this.getCommand("kingdom").setExecutor(new KingdomCommand(this, new HashMap<>()));
+    }
+
+    public void load() {
+        this.guiDisplayItems.load();
+        Bukkit.getScheduler().runTaskLater(this, this.worldManager::populate, 20);
     }
 
     @Override
@@ -54,7 +65,8 @@ public final class Kingdoms extends JavaPlugin {
         List.of(
                         new PlayerJoinListener(this),
                         new ProtectionListener(this),
-                        new ClaimEnterListener(this)
+                        new ClaimEnterListener(this),
+                        new GuiListener()
                 ).
                 forEach(this::registerListener);
     }
@@ -89,5 +101,9 @@ public final class Kingdoms extends JavaPlugin {
 
     public ClaimManager getClaimManager() {
         return claimManager;
+    }
+
+    public GuiDisplayItems getGuiDisplayItems() {
+        return guiDisplayItems;
     }
 }

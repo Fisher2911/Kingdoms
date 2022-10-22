@@ -113,9 +113,8 @@ public class ProtectionListener implements Listener {
     private boolean isAllowed(Player player, Location location, KPermission permission) {
         final ClaimedChunk chunk = this.worldManager.getAt(location);
         if (chunk.isWilderness()) return true;
-
         return this.kingdomManager.getKingdom(chunk.getOwnedBy()).map(k ->
-                        k.getPermissions().hasPermission(k.getRole(player.getUniqueId()), permission)).
+                        k.hasPermission(k.getRole(player.getUniqueId()), permission, chunk)).
                 orElse(false);
     }
 }

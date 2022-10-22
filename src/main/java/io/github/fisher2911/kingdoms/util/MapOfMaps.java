@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -18,6 +19,15 @@ public class MapOfMaps<K, E, V> implements Map<K, Map<E, V>> {
         this.mapFactory = mapFactory;
     }
 
+    public MapOfMaps(MapOfMaps<K, E, V> map) {
+        this.mapFactory = map.mapFactory;
+        this.map = new HashMap<>();
+        for (var entry : map.map.entrySet()) {
+            final Map<E, V> add = this.mapFactory.get();
+            add.putAll(entry.getValue());
+            this.map.put(entry.getKey(), add);
+        }
+    }
 
     @Nullable
     public V put(K k, E e, V v) {
