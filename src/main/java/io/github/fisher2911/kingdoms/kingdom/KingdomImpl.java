@@ -6,6 +6,9 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
+import io.github.fisher2911.kingdoms.kingdom.upgrade.IntUpgrades;
+import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeHolder;
+import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeId;
 import io.github.fisher2911.kingdoms.user.User;
 
 import java.util.Collection;
@@ -27,6 +30,8 @@ public class KingdomImpl implements Kingdom {
     private final PermissionContainer permissions;
     private final PermissionContainer defaultChunkPermissions;
     private final Set<ClaimedChunk> claims;
+    private final UpgradeHolder upgradeHolder;
+    private final Map<String, Integer> upgradeLevels;
 
     public KingdomImpl(
             Kingdoms plugin,
@@ -36,7 +41,9 @@ public class KingdomImpl implements Kingdom {
             Map<UUID, Role> userRoles,
             PermissionContainer permissions,
             PermissionContainer defaultPermissions,
-            Set<ClaimedChunk> claims
+            Set<ClaimedChunk> claims,
+            UpgradeHolder upgradeHolder,
+            Map<String, Integer> upgradeLevels
     ) {
         this.plugin = plugin;
         this.id = id;
@@ -50,6 +57,8 @@ public class KingdomImpl implements Kingdom {
         this.permissions = permissions;
         this.defaultChunkPermissions = defaultPermissions;
         this.claims = claims;
+        this.upgradeHolder = upgradeHolder;
+        this.upgradeLevels = upgradeLevels;
     }
 
     @Override
@@ -134,6 +143,11 @@ public class KingdomImpl implements Kingdom {
     }
 
     @Override
+    public void addMember(User user) {
+
+    }
+
+    @Override
     public void removeMember(User member) {
         this.members.remove(member.getId());
     }
@@ -141,5 +155,37 @@ public class KingdomImpl implements Kingdom {
     @Override
     public Role getRole(UUID uuid) {
         return this.userRoles.getOrDefault(uuid, this.plugin.getRoleManager().getNonMember());
+    }
+
+    @Override
+    public boolean isFull() {
+        return this.getAvailableChunks() > 0;
+    }
+
+    @Override
+    public UpgradeHolder getUpgradeHolder() {
+        return this.upgradeHolder;
+    }
+
+    @Override
+    public Integer getUpgradeLevel(String id) {
+        return this.upgradeLevels.get(id);
+    }
+
+    @Override
+    public int getAvailableChunks() {
+        return this.getTotalPossibleChunks() - this.claims.size();
+    }
+
+    @Override
+    public int getTotalPossibleChunks() {
+        final String id = UpgradeId.MAX_CLAIMS.toString();
+        final Integer maxClaims = this.upgradeHolder.getValueAtLevel(
+                id,
+                IntUpgrades.class,
+                this.upgradeLevels.getOrDefault(id, 0)
+        );
+        if (maxClaims == null) return 0;
+        return maxClaims;
     }
 }

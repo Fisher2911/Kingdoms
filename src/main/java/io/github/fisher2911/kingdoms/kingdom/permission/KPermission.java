@@ -21,7 +21,8 @@ public enum KPermission {
     FARM_CROPS(),
     CLAIM_LAND(PermissionContext.KINGDOM),
     UNCLAIM_LAND(),
-    EDIT_LOWER_ROLES_PERMISSIONS(PermissionContext.KINGDOM)
+    EDIT_LOWER_ROLES_PERMISSIONS(PermissionContext.KINGDOM),
+    INVITE_MEMBER(PermissionContext.KINGDOM)
 
     ;
 

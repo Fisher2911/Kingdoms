@@ -8,6 +8,7 @@ import io.github.fisher2911.kingdoms.gui.GuiListener;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
+import io.github.fisher2911.kingdoms.kingdom.invite.InviteManager;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.listener.ClaimEnterListener;
 import io.github.fisher2911.kingdoms.listener.PlayerJoinListener;
@@ -23,6 +24,7 @@ import java.util.List;
 public final class Kingdoms extends JavaPlugin {
 
     private KingdomManager kingdomManager;
+    private InviteManager inviteManager;
     private UserManager userManager;
     private DataManager dataManager;
     private PriceManager priceManager;
@@ -34,6 +36,7 @@ public final class Kingdoms extends JavaPlugin {
     @Override
     public void onEnable() {
         this.userManager = new UserManager(new HashMap<>());
+        this.inviteManager = new InviteManager(this);
         this.priceManager = new PriceManager();
         this.roleManager = new RoleManager(this, new HashMap<>());
         this.dataManager = new DataManager(this);

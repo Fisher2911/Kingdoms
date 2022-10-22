@@ -52,6 +52,25 @@ public class KingdomManager {
         return Optional.of(kingdom);
     }
 
+    public Optional<Kingdom> join(User user, int kingdomId) {
+        final Optional<Kingdom> empty = Optional.empty();
+        if (user.getKingdomId() != Kingdom.WILDERNESS_ID) {
+            MessageHandler.sendMessage(user, Message.ALREADY_IN_KINGDOM);
+            return empty;
+        }
+        return this.getKingdom(kingdomId).
+                map(kingdom -> {
+                    if (kingdom.isFull()) {
+                        MessageHandler.sendMessage(user, Message.KINGDOM_FULL);
+                        return null;
+                    }
+                    kingdom.addMember(user);
+                    return kingdom;
+                });
+
+
+    }
+
     public Optional<Kingdom> getKingdom(int id) {
         return Optional.ofNullable(this.kingdoms.get(id));
     }

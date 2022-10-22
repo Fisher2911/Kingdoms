@@ -16,6 +16,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.19.1-R0.1-SNAPSHOT")
     compileOnly("com.mojang:authlib:1.5.25")
     implementation("org.spongepowered:configurate-yaml:4.1.2")
+    implementation("net.objecthunter:exp4j:0.4.8")
 }
 
 tasks {
@@ -30,6 +31,7 @@ tasks {
 
     shadowJar {
         relocate("org.spongepowered.configurate", "io.github.fisher2911.kindomgs.configurate.yaml")
+        relocate("net.objecthunter.exp4j", "io.github.fisher2911.kingdoms.exp4j")
         archiveFileName.set("Kingdoms.jar")
 
         dependencies {
