@@ -18,6 +18,7 @@ public interface Kingdom extends KPermissible, Upgradeable {
 
     int getId();
     String getName();
+    String getDescription();
     Collection<User> getMembers();
     int getMaxMembers();
     Map<UUID, Role> getUserRoles();

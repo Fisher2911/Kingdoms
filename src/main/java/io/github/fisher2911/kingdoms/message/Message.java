@@ -35,6 +35,7 @@ public enum Message {
     RECEIVED_INVITE,
     NOT_INVITED_TO_KINGDOM,
     SUCCESSFUL_RELOAD,
+    KINGDOM_INFO
 
     ;
 

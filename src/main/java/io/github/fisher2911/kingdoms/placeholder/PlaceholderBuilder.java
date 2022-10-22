@@ -21,6 +21,12 @@ public class PlaceholderBuilder {
     static {
         put(Kingdom.class, Placeholder.KINGDOM_ID, k -> castAndParseKingdom(k, Kingdom::getId));
         put(Kingdom.class, Placeholder.KINGDOM_NAME, k -> castAndParseKingdom(k, Kingdom::getName));
+        put(Kingdom.class, Placeholder.KINGDOM_DESCRIPTION, k -> castAndParseKingdom(k, Kingdom::getDescription));
+        put(Kingdom.class, Placeholder.KINGDOM_MEMBERS, k -> castAndParseKingdom(k,
+                kingdom -> String.join(", ", kingdom.getMembers().stream().
+                        map(user -> user.getName() + " (" + kingdom.getRole(user.getId()).displayName() + ")").
+                        toList()))
+        );
 
         put(PermissionWrapper.class,
                 Placeholder.PERMISSION_VALUE,

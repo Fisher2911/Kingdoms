@@ -68,6 +68,10 @@ public class InviteManager {
         MessageHandler.sendMessage(user, Message.NOT_INVITED_TO_KINGDOM);
     }
 
+    public void sendInfo(Kingdom kingdom, User user) {
+        MessageHandler.sendMessage(user, Message.KINGDOM_INFO, kingdom);
+    }
+
     public Collection<KingdomInvite> getInvitedTo(UUID invited) {
         return this.invitedPlayers.get(invited);
     }

@@ -26,7 +26,8 @@ public class KingdomImpl implements Kingdom {
 
     private final Kingdoms plugin;
     private final int id;
-    private final String name;
+    private String name;
+    private String description;
     private final Map<UUID, User> members;
     private final Map<UUID, Role> userRoles;
     private final Multimap<Role, UUID> roles;
@@ -40,6 +41,7 @@ public class KingdomImpl implements Kingdom {
             Kingdoms plugin,
             int id,
             String name,
+            String description,
             Map<UUID, User> members,
             Map<UUID, Role> userRoles,
             PermissionContainer permissions,
@@ -51,6 +53,7 @@ public class KingdomImpl implements Kingdom {
         this.plugin = plugin;
         this.id = id;
         this.name = name;
+        this.description = description;
         this.members = members;
         this.userRoles = userRoles;
         this.roles = Multimaps.newSetMultimap(new HashMap<>(), HashSet::new);
@@ -72,6 +75,11 @@ public class KingdomImpl implements Kingdom {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
     }
 
     @Override

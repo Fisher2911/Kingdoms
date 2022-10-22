@@ -102,6 +102,33 @@ public class KingdomManager {
         return Optional.ofNullable(this.kingdoms.get(id));
     }
 
+    public Optional<Kingdom> getKingdomByName(String name) {
+        return this.kingdoms.values().stream().filter(k -> k.getName().equalsIgnoreCase(name)).findAny();
+    }
+
+    public void sendKingdomInfo(User user, Kingdom kingdom) {
+        if ((kingdom.getId() != user.getKingdomId() && !user.hasPermission(CommandPermission.VIEW_OTHER_KINGDOM_INFO)) ||
+                (kingdom.getId() == user.getKingdomId() && !user.hasPermission(CommandPermission.VIEW_SELF_KINGDOM_INFO))
+        ) {
+            MessageHandler.sendMessage(user, Message.NO_COMMAND_PERMISSION);
+            return;
+        }
+        MessageHandler.sendMessage(user, Message.KINGDOM_INFO, kingdom);
+    }
+
+    public void sendKingdomInfo(User user) {
+        this.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
+            if ((kingdom.getId() != user.getKingdomId() && !user.hasPermission(CommandPermission.VIEW_OTHER_KINGDOM_INFO)) ||
+                    (kingdom.getId() == user.getKingdomId() && !user.hasPermission(CommandPermission.VIEW_SELF_KINGDOM_INFO))
+            ) {
+                MessageHandler.sendMessage(user, Message.NO_COMMAND_PERMISSION);
+                return;
+            }
+            MessageHandler.sendMessage(user, Message.KINGDOM_INFO, kingdom);
+        }, () -> MessageHandler.sendMessage(user, Message.NOT_IN_KINGDOM));
+    }
+
+
     public int countKingdoms() {
         return this.kingdoms.size();
     }

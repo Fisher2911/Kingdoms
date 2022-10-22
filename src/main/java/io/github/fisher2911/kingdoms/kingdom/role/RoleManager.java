@@ -19,7 +19,7 @@ public class RoleManager {
         this.plugin = plugin;
         this.roles = roles;
         this.rolesByWeight = new SortedList<>(new ArrayList<>(), Comparator.comparingInt(Role::weight));
-        this.addRole(new Role("leader", "Leader", 0));
+        this.addRole(new Role("leader", "<red>Leader</>", 0));
         this.addRole(new Role("non-member", "Non-Member", 0));
     }
 

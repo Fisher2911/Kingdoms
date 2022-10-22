@@ -28,6 +28,7 @@ public class DataManager {
                 this.plugin,
                 this.plugin.getKingdomManager().countKingdoms(),
                 name,
+                "<green>A default kingdom description",
                 new HashMap<>(),
                 new HashMap<>(),
                 PermissionContainer.createWithLeader(leader),
