@@ -6,11 +6,20 @@ public enum Placeholder {
     KINGDOM_NAME,
 
     PERMISSION_NAME,
+    PERMISSION_DISPLAY_NAME,
     PERMISSION_VALUE,
-    PERMISSION_VALUE_GUI_DISPLAY;
+    PERMISSION_DISPLAY_VALUE,
 
-    public String asString() {
-        return "%" + this.toString().toLowerCase() + "%";
+    UPGRADE_ID,
+    UPGRADE_DISPLAY_NAME,
+    UPGRADE_VALUE,
+    UPGRADE_DISPLAY_VALUE,
+    UPGRADE_DISPLAY_PRICE,
+
+    ;
+
+    public String toString() {
+        return "%" + super.toString().toLowerCase() + "%";
     }
 
 

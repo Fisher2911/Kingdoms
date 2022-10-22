@@ -38,4 +38,16 @@ public class CompositePrice implements Price {
         this.pay(user);
         return true;
     }
+
+    @Override
+    public String getDisplay() {
+        final StringBuilder builder = new StringBuilder();
+        int index = 0;
+        for (Price price : this.prices) {
+            builder.append(price.getDisplay());
+            if (index < this.prices.size() - 1) builder.append("\n");
+            index++;
+        }
+        return builder.toString();
+    }
 }

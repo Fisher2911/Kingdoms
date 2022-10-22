@@ -6,6 +6,7 @@ import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.ClaimCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.UnclaimCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.permission.PermissionCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.upgrade.UpgradeCommand;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
 import org.bukkit.command.Command;
@@ -27,6 +28,7 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         this.addSubCommand(new ClaimCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new UnclaimCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new PermissionCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new UpgradeCommand(this.plugin, new HashMap<>()));
     }
 
     @Override

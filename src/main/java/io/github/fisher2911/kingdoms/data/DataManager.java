@@ -32,7 +32,9 @@ public class DataManager {
                 new HashMap<>(),
                 PermissionContainer.createWithLeader(leader),
                 PermissionContainer.createWithLeader(leader),
-                new HashSet<>()
+                new HashSet<>(),
+                this.plugin.getUpgradeManager().getUpgradeHolder(),
+                new HashMap<>()
         );
         kingdom.setRole(creator, leader);
         return kingdom;

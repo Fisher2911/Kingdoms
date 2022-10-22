@@ -61,8 +61,13 @@ public class ClaimManager {
             MessageHandler.sendMessage(user, Message.ALREADY_CLAIMED);
             return;
         }
+        if (kingdom.getAvailableChunks() <= 0) {
+            MessageHandler.sendMessage(user, Message.NO_AVAILABLE_CHUNKS);
+            return;
+        }
         final ClaimedChunk claimedChunk = new ClaimedChunk(kingdom.getId(), chunk.getChunk(), kingdom.getDefaultChunkPermissions());
         this.worldManager.setChunk(claimedChunk);
+        kingdom.addClaimedChunk(claimedChunk);
         MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_CLAIM);
     }
 
@@ -101,6 +106,7 @@ public class ClaimManager {
         }
         final ClaimedChunk claimedChunk = new ClaimedChunk(kingdom.getId(), at.getChunk(), kingdom.getDefaultChunkPermissions());
         this.worldManager.setToWilderness(claimedChunk.getChunk());
+        kingdom.removeClaimedChunk(claimedChunk);
         MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_UNCLAIM);
     }
 

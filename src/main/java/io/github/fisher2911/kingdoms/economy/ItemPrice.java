@@ -30,6 +30,18 @@ public class ItemPrice implements Price {
         return new PaymentSteps(this.prices, user.getInventory()).cycle().pay();
     }
 
+    @Override
+    public String getDisplay() {
+        final StringBuilder builder = new StringBuilder();
+        int index = 0;
+        for (var entry : this.prices.entrySet()) {
+            builder.append(entry.getKey().getItemMeta().getDisplayName()).append(": ").append(entry.getValue());
+            if (index < this.prices.size() - 1) builder.append(", ");
+            index++;
+        }
+        return builder.toString();
+    }
+
     private static class PaymentSteps {
 
         private final Map<ItemStack, Integer> prices;

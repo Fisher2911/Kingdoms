@@ -22,7 +22,8 @@ public enum KPermission {
     CLAIM_LAND(PermissionContext.KINGDOM),
     UNCLAIM_LAND(),
     EDIT_LOWER_ROLES_PERMISSIONS(PermissionContext.KINGDOM),
-    INVITE_MEMBER(PermissionContext.KINGDOM)
+    INVITE_MEMBER(PermissionContext.KINGDOM),
+    UPGRADE_KINGDOM(PermissionContext.KINGDOM)
 
     ;
 

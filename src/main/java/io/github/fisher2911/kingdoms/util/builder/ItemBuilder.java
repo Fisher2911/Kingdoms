@@ -2,6 +2,7 @@ package io.github.fisher2911.kingdoms.util.builder;
 
 import io.github.fisher2911.kingdoms.placeholder.PlaceholderBuilder;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -19,6 +20,8 @@ public class ItemBuilder {
 
     private ItemBuilder(Material material) {
         this.material = material;
+        this.itemMeta = Bukkit.getItemFactory().getItemMeta(material);
+        this.amount = 1;
     }
 
     private ItemBuilder(ItemStack itemStack) {

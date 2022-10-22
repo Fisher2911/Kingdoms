@@ -40,11 +40,12 @@ public class ClaimEnterListener implements Listener {
         final ClaimedChunk fromChunk = this.worldManager.getAt(from);
         final ClaimedChunk toChunk = this.worldManager.getAt(to);
 
+        if (toChunk.equals(fromChunk)) return;
+
         if (fromChunk.getOwnedBy() == toChunk.getOwnedBy()) {
             this.enterSameChunkToClaim(this.userManager.wrap(event.getPlayer()), toChunk);
             return;
         }
-        if (toChunk.equals(fromChunk)) return;
         if (fromChunk.isWilderness() && !toChunk.isWilderness()) {
             this.handleEnterKingdomLand(event, toChunk);
             return;

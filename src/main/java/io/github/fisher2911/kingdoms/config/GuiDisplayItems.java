@@ -43,10 +43,10 @@ public class GuiDisplayItems {
             }
             final ItemStack itemStack = new ItemStack(random);
             final List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.BLUE + "Enabled: " + Placeholder.PERMISSION_VALUE_GUI_DISPLAY.asString());
+            lore.add(ChatColor.BLUE + "Enabled: " + Placeholder.PERMISSION_DISPLAY_VALUE.toString());
             final ItemBuilder itemBuilder = ItemBuilder.from(itemStack).
                     amount(1).
-                    name(ChatColor.GREEN + Placeholder.PERMISSION_NAME.asString()).
+                    name(ChatColor.GREEN + Placeholder.PERMISSION_DISPLAY_NAME.toString()).
                     lore(lore);
             this.permissionItems.put(permission, itemBuilder);
         }

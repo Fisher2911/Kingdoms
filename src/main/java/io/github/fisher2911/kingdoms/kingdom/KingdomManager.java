@@ -6,6 +6,8 @@ import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.economy.PriceManager;
 import io.github.fisher2911.kingdoms.economy.PriceType;
+import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
+import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
@@ -37,12 +39,12 @@ public class KingdomManager {
             MessageHandler.sendMessage(user, Message.NO_PERMISSION_TO_CREATE_KINGDOM);
             return empty;
         }
-        if (!this.priceManager.getPrice(PriceType.KINGDOM_CREATION, Price.FREE).payIfCanAfford(user)) {
-            MessageHandler.sendMessage(user, Message.CANNOT_AFFORD_TO_CREATE_KINGDOM);
-            return empty;
-        }
         if (this.dataManager.getKingdomByName(name) != null) {
             MessageHandler.sendMessage(user, Message.KINGDOM_ALREADY_EXISTS);
+            return empty;
+        }
+        if (!this.priceManager.getPrice(PriceType.KINGDOM_CREATION, Price.FREE).payIfCanAfford(user)) {
+            MessageHandler.sendMessage(user, Message.CANNOT_AFFORD_TO_CREATE_KINGDOM);
             return empty;
         }
         final Kingdom kingdom = this.dataManager.newKingdom(user, name);
@@ -67,8 +69,31 @@ public class KingdomManager {
                     kingdom.addMember(user);
                     return kingdom;
                 });
+    }
 
-
+    public void tryLevelUpUpgrade(Kingdom kingdom, User user, Upgrades<?> upgrades) {
+        if (!kingdom.hasPermission(user, KPermission.UPGRADE_KINGDOM)) {
+            MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
+            return;
+        }
+        final String upgradesId = upgrades.getId();
+        final Integer upgradeLevel = kingdom.getUpgradeLevel(upgradesId);
+        if (upgradeLevel == null) {
+            MessageHandler.sendMessage(user, Message.UPGRADE_DOES_NOT_EXIST);
+            return;
+        }
+        if (upgrades.getMaxLevel() <= upgradeLevel) {
+            MessageHandler.sendMessage(user, Message.ALREADY_MAX_UPGRADE_LEVEL);
+            return;
+        }
+        final Price price = kingdom.getUpgradePrice(upgradesId);
+        if (!price.payIfCanAfford(user)) {
+            MessageHandler.sendMessage(user, Message.CANNOT_AFFORD_TO_UPGRADE);
+            MessageHandler.sendMessage(user, price.getDisplay());
+            return;
+        }
+        kingdom.setUpgradeLevel(upgradesId, upgradeLevel + 1);
+        MessageHandler.sendMessage(user, Message.LEVEL_UP_UPGRADE_SUCCESSFUL);
     }
 
     public Optional<Kingdom> getKingdom(int id) {

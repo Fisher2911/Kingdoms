@@ -19,6 +19,7 @@ public interface Kingdom extends KPermissible, Upgradeable {
     int getId();
     String getName();
     Collection<User> getMembers();
+    int getMaxMembers();
     Map<UUID, Role> getUserRoles();
     void consumeRoles(Consumer<User> consumer, Role... roles);
     PermissionContainer getPermissions();
@@ -28,6 +29,8 @@ public interface Kingdom extends KPermissible, Upgradeable {
     boolean hasPermission(Role role, KPermission permission);
     boolean hasPermission(Role role, KPermission permission, ClaimedChunk chunk);
     Collection<ClaimedChunk> getClaimedChunks();
+    void addClaimedChunk(ClaimedChunk chunk);
+    void removeClaimedChunk(ClaimedChunk chunk);
     void setRole(User user, Role role);
     void addMember(User user);
     void removeMember(User member);

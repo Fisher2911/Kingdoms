@@ -1,26 +1,30 @@
 package io.github.fisher2911.kingdoms.kingdom.upgrade;
 
 import io.github.fisher2911.kingdoms.economy.Price;
+import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
 import net.objecthunter.exp4j.Expression;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
+public abstract class NumberUpgrades<T extends Number> implements Upgrades<T> {
 
-public abstract class NumberUpgrades<T extends Number> implements Upgrades<T>  {
-
-    private static final String CURRENT_LEVEL_VARIABLE = "c";
+    public static final String CURRENT_LEVEL_VARIABLE = "c";
 
     protected final String id;
-    protected final int maxLevel;
-    protected final Map<Integer, Price> prices;
-
+    protected final String displayName;
     protected final Expression expression;
+    protected final Expression moneyPriceExpression;
+    protected final int maxLevel;
+    protected final ItemBuilder displayItem;
+    protected final ItemBuilder maxLevelDisplayItem;
 
-    public NumberUpgrades(String id, Expression expression, int maxLevel, Map<Integer, Price> prices) {
+    public NumberUpgrades(String id, String displayName, Expression valueExpression, Expression moneyPriceExpression, int maxLevel, ItemBuilder displayItem, ItemBuilder maxLevelDisplayItem) {
         this.id = id;
-        this.expression = expression;
+        this.displayName = displayName;
+        this.expression = valueExpression;
+        this.moneyPriceExpression = moneyPriceExpression;
         this.maxLevel = maxLevel;
-        this.prices = prices;
+        this.displayItem = displayItem;
+        this.maxLevelDisplayItem = maxLevelDisplayItem;
     }
 
     protected Expression setVariable(int level) {
@@ -33,19 +37,34 @@ public abstract class NumberUpgrades<T extends Number> implements Upgrades<T>  {
     }
 
     @Override
-    public @Nullable T getValueAtLevel(int level) {
-        return null;
-    }
-
-    @Override
     @Nullable
     public Price getPriceAtLevel(int level) {
         if (level > this.maxLevel) return null;
-        return this.prices.get(level);
+        return Price.money(this.moneyPriceExpression.setVariable(CURRENT_LEVEL_VARIABLE, level).evaluate());
     }
 
     @Override
     public int getMaxLevel() {
         return this.maxLevel;
+    }
+
+    @Override
+    public ItemBuilder getGuiItem() {
+        return this.displayItem;
+    }
+
+    @Override
+    public ItemBuilder getMaxLevelGuiItem() {
+        return this.maxLevelDisplayItem;
+    }
+
+    @Override
+    public String getDisplayValueAtLevel(int level) {
+        return String.valueOf(this.getValueAtLevel(level));
+    }
+
+    @Override
+    public String getDisplayName() {
+        return this.displayName;
     }
 }

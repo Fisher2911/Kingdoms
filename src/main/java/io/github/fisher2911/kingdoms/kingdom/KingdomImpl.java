@@ -3,12 +3,14 @@ package io.github.fisher2911.kingdoms.kingdom;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.IntUpgrades;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeHolder;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeId;
+import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.user.User;
 
 import java.util.Collection;
@@ -77,6 +79,17 @@ public class KingdomImpl implements Kingdom {
     }
 
     @Override
+    public int getMaxMembers() {
+        final IntUpgrades maxMembers = this.upgradeHolder.getUpgrades(UpgradeId.MAX_MEMBERS.toString(), IntUpgrades.class);
+        if (maxMembers == null) return 0;
+        final Integer level = this.getUpgradeLevel(maxMembers.getId());
+        if (level == null) return 0;
+        final Integer value = maxMembers.getValueAtLevel(level);
+        if (value == null) return 0;
+        return value;
+    }
+
+    @Override
     public Map<UUID, Role> getUserRoles() {
         return this.userRoles;
     }
@@ -137,6 +150,17 @@ public class KingdomImpl implements Kingdom {
     }
 
     @Override
+    public void addClaimedChunk(ClaimedChunk chunk) {
+        this.claims.add(chunk);
+    }
+
+    @Override
+    public void removeClaimedChunk(ClaimedChunk chunk) {
+        this.claims.remove(chunk);
+    }
+
+
+    @Override
     public void setRole(User user, Role role) {
         this.roles.put(role, user.getId());
         this.userRoles.put(user.getId(), role);
@@ -159,7 +183,7 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public boolean isFull() {
-        return this.getAvailableChunks() > 0;
+        return this.getMaxMembers() <= this.getMembers().size();
     }
 
     @Override
@@ -169,7 +193,24 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public Integer getUpgradeLevel(String id) {
-        return this.upgradeLevels.get(id);
+        return this.upgradeLevels.computeIfAbsent(id, i -> 1);
+    }
+
+    @Override
+    public Price getUpgradePrice(String id) {
+        final Integer level = this.getUpgradeLevel(id);
+        if (level == null) return Price.IMPOSSIBLE;
+        final Upgrades<?> upgrades = this.upgradeHolder.getUpgrades(id);
+        if (upgrades == null) return Price.IMPOSSIBLE;
+        return upgrades.getPriceAtLevel(level);
+    }
+
+    @Override
+    public void setUpgradeLevel(String id, int level) {
+        final Upgrades<?> upgrades = this.upgradeHolder.getUpgrades(id);
+        if (upgrades == null) return;
+        if (upgrades.getMaxLevel() <= level) return;
+        this.upgradeLevels.put(id, level);
     }
 
     @Override
@@ -180,10 +221,12 @@ public class KingdomImpl implements Kingdom {
     @Override
     public int getTotalPossibleChunks() {
         final String id = UpgradeId.MAX_CLAIMS.toString();
+        final Integer upgradeLevel = this.getUpgradeLevel(id);
+        if (upgradeLevel == null) return 0;
         final Integer maxClaims = this.upgradeHolder.getValueAtLevel(
                 id,
                 IntUpgrades.class,
-                this.upgradeLevels.getOrDefault(id, 0)
+                upgradeLevel
         );
         if (maxClaims == null) return 0;
         return maxClaims;

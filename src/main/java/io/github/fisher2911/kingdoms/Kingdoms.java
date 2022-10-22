@@ -10,6 +10,7 @@ import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
 import io.github.fisher2911.kingdoms.kingdom.invite.InviteManager;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
+import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeManager;
 import io.github.fisher2911.kingdoms.listener.ClaimEnterListener;
 import io.github.fisher2911.kingdoms.listener.PlayerJoinListener;
 import io.github.fisher2911.kingdoms.listener.ProtectionListener;
@@ -23,6 +24,7 @@ import java.util.List;
 
 public final class Kingdoms extends JavaPlugin {
 
+    private UpgradeManager upgradeManager;
     private KingdomManager kingdomManager;
     private InviteManager inviteManager;
     private UserManager userManager;
@@ -35,6 +37,7 @@ public final class Kingdoms extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        this.upgradeManager = new UpgradeManager(this);
         this.userManager = new UserManager(new HashMap<>());
         this.inviteManager = new InviteManager(this);
         this.priceManager = new PriceManager();
@@ -56,6 +59,7 @@ public final class Kingdoms extends JavaPlugin {
     }
 
     public void load() {
+        this.upgradeManager.load();
         this.guiDisplayItems.load();
         Bukkit.getScheduler().runTaskLater(this, this.worldManager::populate, 20);
     }
@@ -76,6 +80,10 @@ public final class Kingdoms extends JavaPlugin {
 
     public void registerListener(Listener listener) {
         this.getServer().getPluginManager().registerEvents(listener, this);
+    }
+
+    public UpgradeManager getUpgradeManager() {
+        return upgradeManager;
     }
 
     public KingdomManager getKingdomManager() {
@@ -108,5 +116,9 @@ public final class Kingdoms extends JavaPlugin {
 
     public GuiDisplayItems getGuiDisplayItems() {
         return guiDisplayItems;
+    }
+
+    public InviteManager getInviteManager() {
+        return inviteManager;
     }
 }

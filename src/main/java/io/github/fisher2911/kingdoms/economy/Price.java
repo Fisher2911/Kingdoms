@@ -19,6 +19,11 @@ public interface Price {
         public boolean payIfCanAfford(User user) {
             return true;
         }
+
+        @Override
+        public String getDisplay() {
+            return "Free";
+        }
     };
 
     Price IMPOSSIBLE = new Price() {
@@ -36,10 +41,20 @@ public interface Price {
         public boolean payIfCanAfford(User user) {
             return false;
         }
+
+        @Override
+        public String getDisplay() {
+            return "Unaffordable";
+        }
     };
+
+    static Price money(double cost) {
+        return new MoneyPrice(cost);
+    }
 
     boolean canAfford(User user);
     void pay(User user);
     boolean payIfCanAfford(User user);
+    String getDisplay();
 
 }

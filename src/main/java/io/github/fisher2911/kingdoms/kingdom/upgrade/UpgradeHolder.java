@@ -3,6 +3,7 @@ package io.github.fisher2911.kingdoms.kingdom.upgrade;
 import io.github.fisher2911.kingdoms.economy.Price;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -10,19 +11,28 @@ import java.util.function.Consumer;
 public class UpgradeHolder {
 
     private final Map<String, Upgrades<?>> upgradesMap;
-    private final Set<EntryUpgrade> entryUpgrades;
+    private final Set<EntryUpgrade<?>> entryUpgrades;
 
-    public UpgradeHolder(Map<String, Upgrades<?>> upgradesMap, Set<EntryUpgrade> entryUpgrades) {
+    public UpgradeHolder(Map<String, Upgrades<?>> upgradesMap) {
         this.upgradesMap = upgradesMap;
-        this.entryUpgrades = entryUpgrades;
+        this.entryUpgrades = new HashSet<>();
+        for (var entry : this.upgradesMap.entrySet()) {
+            if (!(entry.getValue() instanceof final EntryUpgrade<?> upgrade)) continue;
+            this.entryUpgrades.add(upgrade);
+        }
     }
 
     @Nullable
-    public <T> Upgrades<T> getUpgrades(String id, Class<? extends Upgrades<T>> clazz) {
+    public <T, U extends Upgrades<T>> U getUpgrades(String id, Class<U> clazz) {
         final Object o = this.upgradesMap.get(id);
         if (o == null) return null;
         if (!clazz.isInstance(o)) return null;
         return clazz.cast(o);
+    }
+
+    @Nullable
+    public Upgrades<?> getUpgrades(String id) {
+        return this.upgradesMap.get(id);
     }
 
     @Nullable
@@ -39,13 +49,18 @@ public class UpgradeHolder {
         return upgrades.getPriceAtLevel(level);
     }
 
-    public void handleEntry(Consumer<EntryUpgrade> consumer) {
-        for (EntryUpgrade entryUpgrade : this.entryUpgrades) {
+    public void handleEntry(Consumer<EntryUpgrade<?>> consumer) {
+        for (EntryUpgrade<?> entryUpgrade : this.entryUpgrades) {
             consumer.accept(entryUpgrade);
         }
     }
 
-    public Set<EntryUpgrade> getEntryUpgrades() {
+    public Set<EntryUpgrade<?>> getEntryUpgrades() {
         return entryUpgrades;
     }
+
+    public Map<String, Upgrades<?>> getUpgradesMap() {
+        return upgradesMap;
+    }
+
 }

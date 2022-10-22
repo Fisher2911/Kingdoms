@@ -1,15 +1,13 @@
 package io.github.fisher2911.kingdoms.kingdom.upgrade;
 
-import io.github.fisher2911.kingdoms.economy.Price;
+import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
 import net.objecthunter.exp4j.Expression;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-
 public class IntUpgrades extends NumberUpgrades<Integer> {
 
-    public IntUpgrades(String id, Expression expression, int maxLevel, Map<Integer, Price> prices) {
-        super(id, expression, maxLevel, prices);
+    public IntUpgrades(String id, String displayName, Expression expression, Expression moneyPriceExpression, int maxLevel, ItemBuilder displayItem, ItemBuilder maxLevelDisplayItem) {
+        super(id, displayName, expression, moneyPriceExpression, maxLevel, displayItem, maxLevelDisplayItem);
     }
 
     @Override

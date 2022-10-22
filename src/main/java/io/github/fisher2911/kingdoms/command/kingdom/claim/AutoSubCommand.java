@@ -8,6 +8,7 @@ import io.github.fisher2911.kingdoms.kingdom.claim.ClaimMode;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
+import org.bukkit.Location;
 
 import java.util.Map;
 import java.util.UUID;
@@ -36,6 +37,12 @@ public class AutoSubCommand extends KCommand {
             return;
         }
         this.claimManager.setClaimMode(uuid, claimMode);
+        final Location location = user.getPlayer().getLocation();
+        if (claimMode == ClaimMode.CLAIM) {
+            this.claimManager.tryClaim(user, location);
+        } else if (claimMode == ClaimMode.UNCLAIM) {
+            this.claimManager.tryUnClaim(user, location);
+        }
         MessageHandler.sendMessage(user, claimMode.toString().toLowerCase() + "ing land");
     }
 

@@ -1,20 +1,19 @@
 package io.github.fisher2911.kingdoms.kingdom.upgrade;
 
-import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.user.User;
+import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
 import net.objecthunter.exp4j.Expression;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.Map;
 import java.util.Set;
 
-public class PotionUpgrades extends IntUpgrades implements EntryUpgrade {
+public class PotionUpgrades extends IntUpgrades implements EntryUpgrade<Integer> {
 
     private final Set<PotionEffectType> potionEffectTypes;
 
-    public PotionUpgrades(String id, Expression expression, int maxLevel, Map<Integer, Price> prices, Set<PotionEffectType> potionEffectTypes) {
-        super(id, expression, maxLevel, prices);
+    public PotionUpgrades(String id, String displayName, Expression expression, Expression priceExpression, int maxLevel, ItemBuilder displayItem, ItemBuilder maxLevelDisplayItem, Set<PotionEffectType> potionEffectTypes) {
+        super(id, displayName, expression, priceExpression, maxLevel, displayItem, maxLevelDisplayItem);
         this.potionEffectTypes = potionEffectTypes;
     }
 

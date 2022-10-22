@@ -63,7 +63,8 @@ public class BukkitUser implements User {
 
     @Override
     public double getMoney() {
-        return 0;
+        // todo
+        return 300;
     }
 
     @Override

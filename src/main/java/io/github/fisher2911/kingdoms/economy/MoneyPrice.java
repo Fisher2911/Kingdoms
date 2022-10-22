@@ -27,4 +27,8 @@ public class MoneyPrice implements Price {
         return true;
     }
 
+    @Override
+    public String getDisplay() {
+        return String.valueOf(this.price);
+    }
 }

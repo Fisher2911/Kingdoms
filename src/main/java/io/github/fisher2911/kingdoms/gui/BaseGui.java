@@ -25,7 +25,7 @@ public abstract class BaseGui implements InventoryHolder {
         this.name = name;
         this.rows = rows;
         this.guiItemsMap = guiItemsMap;
-        this.inventory = Bukkit.createInventory(this, this.rows * 9, Component.text(this.rows));
+        this.inventory = Bukkit.createInventory(this, this.rows * 9, Component.text(this.name));
         this.reset();
     }
 
@@ -63,7 +63,6 @@ public abstract class BaseGui implements InventoryHolder {
         final BaseGuiItem item = this.guiItemsMap.get(slot);
         if (item == null) return;
         this.inventory.setItem(slot, item.getItemStack());
-        this.refreshViewers();
     }
 
     public void set(int slot, BaseGuiItem item) {
