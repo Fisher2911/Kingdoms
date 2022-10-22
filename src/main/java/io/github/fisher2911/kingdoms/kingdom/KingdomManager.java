@@ -55,20 +55,22 @@ public class KingdomManager {
     }
 
     public Optional<Kingdom> join(User user, int kingdomId) {
+        return this.getKingdom(kingdomId).flatMap(kingdom -> this.join(user, kingdom));
+    }
+
+    public Optional<Kingdom> join(User user, Kingdom kingdom) {
         final Optional<Kingdom> empty = Optional.empty();
         if (user.getKingdomId() != Kingdom.WILDERNESS_ID) {
             MessageHandler.sendMessage(user, Message.ALREADY_IN_KINGDOM);
             return empty;
         }
-        return this.getKingdom(kingdomId).
-                map(kingdom -> {
-                    if (kingdom.isFull()) {
-                        MessageHandler.sendMessage(user, Message.KINGDOM_FULL);
-                        return null;
-                    }
-                    kingdom.addMember(user);
-                    return kingdom;
-                });
+        if (kingdom.isFull()) {
+            MessageHandler.sendMessage(user, Message.KINGDOM_FULL);
+            return empty;
+        }
+        kingdom.addMember(user);
+        MessageHandler.sendMessage(user, Message.JOINED_KINGDOM);
+        return Optional.of(kingdom);
     }
 
     public void tryLevelUpUpgrade(Kingdom kingdom, User user, Upgrades<?> upgrades) {

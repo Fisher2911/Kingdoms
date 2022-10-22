@@ -35,25 +35,37 @@ public class InviteManager {
             MessageHandler.sendMessage(invited, Message.NO_KINGDOM_PERMISSION);
             return;
         }
-        final KingdomInvite invite = new KingdomInvite(kingdom.getId(), inviter, invited, Instant.now());
+        final KingdomInvite invite = new KingdomInvite(kingdom, inviter, invited, Instant.now());
         final Collection<KingdomInvite> invites = this.getInvitedTo(invited.getId());
         if (invites.contains(invite)) {
             MessageHandler.sendMessage(invited, Message.ALREADY_INVITED);
             return;
         }
         this.invitedPlayers.put(invited.getId(), invite);
+        MessageHandler.sendMessage(inviter, Message.INVITED_MEMBER);
+        MessageHandler.sendMessage(invited, Message.RECEIVED_INVITE);
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
             this.invitedPlayers.remove(invited.getId(), invite);
             if (!inviter.isOnline()) return;
             MessageHandler.sendMessage(inviter, Message.KINGDOM_INVITE_EXPIRED);
+            MessageHandler.sendMessage(invited, Message.KINGDOM_INVITE_EXPIRED);
         }, 20 * 60);
     }
 
-    public void join(KingdomInvite invite) {
+    public void tryJoin(KingdomInvite invite) {
         final User invited = invite.invited();
         final User inviter = invite.inviter();
-        this.kingdomManager.join(invited, invite.kingdomId()).
-                ifPresent(kingdom -> MessageHandler.sendMessage(inviter, Message.PLAYER_JOINED_KINGDOM));
+        this.kingdomManager.join(invited, invite.kingdom().getId()).
+                ifPresent(kingdom -> MessageHandler.sendMessage(inviter, Message.NEW_MEMBER_JOINED_KINGDOM));
+    }
+
+    public void tryJoin(User user, String name) {
+        for (KingdomInvite invite : this.invitedPlayers.get(user.getId())) {
+            if (!invite.kingdom().getName().equalsIgnoreCase(name)) continue;
+            this.tryJoin(invite);
+            return;
+        }
+        MessageHandler.sendMessage(user, Message.NOT_INVITED_TO_KINGDOM);
     }
 
     public Collection<KingdomInvite> getInvitedTo(UUID invited) {

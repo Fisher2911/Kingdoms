@@ -83,7 +83,7 @@ public abstract class KCommand {
     }
 
     @Nullable
-    public List<String> getTabs(String[] args, String[] previousArgs) {
+    public List<String> getTabs(User user, String[] args, String[] previousArgs) {
         if (args.length == 0) return null;
 
         final String[] newArgs = this.getNewArgs(args);
@@ -95,7 +95,7 @@ public abstract class KCommand {
             final String name = entry.getKey();
             final KCommand command = entry.getValue();
             if (name.equals(arg)) {
-                final List<String> newTabs = command.getTabs(newArgs, oldArgs);
+                final List<String> newTabs = command.getTabs(user, newArgs, oldArgs);
                 if (newTabs == null) continue;
                 tabs.addAll(newTabs);
                 continue;

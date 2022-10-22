@@ -12,6 +12,7 @@ import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeHolder;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeId;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.user.User;
+import org.bukkit.Bukkit;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -81,11 +82,20 @@ public class KingdomImpl implements Kingdom {
     @Override
     public int getMaxMembers() {
         final IntUpgrades maxMembers = this.upgradeHolder.getUpgrades(UpgradeId.MAX_MEMBERS.toString(), IntUpgrades.class);
-        if (maxMembers == null) return 0;
+        if (maxMembers == null) {
+            Bukkit.broadcastMessage("Max members null");
+            return 0;
+        }
         final Integer level = this.getUpgradeLevel(maxMembers.getId());
-        if (level == null) return 0;
+        if (level == null) {
+            Bukkit.broadcastMessage("Level null");
+            return 0;
+        }
         final Integer value = maxMembers.getValueAtLevel(level);
-        if (value == null) return 0;
+        if (value == null) {
+            Bukkit.broadcastMessage("Value null");
+            return 0;
+        }
         return value;
     }
 
@@ -168,7 +178,7 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public void addMember(User user) {
-
+        this.members.put(user.getId(), user);
     }
 
     @Override
@@ -209,7 +219,7 @@ public class KingdomImpl implements Kingdom {
     public void setUpgradeLevel(String id, int level) {
         final Upgrades<?> upgrades = this.upgradeHolder.getUpgrades(id);
         if (upgrades == null) return;
-        if (upgrades.getMaxLevel() <= level) return;
+        if (upgrades.getMaxLevel() < level) return;
         this.upgradeLevels.put(id, level);
     }
 

@@ -65,8 +65,8 @@ public class EditChunkPermissionsCommand extends KCommand {
     }
 
     @Override
-    public @Nullable List<String> getTabs(String[] args, String[] previousArgs) {
-        List<String> tabs = super.getTabs(args, previousArgs);
+    public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs) {
+        List<String> tabs = super.getTabs(user, args, previousArgs);
         if (tabs == null) tabs = new ArrayList<>();
         final String lastArg = previousArgs[previousArgs.length - 1];
         if (!lastArg.equalsIgnoreCase("chunk")) return tabs;

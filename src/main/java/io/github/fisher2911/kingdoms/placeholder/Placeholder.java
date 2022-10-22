@@ -15,6 +15,7 @@ public enum Placeholder {
     UPGRADE_VALUE,
     UPGRADE_DISPLAY_VALUE,
     UPGRADE_DISPLAY_PRICE,
+    UPGRADE_LEVEL
 
     ;
 

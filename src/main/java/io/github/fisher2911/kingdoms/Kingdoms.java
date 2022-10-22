@@ -37,9 +37,9 @@ public final class Kingdoms extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        // order matters
         this.upgradeManager = new UpgradeManager(this);
         this.userManager = new UserManager(new HashMap<>());
-        this.inviteManager = new InviteManager(this);
         this.priceManager = new PriceManager();
         this.roleManager = new RoleManager(this, new HashMap<>());
         this.dataManager = new DataManager(this);
@@ -47,6 +47,7 @@ public final class Kingdoms extends JavaPlugin {
         this.worldManager = new WorldManager(this, new HashMap<>());
         this.claimManager = new ClaimManager(this);
         this.guiDisplayItems = new GuiDisplayItems(this);
+        this.inviteManager = new InviteManager(this);
 
         this.registerListeners();
         this.registerCommands();

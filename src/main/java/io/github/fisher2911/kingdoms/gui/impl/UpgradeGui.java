@@ -11,6 +11,7 @@ import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeHolder;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
+import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradeLevelWrapper;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
@@ -53,6 +54,10 @@ public class UpgradeGui {
             final Upgrades<?> upgrades = clicked.getMetadata(GuiItemKeys.UPGRADE, Upgrades.class);
             if (upgrades == null) return;
             kingdomManager.tryLevelUpUpgrade(kingdom, user, upgrades);
+            final Integer newLevel = kingdom.getUpgradeLevel(upgrades.getId());
+            if (newLevel != null && newLevel >= upgrades.getMaxLevel()) {
+                gui.set(slot, clicked.withItem(getUpgradeItem(upgrades, newLevel)));
+            }
             gui.refresh(slot);
         };
 
@@ -61,19 +66,17 @@ public class UpgradeGui {
             final Upgrades<?> upgrades = entry.getValue();
             final Integer upgradeLevel = kingdom.getUpgradeLevel(id);
             if (upgradeLevel == null) continue;
-            final ItemBuilder builder;
-            if (upgradeLevel >= upgrades.getMaxLevel()) {
-                builder = upgrades.getMaxLevelGuiItem();
-            } else {
-                builder = upgrades.getGuiItem();
-            }
+            final ItemBuilder builder = getUpgradeItem(
+                    upgrades,
+                    upgradeLevel
+            );
             final List<Supplier<Object>> placeholders = new ArrayList<>();
             placeholders.add(() -> {
                 final Integer newLevel = kingdom.getUpgradeLevel(id);
                 if (newLevel == null) return new UpgradesWrapper(upgrades, upgradeLevel);
                 return new UpgradesWrapper(upgrades, newLevel);
             });
-
+            placeholders.add(() -> new UpgradeLevelWrapper(kingdom, id));
             items.put(index, GuiItem.builder(builder).
                     clickHandler(clickHandler).
                     metadata(Map.of(GuiItemKeys.UPGRADE, upgrades)).
@@ -89,6 +92,16 @@ public class UpgradeGui {
                         build(),
                 kingdom
         );
+    }
+
+    private static ItemBuilder getUpgradeItem(Upgrades<?> upgrades, int upgradeLevel) {
+        final ItemBuilder builder;
+        if (upgradeLevel >= upgrades.getMaxLevel()) {
+            builder = upgrades.getMaxLevelGuiItem();
+        } else {
+            builder = upgrades.getGuiItem();
+        }
+        return builder;
     }
 
     public void open(HumanEntity human) {

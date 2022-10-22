@@ -1,6 +1,8 @@
 package io.github.fisher2911.kingdoms.user;
 
 import io.github.fisher2911.kingdoms.command.CommandPermission;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -76,5 +78,10 @@ public class ConsoleUser implements User {
     @Override
     public boolean hasKingdom() {
         return false;
+    }
+
+    @Override
+    public void sendMessage(Component component) {
+        Bukkit.getConsoleSender().sendMessage(component);
     }
 }

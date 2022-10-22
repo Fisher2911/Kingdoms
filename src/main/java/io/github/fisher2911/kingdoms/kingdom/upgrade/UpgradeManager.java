@@ -40,7 +40,30 @@ public class UpgradeManager extends Config {
                         lore(List.of(
                                 "",
                                 ChatColor.GREEN + Placeholder.UPGRADE_DISPLAY_VALUE.toString(),
-                                ChatColor.RED + Placeholder.UPGRADE_DISPLAY_PRICE.toString()
+                                ChatColor.RED + Placeholder.UPGRADE_DISPLAY_PRICE.toString(),
+                                ChatColor.GRAY + Placeholder.UPGRADE_LEVEL.toString()
+                        )),
+                ItemBuilder.from(Material.BARRIER).
+                        name(ChatColor.BLUE + Placeholder.UPGRADE_DISPLAY_NAME.toString()).
+                        lore(List.of(
+                                "",
+                                ChatColor.RED + "Max Level"
+                        ))
+        ));
+
+        upgrades.put(UpgradeId.MAX_MEMBERS.toString(), new IntUpgrades(
+                UpgradeId.MAX_MEMBERS.toString(),
+                UpgradeId.MAX_MEMBERS.displayName(),
+                valueExpression,
+                priceExpression,
+                2,
+                ItemBuilder.from(Material.IRON_BARS).
+                        name(ChatColor.BLUE + Placeholder.UPGRADE_DISPLAY_NAME.toString()).
+                        lore(List.of(
+                                "",
+                                ChatColor.GREEN + Placeholder.UPGRADE_DISPLAY_VALUE.toString(),
+                                ChatColor.RED + Placeholder.UPGRADE_DISPLAY_PRICE.toString(),
+                                ChatColor.GRAY + Placeholder.UPGRADE_LEVEL.toString()
                         )),
                 ItemBuilder.from(Material.BARRIER).
                         name(ChatColor.BLUE + Placeholder.UPGRADE_DISPLAY_NAME.toString()).

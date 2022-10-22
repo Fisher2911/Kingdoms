@@ -5,6 +5,8 @@ import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.ClaimCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.UnclaimCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.invite.InviteCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.invite.JoinCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.permission.PermissionCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.upgrade.UpgradeCommand;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
@@ -29,6 +31,8 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         this.addSubCommand(new UnclaimCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new PermissionCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new UpgradeCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new InviteCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new JoinCommand(this.plugin, new HashMap<>()));
     }
 
     @Override
@@ -49,7 +53,7 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        return this.getTabs(args, new String[0]);
+        return this.getTabs(this.userManager.wrap(sender), args, new String[0]);
     }
 
 }

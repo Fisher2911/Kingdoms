@@ -36,6 +36,7 @@ public class DataManager {
                 this.plugin.getUpgradeManager().getUpgradeHolder(),
                 new HashMap<>()
         );
+        kingdom.addMember(creator);
         kingdom.setRole(creator, leader);
         return kingdom;
     }
@@ -45,4 +46,5 @@ public class DataManager {
         // todo
         return null;
     }
+
 }

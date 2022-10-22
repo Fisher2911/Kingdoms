@@ -4,6 +4,7 @@ import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.PermissionWrapper;
+import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradeLevelWrapper;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
 import io.github.fisher2911.kingdoms.util.MapOfMaps;
 import net.kyori.adventure.text.Component;
@@ -70,6 +71,10 @@ public class PlaceholderBuilder {
                     return price.getDisplay();
                 })
         );
+        put(UpgradeLevelWrapper.class,
+                Placeholder.UPGRADE_LEVEL,
+                w -> castAndParseUpgradeLevelWrapper(w, u -> u.kingdom().getUpgradeLevel(u.id()))
+        );
     }
 
     private static Object castAndParseKingdom(Object o, Function<Kingdom, Object> parse) {
@@ -87,6 +92,11 @@ public class PlaceholderBuilder {
     private static Object castAndParseUpgradesWrapper(Object o, Function<UpgradesWrapper, Object> parse) {
         return castAndParse(UpgradesWrapper.class, o, parse);
     }
+
+    private static Object castAndParseUpgradeLevelWrapper(Object o, Function<UpgradeLevelWrapper, Object> parse) {
+        return castAndParse(UpgradeLevelWrapper.class, o, parse);
+    }
+
 
     private static <T> Object castAndParse(Class<T> clazz, Object o, Function<T, Object> parse) {
         return parse.apply(clazz.cast(o));

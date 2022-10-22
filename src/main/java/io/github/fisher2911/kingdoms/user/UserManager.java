@@ -1,5 +1,6 @@
 package io.github.fisher2911.kingdoms.user;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -23,6 +24,10 @@ public class UserManager {
             return this.userMap.getOrDefault(uuid, new BukkitUser(player.getUniqueId(), player.getName(), player));
         }
         return null;
+    }
+
+    public User getUserByName(String name) {
+        return this.wrap(Bukkit.getPlayer(name));
     }
 
     public void addUser(User user) {
