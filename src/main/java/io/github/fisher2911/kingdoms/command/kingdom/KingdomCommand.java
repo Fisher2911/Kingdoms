@@ -3,6 +3,7 @@ package io.github.fisher2911.kingdoms.command.kingdom;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.admin.AdminCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.ClaimCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.UnclaimCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.invite.InviteCommand;
@@ -33,6 +34,7 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         this.addSubCommand(new UpgradeCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new InviteCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new JoinCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new AdminCommand(this.plugin, new HashMap<>()));
     }
 
     @Override

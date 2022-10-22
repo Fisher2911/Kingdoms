@@ -33,12 +33,13 @@ public enum Message {
     NO_AVAILABLE_CHUNKS,
     INVITED_MEMBER,
     RECEIVED_INVITE,
-    NOT_INVITED_TO_KINGDOM
+    NOT_INVITED_TO_KINGDOM,
+    SUCCESSFUL_RELOAD,
 
     ;
 
     public String getConfigPath() {
-        return ALREADY_IN_KINGDOM.toString().toLowerCase().replace("_", "-");
+        return this.toString().toLowerCase().replace("_", "-");
     }
 
     @Nullable

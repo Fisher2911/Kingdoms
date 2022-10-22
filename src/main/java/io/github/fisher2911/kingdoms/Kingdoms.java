@@ -14,6 +14,7 @@ import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeManager;
 import io.github.fisher2911.kingdoms.listener.ClaimEnterListener;
 import io.github.fisher2911.kingdoms.listener.PlayerJoinListener;
 import io.github.fisher2911.kingdoms.listener.ProtectionListener;
+import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -60,6 +61,7 @@ public final class Kingdoms extends JavaPlugin {
     }
 
     public void load() {
+        MessageHandler.load();
         this.upgradeManager.load();
         this.guiDisplayItems.load();
         Bukkit.getScheduler().runTaskLater(this, this.worldManager::populate, 20);
@@ -81,6 +83,10 @@ public final class Kingdoms extends JavaPlugin {
 
     public void registerListener(Listener listener) {
         this.getServer().getPluginManager().registerEvents(listener, this);
+    }
+
+    public void reload() {
+        MessageHandler.reload();
     }
 
     public UpgradeManager getUpgradeManager() {

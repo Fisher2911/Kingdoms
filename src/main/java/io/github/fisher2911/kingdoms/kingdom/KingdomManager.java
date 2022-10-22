@@ -48,7 +48,7 @@ public class KingdomManager {
             return empty;
         }
         final Kingdom kingdom = this.dataManager.newKingdom(user, name);
-        MessageHandler.sendMessage(user, Message.CREATED_KINGDOM);
+        MessageHandler.sendMessage(user, Message.CREATED_KINGDOM, kingdom);
         this.kingdoms.put(kingdom.getId(), kingdom);
         user.setKingdomId(kingdom.getId());
         return Optional.of(kingdom);

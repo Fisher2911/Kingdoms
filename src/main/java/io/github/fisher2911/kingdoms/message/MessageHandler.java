@@ -2,9 +2,11 @@ package io.github.fisher2911.kingdoms.message;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.config.Config;
+import io.github.fisher2911.kingdoms.placeholder.PlaceholderBuilder;
 import io.github.fisher2911.kingdoms.user.User;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
@@ -25,7 +27,6 @@ public class MessageHandler extends Config {
 
     static {
         INSTANCE = new MessageHandler(Kingdoms.getPlugin(Kingdoms.class), "messages.yml");
-        INSTANCE.load();
     }
 
     public static void sendMessage(User user, Message message) {
@@ -34,15 +35,34 @@ public class MessageHandler extends Config {
         user.sendMessage(MINI_MESSAGE.deserialize(value));
     }
 
+    public static void sendMessage(User user, Message message, Object... placeholders) {
+        final String value = INSTANCE.getMessage(message);
+        if (value.isBlank()) return;
+        user.sendMessage(MINI_MESSAGE.deserialize(PlaceholderBuilder.apply(value, placeholders)));
+    }
+
     public static void sendMessage(User user, String message) {
         user.sendMessage(MINI_MESSAGE.deserialize(message));
+    }
+
+    public static void sendMessage(User user, String message, Object... placeholders) {
+        user.sendMessage(MINI_MESSAGE.deserialize(PlaceholderBuilder.apply(message, placeholders)));
     }
 
     private String getMessage(Message message) {
         return this.messages.get(message);
     }
 
-    public void load() {
+    public static void reload() {
+        MessageHandler.INSTANCE.messages.clear();
+        load();
+    }
+
+    public static void load() {
+        INSTANCE.loadMessages();
+    }
+
+    private void loadMessages() {
         final File file = this.path.toFile();
         final boolean exists = file.exists();
         if (!exists) {
@@ -55,7 +75,7 @@ public class MessageHandler extends Config {
         }
         final YamlConfigurationLoader loader = YamlConfigurationLoader.
                 builder().
-                path(this.path).
+                path(this.path).nodeStyle(NodeStyle.BLOCK).
                 defaultOptions(opts ->
                         opts.serializers(build -> {
                         }))
