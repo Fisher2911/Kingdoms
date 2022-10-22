@@ -125,6 +125,17 @@ public class PlaceholderBuilder {
                 map = placeholders.get(superClass);
                 superClass = superClass.getSuperclass();
             }
+            if (map == null) return replaceInterfaces(s, o);
+            for (var entry : map.entrySet()) {
+                s = s.replace(entry.getKey().toString(), String.valueOf(entry.getValue().apply(o)));
+            }
+        }
+        return s;
+    }
+
+    private static String replaceInterfaces(String s, Object o) {
+        for (Class<?> i : o.getClass().getInterfaces()) {
+            final var map = placeholders.get(i);
             if (map == null) continue;
             for (var entry : map.entrySet()) {
                 s = s.replace(entry.getKey().toString(), String.valueOf(entry.getValue().apply(o)));
@@ -141,6 +152,17 @@ public class PlaceholderBuilder {
                 map = placeholders.get(superClass);
                 superClass = superClass.getSuperclass();
             }
+            if (map == null) return replaceInterfaces(component, o);
+            for (var entry : map.entrySet()) {
+                component = component.replaceText(builder -> builder.matchLiteral(entry.getKey().toString()).replacement(String.valueOf(entry.getValue().apply(o))));
+            }
+        }
+        return component;
+    }
+
+    private static Component replaceInterfaces(Component component, Object o) {
+        for (Class<?> i : o.getClass().getInterfaces()) {
+            final var map = placeholders.get(i);
             if (map == null) continue;
             for (var entry : map.entrySet()) {
                 component = component.replaceText(builder -> builder.matchLiteral(entry.getKey().toString()).replacement(String.valueOf(entry.getValue().apply(o))));
