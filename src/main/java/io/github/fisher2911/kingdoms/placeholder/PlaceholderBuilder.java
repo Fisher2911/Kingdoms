@@ -122,7 +122,7 @@ public class PlaceholderBuilder {
             var superClass = o.getClass();
             Map<Placeholder, Function<Object, Object>> map = null;
             while (superClass != null && map == null) {
-                map = placeholders.get(o.getClass());
+                map = placeholders.get(superClass);
                 superClass = superClass.getSuperclass();
             }
             if (map == null) continue;
