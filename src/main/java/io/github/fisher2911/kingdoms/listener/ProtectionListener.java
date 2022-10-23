@@ -13,14 +13,12 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-public class ProtectionListener implements Listener {
+public class ProtectionListener extends KListener {
 
     private final Kingdoms plugin;
     private final KingdomManager kingdomManager;
@@ -28,13 +26,19 @@ public class ProtectionListener implements Listener {
     private final WorldManager worldManager;
 
     public ProtectionListener(Kingdoms plugin) {
+        super(plugin.getGlobalListener());
         this.plugin = plugin;
         this.kingdomManager = this.plugin.getKingdomManager();
         this.userManager = this.plugin.getUserManager();
         this.worldManager = this.plugin.getWorldManager();
     }
 
-    @EventHandler
+    public void init() {
+        this.globalListener.register(BlockBreakEvent.class, this::onBlockBreak);
+        this.globalListener.register(BlockPlaceEvent.class, this::onBlockPlace);
+        this.globalListener.register(PlayerInteractEvent.class, this::onClickBlock);
+    }
+
     public void onBlockBreak(BlockBreakEvent event) {
         final Block block = event.getBlock();
         if (block.getState() instanceof Container) {
@@ -49,7 +53,6 @@ public class ProtectionListener implements Listener {
         }
     }
 
-    @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         final Block block = event.getBlock();
         if (block.getState() instanceof Container) {
@@ -63,7 +66,6 @@ public class ProtectionListener implements Listener {
         }
     }
 
-    @EventHandler
     public void onClickBlock(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             this.handleRightClickBlock(event);

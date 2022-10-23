@@ -77,6 +77,10 @@ public class MessageHandler extends Config {
         user.sendMessage(MINI_MESSAGE.deserialize(PlaceholderBuilder.apply(message, placeholders)));
     }
 
+    public static void sendNotInKingdom(User user) {
+        sendMessage(user, Message.NOT_IN_KINGDOM);
+    }
+
     private String getMessage(Message message) {
         return this.messages.get(message);
     }

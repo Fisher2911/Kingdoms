@@ -2,6 +2,7 @@ package io.github.fisher2911.kingdoms;
 
 import io.github.fisher2911.kingdoms.command.kingdom.KingdomCommand;
 import io.github.fisher2911.kingdoms.config.GuiDisplayItems;
+import io.github.fisher2911.kingdoms.confirm.ConfirmationManager;
 import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.economy.PriceManager;
 import io.github.fisher2911.kingdoms.gui.GuiListener;
@@ -13,6 +14,7 @@ import io.github.fisher2911.kingdoms.kingdom.relation.RelationManager;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeManager;
 import io.github.fisher2911.kingdoms.listener.ClaimEnterListener;
+import io.github.fisher2911.kingdoms.listener.GlobalListener;
 import io.github.fisher2911.kingdoms.listener.PlayerJoinListener;
 import io.github.fisher2911.kingdoms.listener.ProtectionListener;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
@@ -26,6 +28,7 @@ import java.util.List;
 
 public final class Kingdoms extends JavaPlugin {
 
+    private GlobalListener globalListener;
     private UpgradeManager upgradeManager;
     private KingdomManager kingdomManager;
     private InviteManager inviteManager;
@@ -37,10 +40,12 @@ public final class Kingdoms extends JavaPlugin {
     private ClaimManager claimManager;
     private GuiDisplayItems guiDisplayItems;
     private RelationManager relationManager;
+    private ConfirmationManager confirmationManager;
 
     @Override
     public void onEnable() {
         // order matters
+        this.globalListener = new GlobalListener();
         this.upgradeManager = new UpgradeManager(this);
         this.userManager = new UserManager(new HashMap<>());
         this.priceManager = new PriceManager();
@@ -52,6 +57,7 @@ public final class Kingdoms extends JavaPlugin {
         this.guiDisplayItems = new GuiDisplayItems(this);
         this.inviteManager = new InviteManager(this);
         this.relationManager = new RelationManager(this);
+        this.confirmationManager = new ConfirmationManager(this);
 
         this.registerListeners();
         this.registerCommands();
@@ -76,17 +82,19 @@ public final class Kingdoms extends JavaPlugin {
     }
 
     private void registerListeners() {
-        List.of(
-                        new PlayerJoinListener(this),
-                        new ProtectionListener(this),
-                        new ClaimEnterListener(this),
-                        new GuiListener()
-                ).
-                forEach(this::registerListener);
+        new ProtectionListener(this).init();
+        new PlayerJoinListener(this).init();
+        new ClaimEnterListener(this).init();
+        new GuiListener(this.globalListener).init();
+        List.of(this.globalListener).forEach(this::registerListener);
     }
 
     public void registerListener(Listener listener) {
         this.getServer().getPluginManager().registerEvents(listener, this);
+    }
+
+    public GlobalListener getGlobalListener() {
+        return globalListener;
     }
 
     public void reload() {
@@ -135,5 +143,9 @@ public final class Kingdoms extends JavaPlugin {
 
     public RelationManager getRelationManager() {
         return relationManager;
+    }
+
+    public ConfirmationManager getConfirmationManager() {
+        return confirmationManager;
     }
 }

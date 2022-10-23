@@ -2,6 +2,8 @@ package io.github.fisher2911.kingdoms.kingdom;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandPermission;
+import io.github.fisher2911.kingdoms.confirm.Confirmation;
+import io.github.fisher2911.kingdoms.confirm.ConfirmationManager;
 import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.economy.PriceManager;
@@ -128,7 +130,7 @@ public class KingdomManager {
                 return;
             }
             MessageHandler.sendMessage(user, Message.KINGDOM_INFO, kingdom);
-        }, () -> MessageHandler.sendMessage(user, Message.NOT_IN_KINGDOM));
+        }, () -> MessageHandler.sendNotInKingdom(user));
     }
 
     public void tryKick(User kicker, User toKick) {
@@ -158,10 +160,55 @@ public class KingdomManager {
             kingdom.setRole(toSet, role);
             MessageHandler.sendMessage(user, Message.SET_OTHER_ROLE, toSet, role);
             MessageHandler.sendMessage(user, Message.OWN_ROLE_SET, user, role);
-        }, () -> MessageHandler.sendMessage(user, Message.NOT_IN_KINGDOM));
+        }, () -> MessageHandler.sendNotInKingdom(user));
+    }
+
+    public void tryLeave(User user) {
+        this.getKingdom(user.getKingdomId()).
+                ifPresentOrElse(kingdom -> {
+                    final Role role = kingdom.getRole(user);
+                    if (role.equals(this.plugin.getRoleManager().getLeaderRole())) {
+                        MessageHandler.sendMessage(user, Message.LEADER_CANNOT_LEAVE_KINGDOM);
+                        return;
+                    }
+                    kingdom.removeMember(user);
+                    MessageHandler.sendMessage(kingdom, Message.MEMBER_LEFT_KINGDOM, user);
+                    MessageHandler.sendMessage(user, Message.YOU_LEFT_KINGDOM, kingdom);
+                }, () -> MessageHandler.sendNotInKingdom(user));
+    }
+
+    public void tryDisband(User user) {
+        this.getKingdom(user.getKingdomId()).
+                ifPresentOrElse(kingdom -> {
+                    if (!kingdom.isLeader(user)) {
+                        MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
+                        return;
+                    }
+                    final ConfirmationManager confirmationManager = this.plugin.getConfirmationManager();
+                    if (!confirmationManager.hasConfirmation(Confirmation.DISBAND_KINGDOM, user.getId(), true)) {
+                        MessageHandler.sendMessage(user, Message.CONFIRM_DISBAND_KINGDOM, kingdom);
+                        confirmationManager.addConfirmation(
+                                Confirmation.DISBAND_KINGDOM,
+                                user.getId(),
+                                20 * 10,
+                                () -> MessageHandler.sendMessage(user, Message.DISBAND_KINGDOM_CONFIRMATION_EXPIRED)
+                        );
+                        return;
+                    }
+                    this.disband(user, kingdom);
+                }, () -> MessageHandler.sendNotInKingdom(user));
+    }
+
+    private void disband(User user, Kingdom kingdom) {
+        MessageHandler.sendMessage(kingdom, Message.KINGDOM_DISBANDED, kingdom, user);
+        kingdom.getKingdomRelations().keySet().forEach(id ->
+                this.getKingdom(id).ifPresent(k -> this.plugin.getRelationManager().removeRelation(k, kingdom))
+        );
     }
 
     public int countKingdoms() {
         return this.kingdoms.size();
     }
+
+
 }

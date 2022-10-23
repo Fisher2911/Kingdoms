@@ -9,7 +9,6 @@ import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +36,7 @@ public class KickCommand extends KCommand {
     }
 
     @Override
-    public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs) {
-        return Collections.emptyList();
+    public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {
+        return super.getTabs(user, args, previousArgs, true);
     }
 }

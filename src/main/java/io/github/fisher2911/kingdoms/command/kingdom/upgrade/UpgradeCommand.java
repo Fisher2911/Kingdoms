@@ -28,7 +28,7 @@ public class UpgradeCommand extends KCommand {
                             this.plugin,
                             kingdom
                     ).open(user.getPlayer());
-                }, () -> MessageHandler.sendMessage(user, Message.NOT_IN_KINGDOM));
+                }, () -> MessageHandler.sendNotInKingdom(user));
     }
 
     @Override

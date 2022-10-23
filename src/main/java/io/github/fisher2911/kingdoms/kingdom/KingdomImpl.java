@@ -223,12 +223,17 @@ public class KingdomImpl implements Kingdom {
     @Override
     public void addMember(User user) {
         this.members.put(user.getId(), user);
+        user.setKingdomId(this.id);
         this.setRole(user, this.plugin.getRoleManager().getDefaultRole());
     }
 
     @Override
-    public void removeMember(User member) {
-        this.members.remove(member.getId());
+    public void removeMember(User user) {
+        final UUID uuid = user.getId();
+        this.members.remove(uuid);
+        this.roles.remove(this.getRole(user), uuid);
+        this.userRoles.remove(uuid);
+        user.setKingdomId(Kingdom.WILDERNESS_ID);
     }
 
     @Override
@@ -302,10 +307,7 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public void kick(User user) {
-        final UUID uuid = user.getId();
-        this.members.remove(uuid);
-        this.roles.remove(this.getRole(user), uuid);
-        this.userRoles.remove(uuid);
+        this.removeMember(user);
     }
 
     @Override
@@ -354,6 +356,11 @@ public class KingdomImpl implements Kingdom {
     @Override
     public Collection<RelationInfo> getRelations(RelationType type) {
         return this.kingdomRelations.values().stream().filter(info -> info.relationType() == type).collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean isLeader(User user) {
+        return this.getRole(user).equals(this.plugin.getRoleManager().getLeaderRole());
     }
 
     @Override

@@ -44,7 +44,7 @@ public class RelationManager extends Config {
     public void tryAddRelation(User user, Kingdom toRelate, RelationType type) {
         this.kingdomManager.getKingdom(user.getKingdomId()).
                 ifPresentOrElse(kingdom -> this.tryAddRelation(kingdom, user, toRelate, type),
-                        () -> MessageHandler.sendMessage(user, Message.NOT_IN_KINGDOM)
+                        () -> MessageHandler.sendNotInKingdom(user)
                 );
     }
 
@@ -93,9 +93,9 @@ public class RelationManager extends Config {
 
     private void addRelation(Kingdom kingdom, Kingdom toRelate, RelationType type, boolean oneWay) {
         if (!oneWay) {
-            toRelate.setRelation(kingdom.getId(), new RelationInfo(toRelate.getId(), toRelate.getName(), type));
+            toRelate.setRelation(kingdom.getId(), new RelationInfo(kingdom.getId(), kingdom.getName(), type));
         }
-        kingdom.setRelation(toRelate.getId(), new RelationInfo(kingdom.getId(), kingdom.getName(), type));
+        kingdom.setRelation(toRelate.getId(), new RelationInfo(toRelate.getId(), toRelate.getName(), type));
         MessageHandler.sendMessage(kingdom, Message.ACCEPTED_RELATION_REQUEST, toRelate, type);
         MessageHandler.sendMessage(toRelate, Message.RELATION_REQUEST_ACCEPTED, kingdom, type);
     }
@@ -109,7 +109,15 @@ public class RelationManager extends Config {
         MessageHandler.sendMessage(toRelate, Message.RELATION_REMOVED_FROM, kingdom, type);
     }
 
-    public Map<RelationType, Relation> createRelations(Kingdom kingdom) {
+    public void removeRelation(Kingdom kingdom, Kingdom toRelate) {
+        final RelationType type = kingdom.getKingdomRelation(toRelate.getId());
+        if (type == RelationType.NEUTRAL) return;
+        kingdom.removeRelation(toRelate.getId());
+        MessageHandler.sendMessage(kingdom, Message.REMOVED_RELATION_TO, toRelate, type);
+    }
+
+
+        public Map<RelationType, Relation> createRelations(Kingdom kingdom) {
         final Map<RelationType, Relation> relations = new EnumMap<>(RelationType.class);
         for (RelationType type : RelationType.values()) {
             relations.put(type, this.newRelation(type, kingdom));

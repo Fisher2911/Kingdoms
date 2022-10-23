@@ -28,7 +28,7 @@ public class ClaimCommand extends KCommand {
     @Override
     public void execute(User user, String[] args, String[] previous) {
         if (!user.hasKingdom()) {
-            MessageHandler.sendMessage(user, Message.NOT_IN_KINGDOM);
+            MessageHandler.sendNotInKingdom(user);
             return;
         }
         this.kingdomManager.getKingdom(user.getKingdomId()).

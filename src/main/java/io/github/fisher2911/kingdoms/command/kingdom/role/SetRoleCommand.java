@@ -42,7 +42,7 @@ public class SetRoleCommand extends KCommand {
     }
 
     @Override
-    public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs) {
+    public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {
         if (args.length != 1) return Collections.emptyList();
         final String arg = args[0];
         final List<String> tabs = new ArrayList<>();

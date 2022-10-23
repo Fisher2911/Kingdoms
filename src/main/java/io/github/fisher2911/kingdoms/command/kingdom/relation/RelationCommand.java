@@ -44,7 +44,7 @@ public class RelationCommand extends KCommand {
     }
 
     @Override
-    public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs) {
-        return super.getTabs(user, args, previousArgs);
+    public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {
+        return super.getTabs(user, args, previousArgs, false);
     }
 }

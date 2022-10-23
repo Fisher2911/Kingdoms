@@ -35,7 +35,7 @@ public class EditChunkPermissionsCommand extends KCommand {
     @Override
     public void execute(User user, String[] args, String[] previous) {
         if (!user.hasKingdom()) {
-            MessageHandler.sendMessage(user, Message.NOT_IN_KINGDOM);
+            MessageHandler.sendNotInKingdom(user);
             return;
         }
         final Role role = this.roleManager.getById(args[0]);
@@ -65,8 +65,8 @@ public class EditChunkPermissionsCommand extends KCommand {
     }
 
     @Override
-    public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs) {
-        List<String> tabs = super.getTabs(user, args, previousArgs);
+    public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {
+        List<String> tabs = super.getTabs(user, args, previousArgs, false);
         if (tabs == null) tabs = new ArrayList<>();
         final String lastArg = previousArgs[previousArgs.length - 1];
         if (!lastArg.equalsIgnoreCase("chunk")) return tabs;

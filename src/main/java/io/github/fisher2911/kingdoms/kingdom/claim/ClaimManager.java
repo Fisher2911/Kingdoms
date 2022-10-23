@@ -41,7 +41,7 @@ public class ClaimManager {
     public void tryClaim(User user, UUID world, int chunkX, int chunkZ) {
         this.kingdomManager.getKingdom(user.getKingdomId()).
                 ifPresentOrElse(k -> this.tryClaim(user, k, world, chunkX, chunkZ),
-                        () -> MessageHandler.sendMessage(user, Message.NOT_IN_KINGDOM)
+                        () -> MessageHandler.sendNotInKingdom(user)
                 );
     }
 
@@ -86,7 +86,7 @@ public class ClaimManager {
     public void tryUnClaim(User user, UUID world, int chunkX, int chunkZ) {
         this.kingdomManager.getKingdom(user.getKingdomId()).
                 ifPresentOrElse(k -> this.tryUnClaim(user, k, world, chunkX, chunkZ),
-                        () -> MessageHandler.sendMessage(user, Message.NOT_IN_KINGDOM)
+                        () -> MessageHandler.sendNotInKingdom(user)
                 );
     }
 

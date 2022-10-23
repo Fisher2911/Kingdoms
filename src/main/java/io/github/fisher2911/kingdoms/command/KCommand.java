@@ -23,28 +23,6 @@ public abstract class KCommand {
     private final int minArgs;
     private final int maxArgs;
     protected final Map<String, KCommand> subCommands;
-    protected final boolean defaultTabIsNull;
-
-    public KCommand(
-            Kingdoms plugin,
-            String name,
-            @Nullable CommandPermission permission,
-            CommandSenderType senderType,
-            int minArgs,
-            int maxArgs,
-            Map<String, KCommand> subCommands,
-            boolean defaultTabIsNull
-    ) {
-        this.plugin = plugin;
-        this.userManager = this.plugin.getUserManager();
-        this.name = name;
-        this.permission = permission;
-        this.senderType = senderType;
-        this.minArgs = minArgs;
-        this.maxArgs = maxArgs;
-        this.subCommands = subCommands;
-        this.defaultTabIsNull = defaultTabIsNull;
-    }
 
     public KCommand(
             Kingdoms plugin,
@@ -55,9 +33,15 @@ public abstract class KCommand {
             int maxArgs,
             Map<String, KCommand> subCommands
     ) {
-        this(plugin, name, permission, senderType, minArgs, maxArgs, subCommands, false);
+        this.plugin = plugin;
+        this.userManager = this.plugin.getUserManager();
+        this.name = name;
+        this.permission = permission;
+        this.senderType = senderType;
+        this.minArgs = minArgs;
+        this.maxArgs = maxArgs;
+        this.subCommands = subCommands;
     }
-
 
     public void handleArgs(CommandSender sender, String[] args, String[] previousArgs) {
         final User user = this.userManager.wrap(sender);
@@ -99,10 +83,10 @@ public abstract class KCommand {
     }
 
     @Nullable
-    public List<String> getTabs(User user, String[] args, String[] previousArgs) {
+    public List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {
         final List<String> tabs = new ArrayList<>();
         if (args.length == 0) {
-            if (this.defaultTabIsNull) return null;
+            if (defaultTabIsNull) return null;
             return tabs;
         }
 
@@ -114,7 +98,7 @@ public abstract class KCommand {
             final String name = entry.getKey();
             final KCommand command = entry.getValue();
             if (name.equals(arg)) {
-                final List<String> newTabs = command.getTabs(user, newArgs, oldArgs);
+                final List<String> newTabs = command.getTabs(user, newArgs, oldArgs, defaultTabIsNull);
                 if (newTabs == null) continue;
                 tabs.addAll(newTabs);
                 continue;
@@ -123,7 +107,7 @@ public abstract class KCommand {
                 tabs.add(name);
             }
         }
-        if (tabs.isEmpty() && this.defaultTabIsNull) return null;
+        if (tabs.isEmpty() && defaultTabIsNull) return null;
         return tabs;
     }
 

@@ -6,10 +6,12 @@ import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.admin.AdminCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.ClaimCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.UnclaimCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.disband.DisbandCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.info.InfoCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.invite.InviteCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.invite.JoinCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.kick.KickCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.leave.LeaveCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.permission.PermissionCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.relation.RelationCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.role.SetRoleCommand;
@@ -42,6 +44,8 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         this.addSubCommand(new InfoCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new KickCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new SetRoleCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new LeaveCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new DisbandCommand(this.plugin, new HashMap<>()));
         RelationCommand.createAll(this.plugin).forEach(this::addSubCommand);
     }
 
@@ -63,7 +67,7 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        return this.getTabs(this.userManager.wrap(sender), args, new String[0]);
+        return this.getTabs(this.userManager.wrap(sender), args, new String[0], false);
     }
 
 }

@@ -45,6 +45,7 @@ public class InviteManager {
         MessageHandler.sendMessage(inviter, Message.INVITED_MEMBER, invited);
         MessageHandler.sendMessage(invited, Message.RECEIVED_INVITE, kingdom, inviter);
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+            if (!this.invitedPlayers.containsEntry(invited.getId(), invite)) return;
             this.invitedPlayers.remove(invited.getId(), invite);
             if (!inviter.isOnline()) return;
             MessageHandler.sendMessage(inviter, Message.SENT_KINGDOM_INVITE_EXPIRED, invited);

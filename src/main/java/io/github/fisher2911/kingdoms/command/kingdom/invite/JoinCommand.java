@@ -4,12 +4,10 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.invite.InviteManager;
-import io.github.fisher2911.kingdoms.kingdom.invite.KingdomInvite;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,15 +33,16 @@ public class JoinCommand extends KCommand {
 
 
     @Override
-    public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs) {
-        List<String> tabs = super.getTabs(user, args, previousArgs);
-        if (tabs == null) tabs = new ArrayList<>();
-        if (args.length != 1) return tabs;
-        final String arg = args[0];
-        for (KingdomInvite invited : this.inviteManager.getInvitedTo(user.getId())) {
-            final String kingdomName = invited.kingdom().getName();
-            if (kingdomName.startsWith(arg)) tabs.add(kingdomName);
-        }
-        return tabs;
+    public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {
+        return super.getTabs(user, args, previousArgs, true);
+//        List<String> tabs = super.getTabs(user, args, previousArgs);
+//        if (tabs == null) tabs = new ArrayList<>();
+//        if (args.length != 1) return tabs;
+//        final String arg = args[0];
+//        for (KingdomInvite invited : this.inviteManager.getInvitedTo(user.getId())) {
+//            final String kingdomName = invited.kingdom().getName();
+//            if (kingdomName.startsWith(arg)) tabs.add(kingdomName);
+//        }
+//        return tabs;
     }
 }

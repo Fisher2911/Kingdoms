@@ -56,5 +56,6 @@ public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder {
     void setRelation(Integer kingdomId, RelationInfo info);
     void removeRelation(Integer kingdomId);
     void setRelation(RelationType type, Relation relation);
+    boolean isLeader(User user);
 
 }

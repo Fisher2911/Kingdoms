@@ -14,10 +14,9 @@ import io.github.fisher2911.kingdoms.user.UserManager;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-public class ClaimEnterListener implements Listener {
+public class ClaimEnterListener extends KListener {
 
     private final Kingdoms plugin;
     private final WorldManager worldManager;
@@ -26,6 +25,7 @@ public class ClaimEnterListener implements Listener {
     private final UserManager userManager;
 
     public ClaimEnterListener(Kingdoms plugin) {
+        super(plugin.getGlobalListener());
         this.plugin = plugin;
         this.worldManager = this.plugin.getWorldManager();
         this.kingdomManager = this.plugin.getKingdomManager();
@@ -33,7 +33,10 @@ public class ClaimEnterListener implements Listener {
         this.userManager = this.plugin.getUserManager();
     }
 
-    @EventHandler
+    public void init() {
+        this.globalListener.register(PlayerMoveEvent.class, this::onPlayerMove);
+    }
+
     public void onPlayerMove(PlayerMoveEvent event) {
         if (!event.hasChangedBlock()) return;
         final Location from = event.getFrom();
