@@ -7,6 +7,7 @@ import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimMode;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
+import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
@@ -51,7 +52,7 @@ public class ClaimEnterListener implements Listener {
             return;
         }
         if (!fromChunk.isWilderness() && toChunk.isWilderness()) {
-            this.handleEnterWilderness(event, toChunk);
+            this.handleEnterWilderness(event, fromChunk, toChunk);
             return;
         }
     }
@@ -60,7 +61,7 @@ public class ClaimEnterListener implements Listener {
         final Player player = event.getPlayer();
         final User user = this.userManager.wrap(player);
         this.kingdomManager.getKingdom(chunk.getOwnedBy()).ifPresent(kingdom -> {
-                    MessageHandler.sendMessage(user, "Entered kingdom: " + kingdom.getName());
+                    MessageHandler.sendMessage(user, Message.ENTERED_KINGDOM_LAND, kingdom);
                     final ClaimMode claimMode = this.claimManager.getClaimMode(player.getUniqueId());
                     if (claimMode == ClaimMode.UNCLAIM && kingdom.hasPermission(user, KPermission.UNCLAIM_LAND, chunk)) {
                         this.claimManager.tryUnClaim(user, kingdom, chunk);
@@ -69,12 +70,14 @@ public class ClaimEnterListener implements Listener {
         );
     }
 
-    private void handleEnterWilderness(PlayerMoveEvent event, ClaimedChunk chunk) {
+    private void handleEnterWilderness(PlayerMoveEvent event, ClaimedChunk previous, ClaimedChunk chunk) {
         final Player player = event.getPlayer();
         final User user = this.userManager.wrap(player);
         final ClaimMode claimMode = this.claimManager.getClaimMode(player.getUniqueId());
         if (claimMode == ClaimMode.NONE) {
-            MessageHandler.sendMessage(user, "Entered wilderness");
+            this.kingdomManager.getKingdom(previous.getOwnedBy()).
+                    ifPresent(kingdom -> MessageHandler.sendMessage(user, Message.LEFT_KINGDOM_LAND, kingdom));
+            MessageHandler.sendMessage(user, Message.ENTERED_WILDERNESS_LAND);
             return;
         }
         this.enterSameChunkToClaim(user, chunk);

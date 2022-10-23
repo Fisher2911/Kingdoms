@@ -1,0 +1,64 @@
+already-in-kingdom: <red>You are already in a kingdom!
+no-permission-to-create-kingdom: <red>You do not have permission to create a kingdom!
+cannot-afford-to-create-kingdom: <red>You cannot afford to create a kingdom!
+cannot-afford-to-upgrade: <red>You cannot afford to upgrade %upgrade_display_name%
+kingdom-already-exists: <red>%kingdom_name% already exists!
+created-kingdom: <green>You created the kingdom %kingdom_name%
+invalid-command-executor: <red>You are not allowed to execute that command
+no-command-permission: <red>You are not allowed to execute that command
+not-in-kingdom: <red>You are not in a kingdom!
+kingdom-not-found: <red>That kingdom could not be found
+no-kingdom-permission: <red>Your kingdom does not allow you to do that
+already-claimed: <red>The chunk <yellow>(%chunk_x%, %chunk_z%) is already claimed
+successful-chunk-claim: <green>You claimed the chunk <yellow>(%chunk_x%, %chunk_z%)
+successful-chunk-unclaim: <green>You unclaimed the chunk <yellow>(%chunk_x%, %chunk_z%)
+not-claimed-by-kingdom: <red>The chunk <yellow>(%chunk_x%, %chunk_z%) is not claimed
+  by your kingdom
+no-role-found: <red>That role could not be found
+already-invited: <red>%user_name% is already invited to your kingdom
+sent-kingdom-invite-expired: <red>Your invite to %user_name% expired
+received-kingdom-invite-expired: <red>Your invite from %user_name% to %kingdom_name%
+  expired
+new-member-joined-kingdom: <green>%user_name% joined your kingdom
+joined-kingdom: <green>You joined the kingdom %kingdom_name%
+other_kingdom-full: <red>the kingdom %kingdom_name% is full
+already-max-upgrade-level: <red>%upgrade_display_name% is already at the max level
+upgrade-does-not-exist: <red>That upgrade does not exist
+level-up-upgrade-successful: <green>You succesfully leveled up %upgrade_display_name%
+  which now has a value of %Upgrade_display_value%
+no-available-chunks: <red>You cannot claim any more land
+invited-member: <green>You invited %user_name%
+received-invite: <green>You were invited to join %kingdom_name% by %user_name%
+not-invited-to-kingdom: <red>You have not been invited to that kingdom
+successful-reload: <green>Config files reloaded successfully
+kingdom-info: |-
+  <gradient:#42d7f5:#08a4ff>--------%kingdom_name%--------
+  <green>Description: %kingdom_description%
+  <blue>Members: %kingdom_members%
+  <gold>Allies: %kingdom_allies%
+  <yellow>Truces: %kingdom_truces%
+  <red>Enemies: %kingdom_enemies%
+kicked-other: <red>You kicked %user_name% from your kingdom
+kicked-from-kingdom: <red>You were kicked from %kingdom_name% by %user_name%
+not-in-same-kingdom: <red>You are not in the same kingdom as %user_name%
+set-other-role: <green>You set %user_name%\'s role to %role_display_name%
+own-role-set: <green>Your role was set to %role_display_name% by %user_name%
+other-kingdom-full: <red>%kingdom_name% is full
+sent-relation-request-expired: <red>Your %relation_display_name% request to %kingdom_name%
+  expired
+received-relation-request-expired: <red>Your %relation_display_name% request from
+  %kingdom_name% expired
+accepted-relation-request: <green>You are now a(n) %relation_display_name% with %kingdom_name%
+relation-request-accepted: <green>You are now a(n) %relation_display_name% with %kingdom_name%
+sent-relation-request: <green>You sent a %relation_display_name% request to %kingdom_name%
+received-relation-request: <green>You received a %relation_display_name% request from
+  %kingdom_name%
+removed-relation-to: <red>You no longer have a(n) %relation_display_name% relation
+  with %kingdom_name%
+relation-removed-from: <red>You no longer have a(n) %relation_display_name% relation
+  with %kingdom_name%
+cannot-relate-to-self-kingdom: <red>You cannot send a relation request to your own
+  kingdom
+entered-kingdom-land: <green>You have entered the territory of %kingdom_name%
+left-kingdom-land: <green>You have left the territory of %kingdom_name%
+entered-wilderness-land: <green>You have entered the wilderness

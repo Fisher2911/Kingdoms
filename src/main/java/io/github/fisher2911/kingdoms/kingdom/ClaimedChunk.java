@@ -1,28 +1,40 @@
 package io.github.fisher2911.kingdoms.kingdom;
 
+import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
+import io.github.fisher2911.kingdoms.kingdom.permission.RolePermissionHolder;
+import io.github.fisher2911.kingdoms.kingdom.relation.Relation;
+import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
+import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.world.KChunk;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ClaimedChunk implements Claim {
+public class ClaimedChunk implements Claim, RolePermissionHolder {
 
+    private final Kingdoms plugin;
     private final int claimedBy;
     private final KChunk chunk;
     private final PermissionContainer permissions;
+    private final Map<RelationType, Relation> relations;
 
-    public ClaimedChunk(int claimedBy, KChunk chunk, PermissionContainer permissions) {
+    public ClaimedChunk(Kingdoms plugin, int claimedBy, KChunk chunk, PermissionContainer permissions, Map<RelationType, Relation> relations) {
+        this.plugin = plugin;
         this.claimedBy = claimedBy;
         this.chunk = chunk;
         this.permissions = permissions;
+        this.relations = relations;
     }
 
-    public static ClaimedChunk wilderness(KChunk at) {
-        return new ClaimedChunk(Kingdom.WILDERNESS_ID, at, PermissionContainer.empty());
+    public static ClaimedChunk wilderness(Kingdoms plugin, KChunk at) {
+        return new ClaimedChunk(plugin, Kingdom.WILDERNESS_ID, at, PermissionContainer.empty(), new EnumMap<>(RelationType.class));
     }
 
     @Override
@@ -40,6 +52,14 @@ public class ClaimedChunk implements Claim {
         return this.claimedBy;
     }
 
+    public Map<RelationType, Relation> getRelations() {
+        return relations;
+    }
+
+    protected PermissionContainer getPermissions() {
+        return permissions;
+    }
+
     @Override
     @Nullable
     // todo
@@ -55,8 +75,20 @@ public class ClaimedChunk implements Claim {
     }
 
     @Override
-    public PermissionContainer getPermissions() {
-        return permissions;
+    public boolean hasPermission(Role role, KPermission permission) {
+        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role));
+        if (relation == null) return this.permissions.hasPermission(role, permission);
+        return relation.hasPermission(role, permission);
+    }
+
+    @Override
+    public void setPermission(Role role, KPermission permission, boolean value) {
+        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role));
+        if (relation == null) {
+            this.permissions.setPermission(role, permission, value);
+            return;
+        }
+        relation.setPermission(role, permission, value);
     }
 
     @Override

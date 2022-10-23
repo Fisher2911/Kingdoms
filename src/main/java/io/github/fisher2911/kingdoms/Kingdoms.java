@@ -9,6 +9,7 @@ import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
 import io.github.fisher2911.kingdoms.kingdom.invite.InviteManager;
+import io.github.fisher2911.kingdoms.kingdom.relation.RelationManager;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeManager;
 import io.github.fisher2911.kingdoms.listener.ClaimEnterListener;
@@ -35,6 +36,7 @@ public final class Kingdoms extends JavaPlugin {
     private WorldManager worldManager;
     private ClaimManager claimManager;
     private GuiDisplayItems guiDisplayItems;
+    private RelationManager relationManager;
 
     @Override
     public void onEnable() {
@@ -49,6 +51,7 @@ public final class Kingdoms extends JavaPlugin {
         this.claimManager = new ClaimManager(this);
         this.guiDisplayItems = new GuiDisplayItems(this);
         this.inviteManager = new InviteManager(this);
+        this.relationManager = new RelationManager(this);
 
         this.registerListeners();
         this.registerCommands();
@@ -64,6 +67,7 @@ public final class Kingdoms extends JavaPlugin {
         MessageHandler.load();
         this.upgradeManager.load();
         this.guiDisplayItems.load();
+        this.relationManager.load();
         Bukkit.getScheduler().runTaskLater(this, this.worldManager::populate, 20);
     }
 
@@ -127,5 +131,9 @@ public final class Kingdoms extends JavaPlugin {
 
     public InviteManager getInviteManager() {
         return inviteManager;
+    }
+
+    public RelationManager getRelationManager() {
+        return relationManager;
     }
 }

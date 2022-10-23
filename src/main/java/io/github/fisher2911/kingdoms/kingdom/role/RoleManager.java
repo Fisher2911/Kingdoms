@@ -14,23 +14,54 @@ public class RoleManager {
     private final Kingdoms plugin;
     private final Map<String, Role> roles;
     private final List<Role> rolesByWeight;
+    private Role leaderRole;
+    private Role defaultRole;
+    private Role enemyRole;
+    private Role neutralRole;
+    private Role truceRole;
+    private Role allyRole;
 
     public RoleManager(Kingdoms plugin, Map<String, Role> roles) {
         this.plugin = plugin;
         this.roles = roles;
         this.rolesByWeight = new SortedList<>(new ArrayList<>(), Comparator.comparingInt(Role::weight));
-        this.addRole(new Role("leader", "<red>Leader</>", 0));
-        this.addRole(new Role("non-member", "Non-Member", 0));
+        this.leaderRole = new Role("leader", "<red>Leader</red>", 0);
+        this.defaultRole = new Role("member", "<green>Member", 3);
+        this.addRole(this.defaultRole);
+
+        this.enemyRole = new Role("enemy", "Enemy", Integer.MAX_VALUE);
+        this.neutralRole = new Role("neutral", "Neutral", Integer.MAX_VALUE - 1);
+        this.truceRole = new Role("truce", "Truce", Integer.MAX_VALUE - 2);
+        this.allyRole = new Role("ally", "Ally", Integer.MAX_VALUE - 3);
+        this.addRole(this.enemyRole);
+        this.addRole(this.neutralRole);
+        this.addRole(this.truceRole);
+        this.addRole(this.allyRole);
     }
 
-    public Role getLeader() {
-        if (this.rolesByWeight.isEmpty()) throw new IllegalStateException("No roles found");
-        return this.rolesByWeight.get(0);
+    public Role getLeaderRole() {
+        return this.leaderRole;
     }
 
-    public Role getNonMember() {
+    public Role getDefaultRole() {
         if (this.rolesByWeight.isEmpty()) throw new IllegalStateException("No roles found");
-        return this.rolesByWeight.get(this.rolesByWeight.size() - 1);
+        return this.defaultRole;
+    }
+
+    public Role getEnemyRole() {
+        return enemyRole;
+    }
+
+    public Role getNeutralRole() {
+        return neutralRole;
+    }
+
+    public Role getTruceRole() {
+        return truceRole;
+    }
+
+    public Role getAllyRole() {
+        return allyRole;
     }
 
     public Role getById(String id) {

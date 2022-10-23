@@ -2,8 +2,10 @@ package io.github.fisher2911.kingdoms.message;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.config.Config;
+import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.placeholder.PlaceholderBuilder;
 import io.github.fisher2911.kingdoms.user.User;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.yaml.NodeStyle;
@@ -35,14 +37,40 @@ public class MessageHandler extends Config {
         user.sendMessage(MINI_MESSAGE.deserialize(value));
     }
 
+    public static void sendMessage(Kingdom kingdom, Message message) {
+        final String value = INSTANCE.getMessage(message);
+        if (value.isBlank()) return;
+        sendToAll(kingdom, MINI_MESSAGE.deserialize(value));
+    }
+
     public static void sendMessage(User user, Message message, Object... placeholders) {
         final String value = INSTANCE.getMessage(message);
         if (value.isBlank()) return;
         user.sendMessage(MINI_MESSAGE.deserialize(PlaceholderBuilder.apply(value, placeholders)));
     }
 
+    public static void sendMessage(Kingdom kingdom, Message message, Object... placeholders) {
+        final String value = INSTANCE.getMessage(message);
+        if (value.isBlank()) return;
+        sendToAll(kingdom, MINI_MESSAGE.deserialize(PlaceholderBuilder.apply(value, placeholders)));
+    }
+
     public static void sendMessage(User user, String message) {
         user.sendMessage(MINI_MESSAGE.deserialize(message));
+    }
+
+    public static void sendMessage(Kingdom kingdom, String message, Object... placeholders) {
+        sendToAll(kingdom, MINI_MESSAGE.deserialize(PlaceholderBuilder.apply(message, placeholders)));
+    }
+
+    public static void sendMessage(Kingdom kingdom, String message) {
+        sendToAll(kingdom, MINI_MESSAGE.deserialize(message));
+    }
+
+    public static void sendToAll(Kingdom kingdom, Component component) {
+        for (User user : kingdom.getMembers()) {
+            user.sendMessage(component);
+        }
     }
 
     public static void sendMessage(User user, String message, Object... placeholders) {
@@ -67,11 +95,7 @@ public class MessageHandler extends Config {
         final boolean exists = file.exists();
         if (!exists) {
             file.getParentFile().mkdirs();
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            this.plugin.saveResource(this.path.getFileName().toString(), false);
         }
         final YamlConfigurationLoader loader = YamlConfigurationLoader.
                 builder().
@@ -86,6 +110,7 @@ public class MessageHandler extends Config {
                 final String messagePath = message.getConfigPath();
                 if (!source.hasChild(messagePath)) {
                     source.node(messagePath).set(message.toString());
+                    this.messages.put(message, message.toString());
                     continue;
                 }
                 this.messages.put(message, source.node(messagePath).getString(""));

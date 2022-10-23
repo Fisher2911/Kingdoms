@@ -46,7 +46,7 @@ public class EditChunkPermissionsCommand extends KCommand {
         final Player player = user.getPlayer();
         final ClaimedChunk chunk = this.worldManager.getAt(player.getLocation());
         if (chunk.isWilderness()) {
-            MessageHandler.sendMessage(user, Message.NOT_CLAIMED_BY_KINGDOM);
+            MessageHandler.sendMessage(user, Message.NOT_CLAIMED_BY_KINGDOM, chunk.getChunk());
             return;
         }
         this.kingdomManager.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
@@ -73,7 +73,7 @@ public class EditChunkPermissionsCommand extends KCommand {
         if (args.length == 0) return tabs;
         final String arg = args[0];
         for (String role : this.roleManager.getAllRoleIds()) {
-            if (!role.equals(this.roleManager.getLeader().id()) && role.startsWith(arg)) tabs.add(role);
+            if (!role.equals(this.roleManager.getLeaderRole().id()) && role.startsWith(arg)) tabs.add(role);
         }
         return tabs;
     }

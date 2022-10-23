@@ -6,21 +6,26 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
+import io.github.fisher2911.kingdoms.kingdom.relation.Relation;
+import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
+import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.IntUpgrades;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeHolder;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeId;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.user.User;
-import org.bukkit.Bukkit;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class KingdomImpl implements Kingdom {
 
@@ -36,6 +41,8 @@ public class KingdomImpl implements Kingdom {
     private final Set<ClaimedChunk> claims;
     private final UpgradeHolder upgradeHolder;
     private final Map<String, Integer> upgradeLevels;
+    private final Map<RelationType, Relation> relations;
+    private final Map<Integer, RelationInfo> kingdomRelations;
 
     public KingdomImpl(
             Kingdoms plugin,
@@ -48,7 +55,9 @@ public class KingdomImpl implements Kingdom {
             PermissionContainer defaultPermissions,
             Set<ClaimedChunk> claims,
             UpgradeHolder upgradeHolder,
-            Map<String, Integer> upgradeLevels
+            Map<String, Integer> upgradeLevels,
+            Map<RelationType, Relation> relations,
+            Map<Integer, RelationInfo> kingdomRelations
     ) {
         this.plugin = plugin;
         this.id = id;
@@ -65,6 +74,8 @@ public class KingdomImpl implements Kingdom {
         this.claims = claims;
         this.upgradeHolder = upgradeHolder;
         this.upgradeLevels = upgradeLevels;
+        this.relations = relations;
+        this.kingdomRelations = kingdomRelations;
     }
 
     @Override
@@ -90,20 +101,11 @@ public class KingdomImpl implements Kingdom {
     @Override
     public int getMaxMembers() {
         final IntUpgrades maxMembers = this.upgradeHolder.getUpgrades(UpgradeId.MAX_MEMBERS.toString(), IntUpgrades.class);
-        if (maxMembers == null) {
-            Bukkit.broadcastMessage("Max members null");
-            return 0;
-        }
+        if (maxMembers == null) return 0;
         final Integer level = this.getUpgradeLevel(maxMembers.getId());
-        if (level == null) {
-            Bukkit.broadcastMessage("Level null");
-            return 0;
-        }
+        if (level == null) return 0;
         final Integer value = maxMembers.getValueAtLevel(level);
-        if (value == null) {
-            Bukkit.broadcastMessage("Value null");
-            return 0;
-        }
+        if (value == null) return 0;
         return value;
     }
 
@@ -135,29 +137,63 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public boolean hasPermission(User user, KPermission permission) {
-        final Role role = this.getRole(user.getId());
-        if (role == null) return false;
+        final Role role = this.getRole(user);
+        final Relation relation = this.getRelation(user.getKingdomId());
+        if (relation != null) return relation.hasPermission(role, permission);
         return this.hasPermission(role, permission);
     }
 
     @Override
     public boolean hasPermission(User user, KPermission permission, ClaimedChunk chunk) {
-        final Role role = this.getRole(user.getId());
-        if (chunk.getPermissions().containsPermission(role, permission)) {
-            return chunk.getPermissions().hasPermission(role, permission);
+        final Role role = this.getRole(user);
+        final RelationType relationType = this.getKingdomRelation(user.getKingdomId());
+        Relation relation = chunk.getRelations().get(relationType);
+        if (relation != null && relation.hasPermission(role, permission, chunk)) {
+            return true;
+        }
+        relation = this.getRelation(user.getKingdomId());
+        if (relation != null) return relation.hasPermission(role, permission);
+        if (chunk.getPermissions().hasPermission(role, permission)) {
+            return true;
         }
         return this.hasPermission(role, permission);
     }
 
     @Override
+    public void setPermission(User user, KPermission permission, boolean value) {
+        this.setPermission(this.getRole(user), permission, value);
+    }
+
+    @Override
+    public void setPermission(Role role, KPermission permission, boolean value) {
+        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role));
+        if (relation == null) {
+            this.permissions.setPermission(role, permission, value);
+            return;
+        }
+        relation.setPermission(role, permission, value);
+    }
+
+
+    @Override
     public boolean hasPermission(Role role, KPermission permission) {
+        final RelationType relationType = this.plugin.getRelationManager().fromRole(role);
+        final Relation relation = this.relations.get(relationType);
+        if (relation != null) return relation.hasPermission(role, permission);
         return this.permissions.hasPermission(role, permission);
     }
 
     @Override
     public boolean hasPermission(Role role, KPermission permission, ClaimedChunk chunk) {
-        if (chunk.getPermissions().containsPermission(role, permission)) {
-            return chunk.getPermissions().hasPermission(role, permission);
+        final RelationType relationType = this.plugin.getRelationManager().fromRole(role);
+        Relation relation = chunk.getRelations().get(relationType);
+        if (relation != null && relation.hasPermission(role, permission, chunk)) {
+            return true;
+        }
+        relation = this.relations.get(relationType);
+        if (relation != null) return relation.hasPermission(role, permission);
+        if (chunk.getPermissions().hasPermission(role, permission)) {
+            return true;
         }
         return this.hasPermission(role, permission);
     }
@@ -187,6 +223,7 @@ public class KingdomImpl implements Kingdom {
     @Override
     public void addMember(User user) {
         this.members.put(user.getId(), user);
+        this.setRole(user, this.plugin.getRoleManager().getDefaultRole());
     }
 
     @Override
@@ -195,8 +232,13 @@ public class KingdomImpl implements Kingdom {
     }
 
     @Override
-    public Role getRole(UUID uuid) {
-        return this.userRoles.getOrDefault(uuid, this.plugin.getRoleManager().getNonMember());
+    public Role getRole(User user) {
+        final UUID uuid = user.getId();
+        final Role role = this.userRoles.get(uuid);
+        if (role != null) return role;
+        final RelationInfo relation = this.kingdomRelations.get(user.getKingdomId());
+        if (relation == null) return this.plugin.getRoleManager().getNeutralRole();
+        return relation.relationType().getRole(this.plugin.getRoleManager());
     }
 
     @Override
@@ -248,5 +290,82 @@ public class KingdomImpl implements Kingdom {
         );
         if (maxClaims == null) return 0;
         return maxClaims;
+    }
+
+    @Override
+    public boolean canKick(User kicker, User toKick) {
+        if (!this.hasPermission(kicker, KPermission.KICK_MEMBER)) return false;
+        final Role kickerRole = this.getRole(kicker);
+        final Role toKickRole = this.getRole(toKick);
+        return kickerRole.isHigherRankedThan(toKickRole);
+    }
+
+    @Override
+    public void kick(User user) {
+        final UUID uuid = user.getId();
+        this.members.remove(uuid);
+        this.roles.remove(this.getRole(user), uuid);
+        this.userRoles.remove(uuid);
+    }
+
+    @Override
+    @Nullable
+    public Relation getRelation(int kingdomId) {
+        if (kingdomId == this.id) return null;
+        return this.relations.get(this.getKingdomRelation(kingdomId));
+    }
+
+    @Override
+    public Map<Integer, RelationInfo> getKingdomRelations() {
+        return this.kingdomRelations;
+    }
+
+    @Override
+    public Map<RelationType, Relation> getRelations() {
+        return this.relations;
+    }
+
+    @Override
+    @Nullable
+    public RelationType getKingdomRelation(int kingdomId) {
+        if (kingdomId == this.id) return null;
+        final RelationInfo info = this.kingdomRelations.get(kingdomId);
+        if (info == null) return RelationType.NEUTRAL;
+        return info.relationType();
+    }
+
+    @Override
+    public void setRelation(Integer kingdomId, RelationInfo info) {
+        if (kingdomId == this.id) return;
+        this.kingdomRelations.put(kingdomId, info);
+    }
+
+    @Override
+    public void removeRelation(Integer kingdomId) {
+        if (kingdomId == this.id) return;
+        this.kingdomRelations.remove(kingdomId);
+    }
+
+    @Override
+    public void setRelation(RelationType type, Relation relation) {
+        this.relations.put(type, relation);
+    }
+
+    @Override
+    public Collection<RelationInfo> getRelations(RelationType type) {
+        return this.kingdomRelations.values().stream().filter(info -> info.relationType() == type).collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final KingdomImpl kingdom = (KingdomImpl) o;
+        return getId() == kingdom.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }

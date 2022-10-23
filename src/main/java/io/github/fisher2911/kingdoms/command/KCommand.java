@@ -23,6 +23,28 @@ public abstract class KCommand {
     private final int minArgs;
     private final int maxArgs;
     protected final Map<String, KCommand> subCommands;
+    protected final boolean defaultTabIsNull;
+
+    public KCommand(
+            Kingdoms plugin,
+            String name,
+            @Nullable CommandPermission permission,
+            CommandSenderType senderType,
+            int minArgs,
+            int maxArgs,
+            Map<String, KCommand> subCommands,
+            boolean defaultTabIsNull
+    ) {
+        this.plugin = plugin;
+        this.userManager = this.plugin.getUserManager();
+        this.name = name;
+        this.permission = permission;
+        this.senderType = senderType;
+        this.minArgs = minArgs;
+        this.maxArgs = maxArgs;
+        this.subCommands = subCommands;
+        this.defaultTabIsNull = defaultTabIsNull;
+    }
 
     public KCommand(
             Kingdoms plugin,
@@ -33,15 +55,9 @@ public abstract class KCommand {
             int maxArgs,
             Map<String, KCommand> subCommands
     ) {
-        this.plugin = plugin;
-        this.userManager = this.plugin.getUserManager();
-        this.name = name;
-        this.permission = permission;
-        this.senderType = senderType;
-        this.minArgs = minArgs;
-        this.maxArgs = maxArgs;
-        this.subCommands = subCommands;
+        this(plugin, name, permission, senderType, minArgs, maxArgs, subCommands, false);
     }
+
 
     public void handleArgs(CommandSender sender, String[] args, String[] previousArgs) {
         final User user = this.userManager.wrap(sender);
@@ -84,13 +100,16 @@ public abstract class KCommand {
 
     @Nullable
     public List<String> getTabs(User user, String[] args, String[] previousArgs) {
-        if (args.length == 0) return null;
+        final List<String> tabs = new ArrayList<>();
+        if (args.length == 0) {
+            if (this.defaultTabIsNull) return null;
+            return tabs;
+        }
 
         final String[] newArgs = this.getNewArgs(args);
         final String[] oldArgs = this.getPreviousArgs(args, previousArgs);
 
         final String arg = args[0];
-        final List<String> tabs = new ArrayList<>();
         for (var entry : this.subCommands.entrySet()) {
             final String name = entry.getKey();
             final KCommand command = entry.getValue();
@@ -104,6 +123,7 @@ public abstract class KCommand {
                 tabs.add(name);
             }
         }
+        if (tabs.isEmpty() && this.defaultTabIsNull) return null;
         return tabs;
     }
 

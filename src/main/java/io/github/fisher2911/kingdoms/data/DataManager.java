@@ -23,7 +23,7 @@ public class DataManager {
     }
 
     public Kingdom newKingdom(User creator, String name) {
-        final Role leader = this.roleManager.getLeader();
+        final Role leader = this.roleManager.getLeaderRole();
         final Kingdom kingdom = new KingdomImpl(
                 this.plugin,
                 this.plugin.getKingdomManager().countKingdoms(),
@@ -35,8 +35,13 @@ public class DataManager {
                 PermissionContainer.createWithLeader(leader),
                 new HashSet<>(),
                 this.plugin.getUpgradeManager().getUpgradeHolder(),
+                new HashMap<>(),
+                new HashMap<>(),
                 new HashMap<>()
         );
+        for (var entry : this.plugin.getRelationManager().createRelations(kingdom).entrySet()) {
+            kingdom.setRelation(entry.getKey(), entry.getValue());
+        }
         kingdom.addMember(creator);
         kingdom.setRole(creator, leader);
         return kingdom;

@@ -2,6 +2,7 @@ package io.github.fisher2911.kingdoms.user;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +19,7 @@ public class UserManager {
 
     // todo
     public User wrap(CommandSender sender) {
-        if (sender instanceof ConsoleUser) return User.CONSOLE;
+        if (sender instanceof ConsoleCommandSender) return User.CONSOLE;
         if (sender instanceof final Player player) {
             final UUID uuid = player.getUniqueId();
             return this.userMap.getOrDefault(uuid, new BukkitUser(player.getUniqueId(), player.getName(), player));

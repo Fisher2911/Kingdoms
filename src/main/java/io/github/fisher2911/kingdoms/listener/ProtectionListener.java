@@ -5,6 +5,7 @@ import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
+import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -111,10 +112,14 @@ public class ProtectionListener implements Listener {
     }
 
     private boolean isAllowed(Player player, Location location, KPermission permission) {
+        return this.isAllowed(this.userManager.wrap(player), location, permission);
+    }
+
+    private boolean isAllowed(User user, Location location, KPermission permission) {
         final ClaimedChunk chunk = this.worldManager.getAt(location);
         if (chunk.isWilderness()) return true;
         return this.kingdomManager.getKingdom(chunk.getOwnedBy()).map(k ->
-                        k.hasPermission(k.getRole(player.getUniqueId()), permission, chunk)).
+                        k.hasPermission(user, permission, chunk)).
                 orElse(false);
     }
 }

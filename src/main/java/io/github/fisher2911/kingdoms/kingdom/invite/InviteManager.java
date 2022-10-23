@@ -38,17 +38,17 @@ public class InviteManager {
         final KingdomInvite invite = new KingdomInvite(kingdom, inviter, invited, Instant.now());
         final Collection<KingdomInvite> invites = this.getInvitedTo(invited.getId());
         if (invites.contains(invite)) {
-            MessageHandler.sendMessage(invited, Message.ALREADY_INVITED);
+            MessageHandler.sendMessage(invited, Message.ALREADY_INVITED, invited);
             return;
         }
         this.invitedPlayers.put(invited.getId(), invite);
-        MessageHandler.sendMessage(inviter, Message.INVITED_MEMBER);
-        MessageHandler.sendMessage(invited, Message.RECEIVED_INVITE);
+        MessageHandler.sendMessage(inviter, Message.INVITED_MEMBER, invited);
+        MessageHandler.sendMessage(invited, Message.RECEIVED_INVITE, kingdom, inviter);
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
             this.invitedPlayers.remove(invited.getId(), invite);
             if (!inviter.isOnline()) return;
-            MessageHandler.sendMessage(inviter, Message.KINGDOM_INVITE_EXPIRED);
-            MessageHandler.sendMessage(invited, Message.KINGDOM_INVITE_EXPIRED);
+            MessageHandler.sendMessage(inviter, Message.SENT_KINGDOM_INVITE_EXPIRED, invited);
+            MessageHandler.sendMessage(invited, Message.RECEIVED_KINGDOM_INVITE_EXPIRED, inviter, kingdom);
         }, 20 * 60);
     }
 
@@ -56,7 +56,7 @@ public class InviteManager {
         final User invited = invite.invited();
         final User inviter = invite.inviter();
         this.kingdomManager.join(invited, invite.kingdom().getId()).
-                ifPresent(kingdom -> MessageHandler.sendMessage(inviter, Message.NEW_MEMBER_JOINED_KINGDOM));
+                ifPresent(kingdom -> MessageHandler.sendMessage(inviter, Message.NEW_MEMBER_JOINED_KINGDOM, invited));
     }
 
     public void tryJoin(User user, String name) {

@@ -39,7 +39,7 @@ public class WorldManager {
 
     public ClaimedChunk getAt(UUID world, int chunkX, int chunkZ) {
         final WorldMap worldMap = this.getWorldMap(world);
-        if (worldMap == null) return ClaimedChunk.wilderness(KChunk.at(world, chunkX, chunkZ));
+        if (worldMap == null) return ClaimedChunk.wilderness(this.plugin, KChunk.at(world, chunkX, chunkZ));
         return worldMap.getAt(chunkX, chunkZ);
     }
 
@@ -52,13 +52,13 @@ public class WorldManager {
     public void setToWilderness(KChunk at) {
         final WorldMap worldMap = this.getWorldMap(at.world());
         if (worldMap == null) return;
-        worldMap.setChunk(ClaimedChunk.wilderness(at));
+        worldMap.setChunk(ClaimedChunk.wilderness(this.plugin, at));
     }
 
     public void setToWilderness(UUID world, int chunkX, int chunkZ) {
         final WorldMap worldMap = this.getWorldMap(world);
         if (worldMap == null) return;
-        worldMap.setChunk(ClaimedChunk.wilderness(KChunk.at(world, chunkX, chunkZ)));
+        worldMap.setChunk(ClaimedChunk.wilderness(this.plugin, KChunk.at(world, chunkX, chunkZ)));
     }
 
     public void populate() {

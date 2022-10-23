@@ -25,7 +25,7 @@ public class WorldMap {
     }
 
     public ClaimedChunk getAt(int x, int z) {
-        return this.chunks.getOrDefault(KChunk.chunkKeyAt(x, z), ClaimedChunk.wilderness(KChunk.at(this.world, x, z)));
+        return this.chunks.getOrDefault(KChunk.chunkKeyAt(x, z), ClaimedChunk.wilderness(this.plugin, KChunk.at(this.world, x, z)));
     }
 
     public void setChunk(ClaimedChunk chunk) {
@@ -33,7 +33,7 @@ public class WorldMap {
     }
 
     public void setToWilderness(int x, int z) {
-        this.setChunk(ClaimedChunk.wilderness(KChunk.at(this.world, x, z)));
+        this.setChunk(ClaimedChunk.wilderness(this.plugin, KChunk.at(this.world, x, z)));
     }
 
 }

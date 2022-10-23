@@ -11,39 +11,33 @@ import io.github.fisher2911.kingdoms.gui.InventoryEventWrapper;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
-import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContext;
+import io.github.fisher2911.kingdoms.kingdom.permission.RolePermissionHolder;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.PermissionWrapper;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class PermissionGui {
 
     private final BaseGui gui;
-    private final Role role;
-    private final Kingdom kingdom;
-    @Nullable
-    private final ClaimedChunk chunk;
 
-    private PermissionGui(BaseGui gui, Role role, Kingdom kingdom, @Nullable ClaimedChunk chunk) {
+    private PermissionGui(BaseGui gui) {
         this.gui = gui;
-        this.role = role;
-        this.kingdom = kingdom;
-        this.chunk = chunk;
     }
 
     public static PermissionGui create(final Kingdoms plugin, Role role, Kingdom kingdom, ClaimedChunk chunk) {
@@ -67,12 +61,8 @@ public class PermissionGui {
             final KPermission permission = clicked.getMetadata(GuiItemKeys.PERMISSION, KPermission.class);
             if (permission == null) return;
             final boolean newValue = chunk == null ? !kingdom.hasPermission(role, permission) : !kingdom.hasPermission(role, permission, chunk);
-            final PermissionContainer permissions;
-            if (chunk != null) {
-                permissions = chunk.getPermissions();
-            } else {
-                permissions = kingdom.getPermissions();
-            }
+            final RolePermissionHolder permissions;
+            permissions = Objects.requireNonNullElse(chunk, kingdom);
             permissions.setPermission(role, permission, newValue);
             gui.refresh(slot);
         };
@@ -101,10 +91,7 @@ public class PermissionGui {
                         name(ChatColor.DARK_GRAY + "Permissions").
                         items(items).
                         rows(items.size() / 9 + 1).
-                        build(),
-                role,
-                kingdom,
-                chunk
+                        build()
         );
     }
 

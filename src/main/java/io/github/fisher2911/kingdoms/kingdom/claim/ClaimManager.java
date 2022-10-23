@@ -6,7 +6,6 @@ import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
-import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
@@ -58,17 +57,23 @@ public class ClaimManager {
             return;
         }
         if (!chunk.isWilderness()) {
-            MessageHandler.sendMessage(user, Message.ALREADY_CLAIMED);
+            MessageHandler.sendMessage(user, Message.ALREADY_CLAIMED, chunk.getChunk());
             return;
         }
         if (kingdom.getAvailableChunks() <= 0) {
             MessageHandler.sendMessage(user, Message.NO_AVAILABLE_CHUNKS);
             return;
         }
-        final ClaimedChunk claimedChunk = new ClaimedChunk(kingdom.getId(), chunk.getChunk(), kingdom.getDefaultChunkPermissions());
+        final ClaimedChunk claimedChunk = new ClaimedChunk(
+                this.plugin,
+                kingdom.getId(),
+                chunk.getChunk(),
+                kingdom.getDefaultChunkPermissions(),
+                this.plugin.getRelationManager().createRelations(kingdom)
+        );
         this.worldManager.setChunk(claimedChunk);
         kingdom.addClaimedChunk(claimedChunk);
-        MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_CLAIM);
+        MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_CLAIM, chunk.getChunk());
     }
 
     public void tryUnClaim(User user, Location location) {
@@ -96,18 +101,23 @@ public class ClaimManager {
 
     public void tryUnClaim(User user, Kingdom kingdom, ClaimedChunk at) {
         if (at.getOwnedBy() != kingdom.getId()) {
-            MessageHandler.sendMessage(user, Message.NOT_CLAIMED_BY_KINGDOM);
+            MessageHandler.sendMessage(user, Message.NOT_CLAIMED_BY_KINGDOM, at);
             return;
         }
-        final Role role = kingdom.getRole(user.getId());
-        if (!kingdom.hasPermission(role, KPermission.UNCLAIM_LAND, at)) {
+        if (!kingdom.hasPermission(user, KPermission.UNCLAIM_LAND, at)) {
             MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
             return;
         }
-        final ClaimedChunk claimedChunk = new ClaimedChunk(kingdom.getId(), at.getChunk(), kingdom.getDefaultChunkPermissions());
+        final ClaimedChunk claimedChunk = new ClaimedChunk(
+                this.plugin,
+                kingdom.getId(),
+                at.getChunk(),
+                kingdom.getDefaultChunkPermissions(),
+                this.plugin.getRelationManager().createRelations(kingdom)
+        );
         this.worldManager.setToWilderness(claimedChunk.getChunk());
         kingdom.removeClaimedChunk(claimedChunk);
-        MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_UNCLAIM);
+        MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_UNCLAIM, claimedChunk.getChunk());
     }
 
     public void setClaimMode(UUID player, ClaimMode claimMode) {

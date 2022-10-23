@@ -9,7 +9,10 @@ import io.github.fisher2911.kingdoms.command.kingdom.claim.UnclaimCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.info.InfoCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.invite.InviteCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.invite.JoinCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.kick.KickCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.permission.PermissionCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.relation.RelationCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.role.SetRoleCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.upgrade.UpgradeCommand;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
@@ -37,6 +40,9 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         this.addSubCommand(new JoinCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new AdminCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new InfoCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new KickCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new SetRoleCommand(this.plugin, new HashMap<>()));
+        RelationCommand.createAll(this.plugin).forEach(this::addSubCommand);
     }
 
     @Override

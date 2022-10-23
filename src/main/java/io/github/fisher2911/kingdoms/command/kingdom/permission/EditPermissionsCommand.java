@@ -64,7 +64,7 @@ public class EditPermissionsCommand extends KCommand {
         if (args.length == 0) return tabs;
         final String arg = args[0];
         for (String role : this.roleManager.getAllRoleIds()) {
-            if (!role.equals(this.roleManager.getLeader().id()) && role.startsWith(arg)) tabs.add(role);
+            if (!role.equals(this.roleManager.getLeaderRole().id()) && role.startsWith(arg)) tabs.add(role);
         }
         return tabs;
     }
