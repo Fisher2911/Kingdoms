@@ -1,5 +1,6 @@
 package io.github.fisher2911.kingdoms.util.builder;
 
+import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.placeholder.PlaceholderBuilder;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -45,7 +46,7 @@ public class ItemBuilder {
 
     public ItemBuilder name(String name) {
         if (this.itemMeta == null) return this;
-        this.itemMeta.displayName(Component.text(name));
+        this.itemMeta.displayName(MessageHandler.MINI_MESSAGE.deserialize(name));
         return this;
     }
 
@@ -53,7 +54,7 @@ public class ItemBuilder {
         if (this.itemMeta == null) return this;
         final List<Component> newLore = new ArrayList<>();
         for (String s : lore) {
-            newLore.add(Component.text(s));
+            newLore.add(MessageHandler.MINI_MESSAGE.deserialize(s));
         }
         this.itemMeta.lore(newLore);
         return this;

@@ -6,7 +6,6 @@ import io.github.fisher2911.kingdoms.placeholder.Placeholder;
 import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
 import java.util.HashMap;
@@ -36,18 +35,19 @@ public class UpgradeManager extends Config {
                 priceExpression,
                 10,
                 ItemBuilder.from(Material.GRASS_BLOCK).
-                        name(ChatColor.BLUE + Placeholder.UPGRADE_DISPLAY_NAME.toString()).
+                        name("<blue>" + Placeholder.UPGRADE_DISPLAY_NAME).
                         lore(List.of(
                                 "",
-                                ChatColor.GREEN + Placeholder.UPGRADE_DISPLAY_VALUE.toString(),
-                                ChatColor.RED + Placeholder.UPGRADE_DISPLAY_PRICE.toString(),
-                                ChatColor.GRAY + Placeholder.UPGRADE_LEVEL.toString()
+                                "<green>" + Placeholder.UPGRADE_DISPLAY_VALUE,
+                                "<red>" + Placeholder.UPGRADE_DISPLAY_PRICE,
+                                "<gray>Max Claims: " + Placeholder.UPGRADE_DISPLAY_VALUE
                         )),
                 ItemBuilder.from(Material.BARRIER).
-                        name(ChatColor.BLUE + Placeholder.UPGRADE_DISPLAY_NAME.toString()).
+                        name("<blue>" +  Placeholder.UPGRADE_DISPLAY_NAME.toString()).
                         lore(List.of(
                                 "",
-                                ChatColor.RED + "Max Level"
+                                "<gray>Max Claims: " + Placeholder.UPGRADE_DISPLAY_VALUE,
+                                "<red>Max Level"
                         ))
         ));
 
@@ -58,18 +58,19 @@ public class UpgradeManager extends Config {
                 priceExpression,
                 2,
                 ItemBuilder.from(Material.IRON_BARS).
-                        name(ChatColor.BLUE + Placeholder.UPGRADE_DISPLAY_NAME.toString()).
+                        name("<blue>" + Placeholder.UPGRADE_DISPLAY_NAME.toString()).
                         lore(List.of(
                                 "",
-                                ChatColor.GREEN + Placeholder.UPGRADE_DISPLAY_VALUE.toString(),
-                                ChatColor.RED + Placeholder.UPGRADE_DISPLAY_PRICE.toString(),
-                                ChatColor.GRAY + Placeholder.UPGRADE_LEVEL.toString()
+                                "<green>" + Placeholder.UPGRADE_DISPLAY_VALUE,
+                                "<red>" + Placeholder.UPGRADE_DISPLAY_PRICE,
+                                "<gray>Members: " + Placeholder.UPGRADE_DISPLAY_VALUE
                         )),
                 ItemBuilder.from(Material.BARRIER).
-                        name(ChatColor.BLUE + Placeholder.UPGRADE_DISPLAY_NAME.toString()).
+                        name("<blue>" +  Placeholder.UPGRADE_DISPLAY_NAME.toString()).
                         lore(List.of(
                                 "",
-                                ChatColor.RED + "Max Level"
+                                "<gray>Members: " + Placeholder.UPGRADE_DISPLAY_VALUE,
+                                "<red>Max Level"
                         ))
         ));
         this.upgradeHolder = new UpgradeHolder(upgrades);

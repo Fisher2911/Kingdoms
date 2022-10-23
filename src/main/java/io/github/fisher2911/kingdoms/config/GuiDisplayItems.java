@@ -5,7 +5,6 @@ import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.placeholder.Placeholder;
 import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -43,10 +42,10 @@ public class GuiDisplayItems {
             }
             final ItemStack itemStack = new ItemStack(random);
             final List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.BLUE + "Enabled: " + Placeholder.PERMISSION_DISPLAY_VALUE.toString());
+            lore.add("<blue>Enabled: " + Placeholder.PERMISSION_DISPLAY_VALUE);
             final ItemBuilder itemBuilder = ItemBuilder.from(itemStack).
                     amount(1).
-                    name(ChatColor.GREEN + Placeholder.PERMISSION_DISPLAY_NAME.toString()).
+                    name("<green>" + Placeholder.PERMISSION_DISPLAY_NAME).
                     lore(lore);
             this.permissionItems.put(permission, itemBuilder);
         }

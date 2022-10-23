@@ -7,6 +7,7 @@ import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
+import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.PermissionWrapper;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradeLevelWrapper;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
@@ -14,7 +15,6 @@ import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.util.MapOfMaps;
 import io.github.fisher2911.kingdoms.world.KChunk;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +60,7 @@ public class PlaceholderBuilder {
         );
         put(PermissionWrapper.class,
                 Placeholder.PERMISSION_DISPLAY_VALUE,
-                p -> castAndParsePermissionWrapper(p, w -> w.value() ? ChatColor.GREEN + "True" : ChatColor.RED + "False")
+                p -> castAndParsePermissionWrapper(p, w -> MessageHandler.MINI_MESSAGE.deserialize(w.value() ? "<green>True" : "<red>False"))
         );
         put(PermissionWrapper.class,
                 Placeholder.PERMISSION_NAME,
@@ -191,62 +191,90 @@ public class PlaceholderBuilder {
 
     public static String apply(String s, Object... objects) {
         for (Object o : objects) {
-            var superClass = o.getClass();
-            Map<Placeholder, Function<Object, Object>> map = null;
-            while (superClass != null && map == null) {
-                map = placeholders.get(superClass);
-                superClass = superClass.getSuperclass();
-            }
-            if (map == null) {
-                s = replaceInterfaces(s, o);
-                continue;
-            }
+            s = replaceSuperClasses(s, o);
+        }
+        return s;
+    }
+
+    private static String replaceInterfaces(String s, Object o, Class<?> clazz) {
+        for (Class<?> i : clazz.getInterfaces()) {
+            final var map = placeholders.get(i);
+            if (map == null) continue;
             for (var entry : map.entrySet()) {
-                s = s.replace(entry.getKey().toString(), String.valueOf(entry.getValue().apply(o)));
+                final String key = entry.getKey().toString();
+                final Object value = entry.getValue().apply(o);
+                s = replace(s, key, value);
             }
         }
         return s;
     }
 
-    private static String replaceInterfaces(String s, Object o) {
-        for (Class<?> i : o.getClass().getInterfaces()) {
-            final var map = placeholders.get(i);
-            if (map == null) continue;
-            for (var entry : map.entrySet()) {
-                s = s.replace(entry.getKey().toString(), String.valueOf(entry.getValue().apply(o)));
-            }
+    private static String replaceSuperClasses(String s, Object o) {
+        var superClass = o.getClass();
+        Map<Placeholder, Function<Object, Object>> map = null;
+        while (superClass != null && map == null) {
+            s = replaceInterfaces(s, o, superClass);
+            map = placeholders.get(superClass);
+            superClass = superClass.getSuperclass();
+        }
+        if (map == null) return s;
+        for (var entry : map.entrySet()) {
+            final String key = entry.getKey().toString();
+            final Object value = entry.getValue().apply(o);
+            s = replace(s, key, value);
         }
         return s;
+    }
+
+    private static String replace(String original, String key, Object value) {
+        if (value instanceof Component component) {
+            return original.replace(key, MessageHandler.MINI_MESSAGE.serialize(component));
+        }
+        return original.replace(key, String.valueOf(value));
     }
 
     public static Component apply(Component component, Object... objects) {
         for (Object o : objects) {
-            var superClass = o.getClass();
-            Map<Placeholder, Function<Object, Object>> map = null;
-            while (superClass != null && map == null) {
-                map = placeholders.get(superClass);
-                superClass = superClass.getSuperclass();
-            }
-            if (map == null) {
-                component = replaceInterfaces(component, o);
-                continue;
-            }
+            component = replaceSuperClasses(component, o);
+        }
+        return component;
+    }
+
+    private static Component replaceInterfaces(Component component, Class<?> clazz, Object o) {
+        for (Class<?> i : clazz.getInterfaces()) {
+            final var map = placeholders.get(i);
+            if (map == null) continue;
             for (var entry : map.entrySet()) {
-                component = component.replaceText(builder -> builder.matchLiteral(entry.getKey().toString()).replacement(String.valueOf(entry.getValue().apply(o))));
+                final String key = entry.getKey().toString();
+                final Object value = entry.getValue().apply(o);
+                component = replace(component, key, value);
             }
         }
         return component;
     }
 
-    private static Component replaceInterfaces(Component component, Object o) {
-        for (Class<?> i : o.getClass().getInterfaces()) {
-            final var map = placeholders.get(i);
-            if (map == null) continue;
-            for (var entry : map.entrySet()) {
-                component = component.replaceText(builder -> builder.matchLiteral(entry.getKey().toString()).replacement(String.valueOf(entry.getValue().apply(o))));
-            }
+    private static Component replaceSuperClasses(Component component, Object o) {
+        var superClass = o.getClass();
+        Map<Placeholder, Function<Object, Object>> map = null;
+        while (superClass != null && map == null) {
+            map = placeholders.get(superClass);
+            component = replaceInterfaces(component, superClass, o);
+            superClass = superClass.getSuperclass();
+        }
+        if (map == null) return component;
+        for (var entry : map.entrySet()) {
+            final String key = entry.getKey().toString();
+            final Object value = entry.getValue().apply(o);
+            component = replace(component, key, value);
         }
         return component;
+    }
+
+    private static Component replace(Component original, String key, Object value) {
+        if (value instanceof Component component) {
+            return original.replaceText(builder -> builder.matchLiteral(key).replacement(component));
+        }
+        return original.replaceText(builder -> builder.matchLiteral(key).replacement(String.valueOf(value)));
     }
 
 }

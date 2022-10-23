@@ -15,6 +15,7 @@ public class GuiListener implements Listener {
     public void onClick(InventoryClickEvent event) {
         final Inventory inventory = event.getClickedInventory();
         final InventoryView view = event.getView();
+        if (inventory == null) return;
         if (inventory.getHolder() instanceof final BaseGui gui) {
             gui.handleClick(event);
             return;

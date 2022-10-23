@@ -19,8 +19,6 @@ import io.github.fisher2911.kingdoms.placeholder.wrapper.PermissionWrapper;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -88,7 +86,7 @@ public class PermissionGui {
         }
         return new PermissionGui(
                 Gui.builder().
-                        name(ChatColor.DARK_GRAY + "Permissions").
+                        name("<gray>Permissions").
                         items(items).
                         rows(items.size() / 9 + 1).
                         build()

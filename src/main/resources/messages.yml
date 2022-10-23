@@ -25,7 +25,7 @@ other_kingdom-full: <red>the kingdom %kingdom_name% is full
 already-max-upgrade-level: <red>%upgrade_display_name% is already at the max level
 upgrade-does-not-exist: <red>That upgrade does not exist
 level-up-upgrade-successful: <green>You succesfully leveled up %upgrade_display_name%
-  which now has a value of %Upgrade_display_value%
+  which now has a value of %upgrade_display_value%
 no-available-chunks: <red>You cannot claim any more land
 invited-member: <green>You invited %user_name%
 received-invite: <green>You were invited to join %kingdom_name% by %user_name%

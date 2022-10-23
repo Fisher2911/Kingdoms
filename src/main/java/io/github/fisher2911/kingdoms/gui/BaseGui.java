@@ -1,6 +1,6 @@
 package io.github.fisher2911.kingdoms.gui;
 
-import net.kyori.adventure.text.Component;
+import io.github.fisher2911.kingdoms.message.MessageHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -25,7 +25,7 @@ public abstract class BaseGui implements InventoryHolder {
         this.name = name;
         this.rows = rows;
         this.guiItemsMap = guiItemsMap;
-        this.inventory = Bukkit.createInventory(this, this.rows * 9, Component.text(this.name));
+        this.inventory = Bukkit.createInventory(this, this.rows * 9, MessageHandler.MINI_MESSAGE.deserialize(this.name));
         this.reset();
     }
 

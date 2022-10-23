@@ -11,6 +11,7 @@ import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
 import io.github.fisher2911.kingdoms.user.User;
 
 import java.util.Map;
@@ -86,17 +87,18 @@ public class KingdomManager {
             MessageHandler.sendMessage(user, Message.UPGRADE_DOES_NOT_EXIST);
             return;
         }
+        final UpgradesWrapper wrapper = new UpgradesWrapper(upgrades, upgradeLevel);
         if (upgrades.getMaxLevel() <= upgradeLevel) {
-            MessageHandler.sendMessage(user, Message.ALREADY_MAX_UPGRADE_LEVEL, upgrades);
+            MessageHandler.sendMessage(user, Message.ALREADY_MAX_UPGRADE_LEVEL, wrapper);
             return;
         }
         final Price price = kingdom.getUpgradePrice(upgradesId);
         if (!price.payIfCanAfford(user)) {
-            MessageHandler.sendMessage(user, Message.CANNOT_AFFORD_TO_UPGRADE, upgrades);
+            MessageHandler.sendMessage(user, Message.CANNOT_AFFORD_TO_UPGRADE, wrapper);
             return;
         }
         kingdom.setUpgradeLevel(upgradesId, upgradeLevel + 1);
-        MessageHandler.sendMessage(user, Message.LEVEL_UP_UPGRADE_SUCCESSFUL, upgrades);
+        MessageHandler.sendMessage(user, Message.LEVEL_UP_UPGRADE_SUCCESSFUL, new UpgradesWrapper(upgrades, upgradeLevel + 1));
     }
 
     public Optional<Kingdom> getKingdom(int id) {
