@@ -3,7 +3,7 @@ package io.github.fisher2911.kingdoms.command.kingdom.permission;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import io.github.fisher2911.kingdoms.gui.impl.PermissionGui;
+import io.github.fisher2911.kingdoms.gui.type.PermissionGui;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;

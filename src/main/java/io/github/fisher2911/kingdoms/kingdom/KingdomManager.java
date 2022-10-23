@@ -204,6 +204,8 @@ public class KingdomManager {
         kingdom.getKingdomRelations().keySet().forEach(id ->
                 this.getKingdom(id).ifPresent(k -> this.plugin.getRelationManager().removeRelation(k, kingdom))
         );
+        kingdom.getMembers().forEach(member -> member.setKingdomId(Kingdom.WILDERNESS_ID));
+        this.kingdoms.remove(kingdom.getId());
     }
 
     public int countKingdoms() {

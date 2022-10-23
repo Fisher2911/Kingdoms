@@ -1,8 +1,8 @@
 package io.github.fisher2911.kingdoms.user;
 
+import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.command.CommandPermission;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -22,12 +22,14 @@ public class BukkitUser implements User {
     @Nullable
     private final Player player;
     private int kingdomId;
+    private ChatChannel chatChannel;
 
     public BukkitUser(UUID uuid, String name, @Nullable Player player) {
         this.uuid = uuid;
         this.name = name;
         this.player = player;
         this.kingdomId = Kingdom.WILDERNESS_ID;
+        this.chatChannel = ChatChannel.GLOBAL;
     }
 
     @Override
@@ -100,8 +102,12 @@ public class BukkitUser implements User {
     }
 
     @Override
-    public void sendMessage(Component component) {
-        if (!this.isOnline()) return;
-        this.player.sendMessage(component);
+    public ChatChannel getChatChannel() {
+        return this.chatChannel;
+    }
+
+    @Override
+    public void setChatChannel(ChatChannel chatChannel) {
+        this.chatChannel = chatChannel;
     }
 }

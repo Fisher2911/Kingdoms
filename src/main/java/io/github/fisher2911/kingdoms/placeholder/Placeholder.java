@@ -29,6 +29,8 @@ public enum Placeholder {
     CHUNK_X,
     CHUNK_Z,
 
+    CHAT_CHANNEL,
+
     ROLE_DISPLAY_NAME,
 
     RELATION_DISPLAY_NAME

@@ -1,7 +1,7 @@
 package io.github.fisher2911.kingdoms.user;
 
+import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.command.CommandPermission;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -80,8 +80,17 @@ public class ConsoleUser implements User {
         return false;
     }
 
+    public void sendMessage(String message) {
+        Bukkit.getConsoleSender().sendMessage(message);
+    }
+
     @Override
-    public void sendMessage(Component component) {
-        Bukkit.getConsoleSender().sendMessage(component);
+    public ChatChannel getChatChannel() {
+        return ChatChannel.GLOBAL;
+    }
+
+    @Override
+    public void setChatChannel(ChatChannel chatChannel) {
+
     }
 }

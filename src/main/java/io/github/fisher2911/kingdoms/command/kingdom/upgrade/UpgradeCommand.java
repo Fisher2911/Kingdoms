@@ -3,9 +3,8 @@ package io.github.fisher2911.kingdoms.command.kingdom.upgrade;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import io.github.fisher2911.kingdoms.gui.impl.UpgradeGui;
+import io.github.fisher2911.kingdoms.gui.type.UpgradeGui;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
-import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
 

@@ -1,4 +1,4 @@
-package io.github.fisher2911.kingdoms.gui.impl;
+package io.github.fisher2911.kingdoms.gui.type;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.gui.BaseGui;

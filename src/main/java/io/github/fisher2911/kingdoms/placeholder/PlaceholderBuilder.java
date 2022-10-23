@@ -1,6 +1,7 @@
 package io.github.fisher2911.kingdoms.placeholder;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
@@ -125,6 +126,11 @@ public class PlaceholderBuilder {
         put(RelationType.class,
                 Placeholder.RELATION_DISPLAY_NAME,
                 r -> castAndParseRelationType(r, RelationType::displayName)
+        );
+
+        put(ChatChannel.class,
+                Placeholder.CHAT_CHANNEL,
+                c -> castAndParse(ChatChannel.class, c, ChatChannel::displayName)
         );
     }
 

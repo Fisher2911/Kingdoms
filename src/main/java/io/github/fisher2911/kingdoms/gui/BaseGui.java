@@ -25,7 +25,7 @@ public abstract class BaseGui implements InventoryHolder {
         this.name = name;
         this.rows = rows;
         this.guiItemsMap = guiItemsMap;
-        this.inventory = Bukkit.createInventory(this, this.rows * 9, MessageHandler.MINI_MESSAGE.deserialize(this.name));
+        this.inventory = Bukkit.createInventory(this, this.rows * 9, MessageHandler.serialize(this.name));
         this.reset();
     }
 

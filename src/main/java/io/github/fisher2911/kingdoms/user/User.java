@@ -1,7 +1,7 @@
 package io.github.fisher2911.kingdoms.user;
 
+import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.command.CommandPermission;
-import net.kyori.adventure.text.Component;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -28,6 +28,7 @@ public interface User {
     boolean hasPermission(CommandPermission permission);
     Map<Integer, ItemStack> getInventory();
     boolean hasKingdom();
-    void sendMessage(Component component);
+    ChatChannel getChatChannel();
+    void setChatChannel(ChatChannel chatChannel);
 
 }

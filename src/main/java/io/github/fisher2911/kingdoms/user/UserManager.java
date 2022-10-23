@@ -1,5 +1,8 @@
 package io.github.fisher2911.kingdoms.user;
 
+import io.github.fisher2911.kingdoms.chat.ChatChannel;
+import io.github.fisher2911.kingdoms.message.Message;
+import io.github.fisher2911.kingdoms.message.MessageHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -25,6 +28,15 @@ public class UserManager {
             return this.userMap.getOrDefault(uuid, new BukkitUser(player.getUniqueId(), player.getName(), player));
         }
         return null;
+    }
+
+    public void changeChatChannel(User user, ChatChannel channel) {
+        if (!user.hasKingdom()) {
+            MessageHandler.sendMessage(user, Message.MUST_BE_IN_KINGDOM_TO_CHANGE_CHAT);
+            return;
+        }
+        user.setChatChannel(channel);
+        MessageHandler.sendMessage(user, Message.CHAT_CHANNEL_CHANGED, channel);
     }
 
     public User getUserByName(String name) {

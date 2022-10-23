@@ -13,6 +13,7 @@ import io.github.fisher2911.kingdoms.kingdom.invite.InviteManager;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationManager;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeManager;
+import io.github.fisher2911.kingdoms.listener.ChatListener;
 import io.github.fisher2911.kingdoms.listener.ClaimEnterListener;
 import io.github.fisher2911.kingdoms.listener.GlobalListener;
 import io.github.fisher2911.kingdoms.listener.PlayerJoinListener;
@@ -86,6 +87,7 @@ public final class Kingdoms extends JavaPlugin {
         new PlayerJoinListener(this).init();
         new ClaimEnterListener(this).init();
         new GuiListener(this.globalListener).init();
+        new ChatListener(this).init();
         List.of(this.globalListener).forEach(this::registerListener);
     }
 

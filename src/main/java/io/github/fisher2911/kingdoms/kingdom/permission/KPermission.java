@@ -63,12 +63,12 @@ public class KPermission {
     private final String id;
     private final Set<PermissionContext> permissionContextSet;
 
-    public KPermission(String id) {
+    private KPermission(String id) {
         this.id = id;
         this.permissionContextSet = EnumSet.allOf(PermissionContext.class);
     }
 
-    public KPermission(String id, PermissionContext... contexts) {
+    private KPermission(String id, PermissionContext... contexts) {
         this.id = id;
         this.permissionContextSet = EnumSet.copyOf(Arrays.asList(contexts));
     }
@@ -87,6 +87,11 @@ public class KPermission {
 
     public String displayName() {
         return StringUtils.capitalize(this.toString().replace("_", " ").toLowerCase(Locale.ROOT));
+    }
+
+    @Override
+    public String toString() {
+        return this.id;
     }
 
     @Override

@@ -2,7 +2,6 @@ package io.github.fisher2911.kingdoms.util.builder;
 
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.placeholder.PlaceholderBuilder;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -46,17 +45,17 @@ public class ItemBuilder {
 
     public ItemBuilder name(String name) {
         if (this.itemMeta == null) return this;
-        this.itemMeta.displayName(MessageHandler.MINI_MESSAGE.deserialize(name));
+        this.itemMeta.setDisplayName(MessageHandler.serialize(name));
         return this;
     }
 
     public ItemBuilder lore(List<String> lore) {
         if (this.itemMeta == null) return this;
-        final List<Component> newLore = new ArrayList<>();
+        final List<String> newLore = new ArrayList<>();
         for (String s : lore) {
-            newLore.add(MessageHandler.MINI_MESSAGE.deserialize(s));
+            newLore.add(MessageHandler.serialize(s));
         }
-        this.itemMeta.lore(newLore);
+        this.itemMeta.setLore(newLore);
         return this;
     }
 
@@ -83,15 +82,15 @@ public class ItemBuilder {
         itemStack.setAmount(Math.max(1, this.amount));
         if (this.itemMeta == null) return itemStack;
         final ItemMeta itemMeta = this.itemMeta.clone();
-        final Component name = itemMeta.displayName();
-        if (name != null) itemMeta.displayName(PlaceholderBuilder.apply(name, placeholders));
-        final List<Component> lore = itemMeta.lore();
+        final String name = itemMeta.getDisplayName();
+        if (name != null) itemMeta.setDisplayName(PlaceholderBuilder.apply(name, placeholders));
+        final List<String> lore = itemMeta.getLore();
         if (lore != null) {
-            final List<Component> newLore = new ArrayList<>();
-            for (Component c : lore) {
-                newLore.add(PlaceholderBuilder.apply(c, placeholders));
+            final List<String> newLore = new ArrayList<>();
+            for (String s : lore) {
+                newLore.add(PlaceholderBuilder.apply(s, placeholders));
             }
-            itemMeta.lore(newLore);
+            itemMeta.setLore(newLore);
         }
         itemStack.setItemMeta(itemMeta);
         return itemStack;

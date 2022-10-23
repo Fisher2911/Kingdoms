@@ -13,7 +13,6 @@ import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 public class ClaimEnterListener extends KListener {
@@ -38,7 +37,7 @@ public class ClaimEnterListener extends KListener {
     }
 
     public void onPlayerMove(PlayerMoveEvent event) {
-        if (!event.hasChangedBlock()) return;
+        if (event.getTo() == null || !this.hasChangedBlock(event.getFrom(), event.getTo())) return;
         final Location from = event.getFrom();
         final Location to = event.getTo();
         final ClaimedChunk fromChunk = this.worldManager.getAt(from);
@@ -58,6 +57,10 @@ public class ClaimEnterListener extends KListener {
             this.handleEnterWilderness(event, fromChunk, toChunk);
             return;
         }
+    }
+
+    private boolean hasChangedBlock(Location from, Location to) {
+        return from.getBlockX() != to.getBlockX() || from.getBlockY() != to.getBlockY() || from.getBlockZ() != to.getBlockZ();
     }
 
     private void handleEnterKingdomLand(PlayerMoveEvent event, ClaimedChunk chunk) {
