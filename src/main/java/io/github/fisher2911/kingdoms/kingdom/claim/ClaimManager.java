@@ -101,7 +101,7 @@ public class ClaimManager {
 
     public void tryUnClaim(User user, Kingdom kingdom, ClaimedChunk at) {
         if (at.getOwnedBy() != kingdom.getId()) {
-            MessageHandler.sendMessage(user, Message.NOT_CLAIMED_BY_KINGDOM, at);
+            MessageHandler.sendMessage(user, Message.NOT_CLAIMED_BY_KINGDOM, at.getChunk());
             return;
         }
         if (!kingdom.hasPermission(user, KPermission.UNCLAIM_LAND, at)) {

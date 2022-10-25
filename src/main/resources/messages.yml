@@ -62,3 +62,23 @@ cannot-relate-to-self-kingdom: <red>You cannot send a relation request to your o
 entered-kingdom-land: <green>You have entered the territory of %kingdom_name%
 left-kingdom-land: <green>You have left the territory of %kingdom_name%
 entered-wilderness-land: <green>You have entered the wilderness
+leader-cannot-leave-kingdom: <red>You cannot leave your kingdom because you are the
+  leader
+member-left-kingdom: <red>%user_name% left the kingdom
+you-left-kingdom: <red>You left the kingdom %kingdom_name%
+confirm-disband-kingdom: <red>Are you sure you want to disband your kingdom? Type
+  the message again to confirm
+disband-kingdom-confirmation-expired: <red>Your request to disband your kingdom expired
+kingdom-disbanded: <red>Your kingdom was disbanded by %user_name%
+must-be-in-kingdom-to-change-chat: <red>You must be in a kingdom to change chat channels
+chat-channel-changed: <green>Your chat channel was changed to %chat_channel%
+chat-channel-not-found: <red>That chat channel could not be found
+kingdom-bank-withdraw-success: <green>You withdrew %transaction_amount% from your
+  kingdom's bank <yellow>(Total is %kingdom_bank_balance%)
+kingdom-bank-deposit-success: <green>You deposited %transaction_amount% into your
+  kingdom's bank <yellow>(Total is %kingdom_bank_balance%)
+not-enough-funds: <red>Your kingdom only has %kingdom_bank_balance%
+kingdom-bank-not-large-enough: <red>Your kingdom's bank is not large enough!
+user-not-enough-money: <red>You do not have enough money to do this
+kingdom-balance: <green>Your kingdom's bank balance is %kingdom_bank_balance%
+max-relations-reached: MAX_RELATIONS_REACHED

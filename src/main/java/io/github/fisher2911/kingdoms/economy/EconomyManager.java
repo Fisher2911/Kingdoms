@@ -28,8 +28,8 @@ public class EconomyManager {
                 return;
             }
             final TransactionResult result = kingdom.getBank().deposit(kingdom, amount);
-            user.takeMoney(result.amount());
-            MessageHandler.sendMessage(user, result.type().getMessage(), result, kingdom);
+            user.takeMoney(amount);
+            MessageHandler.sendMessage(user, result.type().getMessage(), result.type().of(amount), kingdom);
         }, () -> MessageHandler.sendNotInKingdom(user));
     }
 
@@ -40,8 +40,8 @@ public class EconomyManager {
                 return;
             }
             final TransactionResult result = kingdom.getBank().withdraw(kingdom, amount);
-            user.addMoney(result.amount());
-            MessageHandler.sendMessage(user, result.type().getMessage(), result, kingdom);
+            user.addMoney(amount);
+            MessageHandler.sendMessage(user, result.type().getMessage(), result.type().of(amount), kingdom);
         }, () -> MessageHandler.sendNotInKingdom(user));
     }
 

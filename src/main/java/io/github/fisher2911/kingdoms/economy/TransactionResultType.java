@@ -18,6 +18,10 @@ public enum TransactionResultType {
         this.message = message;
     }
 
+    public TransactionResult of(double balance) {
+        return new TransactionResult(this, balance);
+    }
+
     public Message getMessage() {
         return message;
     }

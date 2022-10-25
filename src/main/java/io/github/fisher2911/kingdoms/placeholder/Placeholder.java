@@ -37,7 +37,7 @@ public enum Placeholder {
 
     TRANSACTION_AMOUNT,
 
-    KINGDOM_BALANCE,
+    KINGDOM_BANK_BALANCE,
 
     ;
 

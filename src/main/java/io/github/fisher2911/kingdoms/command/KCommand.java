@@ -66,8 +66,9 @@ public abstract class KCommand {
         final String first = args[0];
         final KCommand subCommand = this.subCommands.get(first.toLowerCase());
         if (subCommand != null) {
-            final String[] newArgs = new String[argsLength - 1];
-            System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+//            final String[] newArgs = new String[argsLength - 1];
+//            System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+            final String[] newArgs = this.getNewArgs(args);
             subCommand.handleArgs(sender, newArgs, newPrevious);
             return;
         }
@@ -82,32 +83,40 @@ public abstract class KCommand {
         this.subCommands.put(command.name, command);
     }
 
+    // original: [k, bank, ]
+    // old: [bank]
+    // new: [ ]
+
     @Nullable
     public List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {
         final List<String> tabs = new ArrayList<>();
+        if (this.permission != null && !user.hasPermission(this.permission)) {
+            MessageHandler.sendMessage(user, Message.NO_COMMAND_PERMISSION);
+            if (defaultTabIsNull) return null;
+            return tabs;
+        }
+        final int argsLength = args.length;
+        final String[] newPrevious = this.getPreviousArgs(args, previousArgs);
+        if ((this.minArgs != -1 && argsLength < this.minArgs) || (this.maxArgs != -1 && argsLength > this.maxArgs)) {
+            if (defaultTabIsNull) return null;
+            return tabs;
+        }
         if (args.length == 0) {
             if (defaultTabIsNull) return null;
             return tabs;
         }
-
-        final String[] newArgs = this.getNewArgs(args);
-        final String[] oldArgs = this.getPreviousArgs(args, previousArgs);
-
-        final String arg = args[0];
-        for (var entry : this.subCommands.entrySet()) {
-            final String name = entry.getKey();
-            final KCommand command = entry.getValue();
-            if (name.equals(arg)) {
-                final List<String> newTabs = command.getTabs(user, newArgs, oldArgs, defaultTabIsNull);
-                if (newTabs == null) continue;
-                tabs.addAll(newTabs);
-                continue;
-            }
-            if (name.startsWith(arg)) {
-                tabs.add(name);
+        final String first = args[0];
+        final KCommand subCommand = this.subCommands.get(first.toLowerCase());
+        if (subCommand != null) {
+            final String[] newArgs = this.getNewArgs(args);
+            return subCommand.getTabs(user, newArgs, newPrevious, defaultTabIsNull);
+        }
+        final String previous = previousArgs.length > 0 ? previousArgs[previousArgs.length - 1] : "";
+        for (KCommand command : this.subCommands.values()) {
+            if (!command.name.equalsIgnoreCase(previous) && command.name.startsWith(first.toLowerCase())) {
+                tabs.add(command.name);
             }
         }
-        if (tabs.isEmpty() && defaultTabIsNull) return null;
         return tabs;
     }
 

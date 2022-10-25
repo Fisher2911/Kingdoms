@@ -2,7 +2,6 @@ package io.github.fisher2911.kingdoms.gui;
 
 import io.github.fisher2911.kingdoms.listener.GlobalListener;
 import io.github.fisher2911.kingdoms.listener.KListener;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -32,7 +31,7 @@ public class GuiListener extends KListener {
             gui.handleClick(event);
             return;
         }
-        if (view.getBottomInventory().equals(inventory) && view.getTopInventory() instanceof final BaseGui gui) {
+        if (view.getTopInventory().getHolder() instanceof final BaseGui gui) {
             gui.handleClick(event);
         }
     }

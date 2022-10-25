@@ -3,7 +3,11 @@ package io.github.fisher2911.kingdoms.gui;
 public enum GuiItemKeys {
 
     PERMISSION,
-    UPGRADE
+    KINGDOM,
+    ROLE,
+    CHUNK,
+    UPGRADE,
+
 
     ;
 

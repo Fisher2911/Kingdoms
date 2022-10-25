@@ -23,4 +23,8 @@ public enum UpgradeId {
         return this.displayName;
     }
 
+    @Override
+    public String toString() {
+        return super.toString().toLowerCase().replace("_", "-");
+    }
 }

@@ -39,6 +39,10 @@ public abstract class BaseGuiItem {
         return this.placeholders.stream().map(Supplier::get).toArray();
     }
 
+    public abstract BaseGuiItem withPlaceholders(List<Supplier<Object>> placeholders);
+
+    public abstract BaseGuiItem copy();
+
     @Nullable
     public <T> T getMetadata(Object key, Class<T> clazz) {
         final Object o = this.metadata.get(key);
@@ -47,7 +51,7 @@ public abstract class BaseGuiItem {
         return clazz.cast(o);
     }
 
-    public void setMetadata(String key, Object value) {
+    public void setMetadata(Object key, Object value) {
         this.metadata.put(key, value);
     }
 

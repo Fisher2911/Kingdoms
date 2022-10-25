@@ -15,13 +15,13 @@ public class WithdrawSubCommand extends KCommand {
     private final EconomyManager economyManager;
 
     public WithdrawSubCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
-        super(plugin, "withdraw", null, CommandSenderType.PLAYER, 2, 2, subCommands);
+        super(plugin, "withdraw", null, CommandSenderType.PLAYER, 1, 1, subCommands);
         this.economyManager = this.plugin.getEconomyManager();
     }
 
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
-        final Double amount = NumberUtil.doubleValueOf(args[1]);
+        final Double amount = NumberUtil.doubleValueOf(args[0]);
         if (amount == null) {
             this.sendHelp(user, args, previousArgs);
             return;

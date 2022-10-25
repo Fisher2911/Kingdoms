@@ -2,6 +2,7 @@ package io.github.fisher2911.kingdoms;
 
 import io.github.fisher2911.kingdoms.command.kingdom.KingdomCommand;
 import io.github.fisher2911.kingdoms.config.GuiDisplayItems;
+import io.github.fisher2911.kingdoms.config.KingdomSettings;
 import io.github.fisher2911.kingdoms.confirm.ConfirmationManager;
 import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.economy.EconomyManager;
@@ -44,6 +45,7 @@ public final class Kingdoms extends JavaPlugin {
     private DataManager dataManager;
     private PriceManager priceManager;
     private RoleManager roleManager;
+    private KingdomSettings kingdomSettings;
     private WorldManager worldManager;
     private ClaimManager claimManager;
     private GuiDisplayItems guiDisplayItems;
@@ -65,6 +67,7 @@ public final class Kingdoms extends JavaPlugin {
         this.userManager = new UserManager(this, new HashMap<>());
         this.priceManager = new PriceManager();
         this.roleManager = new RoleManager(this, new HashMap<>());
+        this.kingdomSettings = new KingdomSettings(this);
         this.dataManager = new DataManager(this);
         this.kingdomManager = new KingdomManager(this, new HashMap<>());
         this.worldManager = new WorldManager(this, new HashMap<>());
@@ -87,6 +90,8 @@ public final class Kingdoms extends JavaPlugin {
 
     public void load() {
         MessageHandler.load();
+        this.roleManager.load();
+        this.kingdomSettings.load();
         this.upgradeManager.load();
         this.guiDisplayItems.load();
         this.relationManager.load();
@@ -124,6 +129,7 @@ public final class Kingdoms extends JavaPlugin {
 
     public void reload() {
         MessageHandler.reload();
+        this.upgradeManager.reload();
     }
 
     public UpgradeManager getUpgradeManager() {
@@ -148,6 +154,10 @@ public final class Kingdoms extends JavaPlugin {
 
     public RoleManager getRoleManager() {
         return roleManager;
+    }
+
+    public KingdomSettings getKingdomSettings() {
+        return kingdomSettings;
     }
 
     public WorldManager getWorldManager() {

@@ -41,7 +41,11 @@ public class MessageHandler extends Config {
     }
 
     public static String serialize(String s) {
-        return LEGACY_COMPONENT_SERIALIZER.serialize(MINI_MESSAGE.deserialize(s));
+        try {
+            return LEGACY_COMPONENT_SERIALIZER.serialize(MINI_MESSAGE.deserialize(s));
+        } catch (final Exception e) {
+            throw new RuntimeException();
+        }
     }
 
     public static void sendMessage(User user, Message message) {

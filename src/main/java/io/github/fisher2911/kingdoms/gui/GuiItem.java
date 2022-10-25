@@ -1,6 +1,7 @@
 package io.github.fisher2911.kingdoms.gui;
 
 import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
@@ -54,8 +55,52 @@ public class GuiItem extends BaseGuiItem {
         this.dragHandler.accept(event);
     }
 
+    public static GuiItem nextPage(ItemBuilder itemBuilder, Collection<ClickType> clickTypes) {
+        return new GuiItem(itemBuilder, new HashMap<>(), nextPageWrapper(clickTypes), null, new ArrayList<>());
+    }
+
+    public static GuiItem nextPage(ItemBuilder itemBuilder) {
+        return nextPage(itemBuilder, List.of(ClickType.values()));
+    }
+
+    public static Consumer<InventoryEventWrapper<InventoryClickEvent>> nextPageWrapper(Collection<ClickType> clickTypes) {
+        return event -> {
+            if (!clickTypes.contains(event.event().getClick())) return;
+            event.gui().goToNextPage();
+        };
+    }
+
+    public static GuiItem previousPage(ItemBuilder itemBuilder, Collection<ClickType> clickTypes) {
+        return new GuiItem(itemBuilder, new HashMap<>(), previousPageWrapper(clickTypes), null, new ArrayList<>());
+    }
+
+    public static GuiItem previousPage(ItemBuilder itemBuilder) {
+        return previousPage(itemBuilder, List.of(ClickType.values()));
+    }
+
+    public static Consumer<InventoryEventWrapper<InventoryClickEvent>> previousPageWrapper(Collection<ClickType> clickTypes) {
+        return event -> {
+            if (!clickTypes.contains(event.event().getClick())) return;
+            event.gui().goToPreviousPage();
+        };
+    }
+
+    @Override
+    public BaseGuiItem withPlaceholders(List<Supplier<Object>> placeholders) {
+        return new GuiItem(this.itemBuilder, new HashMap<>(this.metadata), this.clickHandler, this.dragHandler, placeholders);
+    }
+
+    @Override
+    public BaseGuiItem copy() {
+        return new GuiItem(this.itemBuilder, new HashMap<>(this.metadata), this.clickHandler, this.dragHandler, this.placeholders);
+    }
+
     public static Builder builder(ItemBuilder itemBuilder) {
         return Builder.of(itemBuilder);
+    }
+
+    public static Builder builder(GuiItem guiItem) {
+        return Builder.of(guiItem);
     }
 
     public static class Builder {
@@ -71,8 +116,20 @@ public class GuiItem extends BaseGuiItem {
             this.itemBuilder = itemBuilder;
         }
 
+        private Builder(GuiItem guiItem) {
+            this.itemBuilder = guiItem.itemBuilder;
+            this.metadata = guiItem.metadata;
+            this.clickHandler = guiItem.clickHandler;
+            this.dragHandler = guiItem.dragHandler;
+            this.placeholders.addAll(guiItem.placeholders);
+        }
+
         private static Builder of(ItemBuilder itemBuilder) {
             return new Builder(itemBuilder);
+        }
+
+        private static Builder of(GuiItem guiItem) {
+            return new Builder(guiItem);
         }
 
         public Builder metadata(Map<Object, Object> metadata) {

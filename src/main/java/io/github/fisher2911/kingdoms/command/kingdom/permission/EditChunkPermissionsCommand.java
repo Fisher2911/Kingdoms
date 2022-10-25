@@ -70,7 +70,7 @@ public class EditChunkPermissionsCommand extends KCommand {
         if (tabs == null) tabs = new ArrayList<>();
         final String lastArg = previousArgs[previousArgs.length - 1];
         if (!lastArg.equalsIgnoreCase("chunk")) return tabs;
-        if (args.length == 0) return tabs;
+        if (args.length != 1) return tabs;
         final String arg = args[0];
         for (String role : this.roleManager.getAllRoleIds()) {
             if (!role.equals(this.roleManager.getLeaderRole().id()) && role.startsWith(arg)) tabs.add(role);

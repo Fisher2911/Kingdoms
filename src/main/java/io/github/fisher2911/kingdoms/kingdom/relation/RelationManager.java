@@ -3,12 +3,13 @@ package io.github.fisher2911.kingdoms.kingdom.relation;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.config.Config;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
+import io.github.fisher2911.kingdoms.kingdom.upgrade.IntUpgrades;
+import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeId;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
@@ -21,15 +22,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-public class RelationManager extends Config {
+public class RelationManager {
 
+    private final Kingdoms plugin;
     private final KingdomManager kingdomManager;
     private final Map<RelationType, Map<KPermission, Boolean>> defaultRelationPermissions = new EnumMap<>(RelationType.class);
     private Map<String, RelationType> roleRelationMap;
     private final Multimap<Integer, RelationInvite> invitedRelations;
 
     public RelationManager(Kingdoms plugin) {
-        super(plugin, "relations.yml");
+        this.plugin = plugin;
         this.kingdomManager = this.plugin.getKingdomManager();
         this.invitedRelations = Multimaps.newSetMultimap(new HashMap<>(), HashSet::new);
     }
@@ -55,6 +57,12 @@ public class RelationManager extends Config {
         }
         final RelationType currentRelation = kingdom.getKingdomRelation(toRelate.getId());
         final boolean addingRelation = type != currentRelation;
+
+        if (this.getMaxRelations(kingdom, type, 0) <= kingdom.getRelations(type).size()) {
+            MessageHandler.sendMessage(user, Message.MAX_RELATIONS_REACHED, type);
+            return;
+        }
+
         final KPermission permission = addingRelation ? type.getAddPermission() : type.getRemovePermission();
         if (!kingdom.hasPermission(user, permission)) {
             MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
@@ -133,10 +141,25 @@ public class RelationManager extends Config {
         return new Relation(kingdom, type, type.getRole(this.plugin.getRoleManager()), defaultPerms);
     }
 
+    public int getMaxRelations(Kingdom kingdom, RelationType type, int def) {
+        final String upgradeId = switch (type) {
+            case ALLY -> UpgradeId.MAX_ALLIES.displayName();
+            case TRUCE -> UpgradeId.MAX_TRUCES.displayName();
+            case ENEMY -> UpgradeId.MAX_ENEMIES.displayName();
+            default -> null;
+        };
+        if (upgradeId == null) return def;
+        final Integer value = kingdom.getUpgradesValue(upgradeId, IntUpgrades.class);
+        if (value == null) return def;
+        return value;
+    }
+
     @Nullable
     public RelationType fromRole(Role role) {
         return this.roleRelationMap.get(role.id());
     }
+
+    private static final String RELATIONS_PATH = "relations";
 
     public void load() {
         final RoleManager roleManager = this.plugin.getRoleManager();
@@ -146,5 +169,14 @@ public class RelationManager extends Config {
                 roleManager.getTruceRole().id(), RelationType.TRUCE,
                 roleManager.getAllyRole().id(), RelationType.ALLY
         );
+        final Role allyRole = roleManager.getAllyRole();
+        this.defaultRelationPermissions.put(this.fromRole(allyRole), roleManager.getDefaultRolePermissions().getPermissions().get(allyRole.id()));
+        final Role truceRole = roleManager.getTruceRole();
+        this.defaultRelationPermissions.put(this.fromRole(truceRole), roleManager.getDefaultRolePermissions().getPermissions().get(truceRole.id()));
+        final Role enemyRole = roleManager.getEnemyRole();
+        this.defaultRelationPermissions.put(this.fromRole(enemyRole), roleManager.getDefaultRolePermissions().getPermissions().get(enemyRole.id()));
+        final Role neutralRole = roleManager.getNeutralRole();
+        this.defaultRelationPermissions.put(this.fromRole(neutralRole), roleManager.getDefaultRolePermissions().getPermissions().get(neutralRole.id()));
+
     }
 }

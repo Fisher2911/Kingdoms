@@ -2,15 +2,18 @@ package io.github.fisher2911.kingdoms.kingdom.permission;
 
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.util.MapOfMaps;
+import org.spongepowered.configurate.ConfigurationNode;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class PermissionContainer {
 
-    private final MapOfMaps<Role, KPermission, Boolean> permissions;
+    // String is role id
+    private final MapOfMaps<String, KPermission, Boolean> permissions;
 
-    public PermissionContainer(MapOfMaps<Role, KPermission, Boolean> permissions) {
+    public PermissionContainer(MapOfMaps<String, KPermission, Boolean> permissions) {
         this.permissions = permissions;
     }
 
@@ -22,24 +25,24 @@ public class PermissionContainer {
         return new PermissionContainer(new MapOfMaps<>(Collections.emptyMap(), Collections::emptyMap));
     }
 
-    public static PermissionContainer createWithLeader(Role leader) {
-        final MapOfMaps<Role, KPermission, Boolean> mapOfMaps = new MapOfMaps<>(new HashMap<>(), HashMap::new);
-        for (KPermission permission : KPermission.values()) {
-            mapOfMaps.put(leader, permission, true);
-        }
-        return new PermissionContainer(mapOfMaps);
-    }
+//    public static PermissionContainer createWithLeader(Role leader) {
+//        final MapOfMaps<String, KPermission, Boolean> mapOfMaps = new MapOfMaps<>(new HashMap<>(), HashMap::new);
+//        for (KPermission permission : KPermission.values()) {
+//            mapOfMaps.put(leader.id(), permission, true);
+//        }
+//        return new PermissionContainer(mapOfMaps);
+//    }
 
     public boolean hasPermission(Role role, KPermission permission) {
-        return this.permissions.getOrDefault(role, permission, false);
+        return this.permissions.getOrDefault(role.id(), permission, false);
     }
 
     public boolean containsPermission(Role role, KPermission permission) {
-        return this.permissions.getOrDefault(role, Collections.emptyMap()).containsKey(permission);
+        return this.permissions.getOrDefault(role.id(), Collections.emptyMap()).containsKey(permission);
     }
 
     public boolean ifPermissible(Role role, KPermission permission, Runnable runnable) {
-        if (this.permissions.getOrDefault(role, permission, false)) {
+        if (this.permissions.getOrDefault(role.id(), permission, false)) {
             runnable.run();
             return true;
         }
@@ -53,10 +56,10 @@ public class PermissionContainer {
     }
 
     public void setPermission(Role role, KPermission permission, boolean value) {
-        this.permissions.put(role, permission, value);
+        this.permissions.put(role.id(), permission, value);
     }
 
-    public MapOfMaps<Role, KPermission, Boolean> getPermissions() {
+    public MapOfMaps<String, KPermission, Boolean> getPermissions() {
         return this.permissions;
     }
 
@@ -69,5 +72,24 @@ public class PermissionContainer {
 
     public PermissionContainer copy() {
         return new PermissionContainer(new MapOfMaps<>(this.permissions));
+    }
+
+    public static PermissionContainer deserialize(ConfigurationNode node, String permissionPath) {
+        final MapOfMaps<String, KPermission, Boolean> mapOfMaps = new MapOfMaps<>(new HashMap<>(), HashMap::new);
+        for (var entry : node.childrenMap().entrySet()) {
+            if (!(entry.getKey() instanceof String roleId)) continue;
+            final ConfigurationNode roleNode = node.node(roleId).node(permissionPath);
+            mapOfMaps.put(roleId, deserializePermissions(roleNode));
+        }
+        return new PermissionContainer(mapOfMaps);
+    }
+
+    public static Map<KPermission, Boolean> deserializePermissions(ConfigurationNode node) {
+        final Map<KPermission, Boolean> permissions = new HashMap<>();
+        for (var entry : node.childrenMap().entrySet()) {
+            if (!(entry.getKey() instanceof final String key)) continue;
+            permissions.put(KPermission.get(key), entry.getValue().getBoolean(false));
+        }
+        return permissions;
     }
 }

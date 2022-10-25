@@ -1,13 +1,19 @@
 package io.github.fisher2911.kingdoms.kingdom.upgrade;
 
+import io.github.fisher2911.kingdoms.config.serializer.ItemSerializer;
 import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
 import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+
+import java.io.IOException;
 
 public abstract class NumberUpgrades<T extends Number> implements Upgrades<T> {
 
-    public static final String CURRENT_LEVEL_VARIABLE = "c";
+    public static final String CURRENT_LEVEL_VARIABLE = "level";
 
     protected final String id;
     protected final String displayName;
@@ -67,4 +73,48 @@ public abstract class NumberUpgrades<T extends Number> implements Upgrades<T> {
     public String getDisplayName() {
         return this.displayName;
     }
+
+    public static final String DOUBLE_UPGRADE_TYPE = "double";
+    public static final String INT_UPGRADE_TYPE = "int";
+
+    private static final String UPGRADES_TYPE = "type";
+    private static final String ID = "id";
+    private static final String DISPLAY_NAME = "display-name";
+    private static final String EXPRESSION = "expression";
+    private static final String MONEY_PRICE_EXPRESSION = "money-price-expression";
+    private static final String MAX_LEVEL = "max-level";
+    private static final String DISPLAY_ITEM = "display-item";
+    private static final String MAX_LEVEL_DISPLAY_ITEM = "max-level-item";
+
+    public static NumberUpgrades<?> deserialize(ConfigurationNode node, String type) {
+        try {
+            final String id = node.node(ID).getString();
+            final String displayName = node.node(DISPLAY_NAME).getString();
+            final Expression expression = new ExpressionBuilder(node.node(EXPRESSION).getString("")).variable(CURRENT_LEVEL_VARIABLE).build();
+            final Expression moneyPriceExpression = new ExpressionBuilder(node.node(MONEY_PRICE_EXPRESSION).getString("")).variable(CURRENT_LEVEL_VARIABLE).build();
+            final int maxLevel = node.node(MAX_LEVEL).getInt();
+            final ItemBuilder displayItem = ItemSerializer.INSTANCE.deserialize(ItemBuilder.class, node.node(DISPLAY_ITEM));
+            final ItemBuilder maxLevelDisplayItem = ItemSerializer.INSTANCE.deserialize(ItemBuilder.class, node.node(MAX_LEVEL_DISPLAY_ITEM));
+            return switch (type.toLowerCase()) {
+                case DOUBLE_UPGRADE_TYPE -> new DoubleUpgrades(id, displayName, expression, moneyPriceExpression, maxLevel, displayItem, maxLevelDisplayItem);
+                case INT_UPGRADE_TYPE -> new IntUpgrades(id, displayName, expression, moneyPriceExpression, maxLevel, displayItem, maxLevelDisplayItem);
+                default -> throw new SerializationException("Invalid upgrades type: " + type);
+            };
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to deserialize number upgrades", e);
+        }
+    }
+
+    public static NumberUpgrades<?> deserialize(ConfigurationNode node) {
+        return deserialize(node, node.node(UPGRADES_TYPE).getString(""));
+    }
+
+    public static IntUpgrades deserializeIntUpgrades(ConfigurationNode node) {
+        return (IntUpgrades) deserialize(node, INT_UPGRADE_TYPE);
+    }
+
+    public static DoubleUpgrades deserializeDoubleUpgrades(ConfigurationNode node) {
+        return (DoubleUpgrades) deserialize(node, DOUBLE_UPGRADE_TYPE);
+    }
+
 }

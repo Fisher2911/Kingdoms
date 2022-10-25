@@ -1,20 +1,34 @@
 package io.github.fisher2911.kingdoms.config;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
-import java.nio.file.Path;
+import java.io.IOException;
 
-public class KingdomSettings {
-
-    private final Kingdoms plugin;
-    private final Path path;
+public class KingdomSettings extends Config {
 
     public KingdomSettings(Kingdoms plugin) {
-        this.plugin = plugin;
-        this.path = this.plugin.getDataFolder().toPath().resolve("kingdom-settings.yml");
+        super(plugin, "kingdom-defaults", "settings.yml");
     }
 
-    public void load() {
+    public static final String DEFAULT_KINGDOM_DESCRIPTION = "default-kingdom-description";
 
+    private String defaultKingdomDescription;
+
+    public void load() {
+        final YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                .path(this.path)
+                .build();
+
+        try {
+            final var source = loader.load();
+            this.defaultKingdomDescription = source.node(DEFAULT_KINGDOM_DESCRIPTION).getString("");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getDefaultKingdomDescription() {
+        return this.defaultKingdomDescription;
     }
 }

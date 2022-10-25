@@ -284,6 +284,16 @@ public class KingdomImpl implements Kingdom {
     }
 
     @Override
+    @Nullable
+    public <T> T getUpgradesValue(String id, Class<? extends Upgrades<T>> clazz) {
+        final Upgrades<T> upgrades = this.upgradeHolder.getUpgrades(id, clazz);
+        if (upgrades == null) return null;
+        final Integer level = upgradeLevels.get(id);
+        if (level == null) return null;
+        return upgrades.getValueAtLevel(level);
+    }
+
+    @Override
     public int getAvailableChunks() {
         return this.getTotalPossibleChunks() - this.claims.size();
     }

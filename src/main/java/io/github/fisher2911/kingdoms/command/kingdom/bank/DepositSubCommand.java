@@ -7,6 +7,7 @@ import io.github.fisher2911.kingdoms.economy.EconomyManager;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.util.NumberUtil;
+import org.bukkit.Bukkit;
 
 import java.util.Map;
 
@@ -15,13 +16,13 @@ public class DepositSubCommand extends KCommand {
     private final EconomyManager economyManager;
 
     public DepositSubCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
-        super(plugin, "deposit", null, CommandSenderType.PLAYER, 2, 2, subCommands);
+        super(plugin, "deposit", null, CommandSenderType.PLAYER, 1, 1, subCommands);
         this.economyManager = this.plugin.getEconomyManager();
     }
 
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
-        final Double amount = NumberUtil.doubleValueOf(args[1]);
+        final Double amount = NumberUtil.doubleValueOf(args[0]);
         if (amount == null) {
             this.sendHelp(user, args, previousArgs);
             return;

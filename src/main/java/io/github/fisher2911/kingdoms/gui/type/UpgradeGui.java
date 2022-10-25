@@ -88,6 +88,7 @@ public class UpgradeGui {
                         name("<gray>Permissions").
                         items(items).
                         rows(items.size() / 9 + 1).
+                        cancelAllClicks().
                         build(),
                 kingdom
         );

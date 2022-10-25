@@ -4,7 +4,6 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.economy.Bank;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomImpl;
-import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.user.User;
@@ -32,8 +31,8 @@ public class DataManager {
                 "<green>A default kingdom description",
                 new HashMap<>(),
                 new HashMap<>(),
-                PermissionContainer.createWithLeader(leader),
-                PermissionContainer.createWithLeader(leader),
+                this.roleManager.getDefaultRolePermissions(),
+                this.roleManager.getDefaultRolePermissions(),
                 new HashSet<>(),
                 this.plugin.getUpgradeManager().getUpgradeHolder(),
                 new HashMap<>(),
