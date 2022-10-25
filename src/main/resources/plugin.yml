@@ -3,6 +3,7 @@ version: '${version}'
 main: io.github.fisher2911.kingdoms.Kingdoms
 api-version: 1.16
 authors: [ Fisher2911 ]
+depend: [ Vault ]
 commands:
   kingdom:
     description: test
