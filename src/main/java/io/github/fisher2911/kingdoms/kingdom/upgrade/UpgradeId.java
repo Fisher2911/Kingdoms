@@ -5,11 +5,15 @@ public enum UpgradeId {
     MAX_CLAIMS("Max Claims"),
     MAX_SPAWNERS("Max Spawners"),
     MAX_HOPPERS_PER_CHUNK("Max Hoppers Per Chunk"),
-    MAX_MEMBERS("Max Members")
+    MAX_MEMBERS("Max Members"),
+    BANK_LIMIT("Bank Limit"),
+    MAX_ALLIES("Max Allies"),
+    MAX_TRUCES("Max Truces"),
+    MAX_ENEMIES("Max Enemies"),
 
     ;
 
-    private String displayName;
+    private final String displayName;
 
     UpgradeId(String displayName) {
         this.displayName = displayName;

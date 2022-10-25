@@ -22,6 +22,7 @@ public interface User {
     OfflinePlayer getOfflinePlayer();
     boolean isOnline();
     void takeMoney(double amount);
+    void addMoney(double amount);
     double getMoney();
     int getKingdomId();
     void setKingdomId(int id);

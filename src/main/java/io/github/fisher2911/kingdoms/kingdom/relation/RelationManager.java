@@ -69,6 +69,7 @@ public class RelationManager extends Config {
             for (RelationInvite invite : this.invitedRelations.get(toRelate.getId())) {
                 if (invite.invited().getId() != kingdom.getId()) continue;
                 this.addRelation(kingdom, toRelate, type, canBeOneWay);
+                this.invitedRelations.remove(toRelate.getId(), invite);
                 return;
             }
             final RelationInvite invite = new RelationInvite(
@@ -116,8 +117,7 @@ public class RelationManager extends Config {
         MessageHandler.sendMessage(kingdom, Message.REMOVED_RELATION_TO, toRelate, type);
     }
 
-
-        public Map<RelationType, Relation> createRelations(Kingdom kingdom) {
+    public Map<RelationType, Relation> createRelations(Kingdom kingdom) {
         final Map<RelationType, Relation> relations = new EnumMap<>(RelationType.class);
         for (RelationType type : RelationType.values()) {
             relations.put(type, this.newRelation(type, kingdom));

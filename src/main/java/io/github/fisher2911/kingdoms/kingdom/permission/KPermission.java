@@ -42,6 +42,9 @@ public class KPermission {
     public static final KPermission REMOVE_NEUTRAL = register("remove_neutral", PermissionContext.KINGDOM);
     public static final KPermission REMOVE_TRUCE = register("remove_truce", PermissionContext.KINGDOM);
     public static final KPermission REMOVE_ALLY = register("remove_ally", PermissionContext.KINGDOM);
+    public static final KPermission DEPOSIT_MONEY = register("deposit_money", PermissionContext.KINGDOM);
+    public static final KPermission WITHDRAW_MONEY = register("withdraw_money", PermissionContext.KINGDOM);
+    public static final KPermission VIEW_BANK_BALANCE = register("view_bank_balance", PermissionContext.KINGDOM);
 
     public static Collection<KPermission> values() {
         return allPermissions;

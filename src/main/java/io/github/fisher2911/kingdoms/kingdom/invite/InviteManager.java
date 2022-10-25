@@ -57,7 +57,10 @@ public class InviteManager {
         final User invited = invite.invited();
         final User inviter = invite.inviter();
         this.kingdomManager.join(invited, invite.kingdom().getId()).
-                ifPresent(kingdom -> MessageHandler.sendMessage(inviter, Message.NEW_MEMBER_JOINED_KINGDOM, invited));
+                ifPresent(kingdom -> {
+                    MessageHandler.sendMessage(inviter, Message.NEW_MEMBER_JOINED_KINGDOM, invited);
+                    this.invitedPlayers.remove(invited.getId(), invite);
+                });
     }
 
     public void tryJoin(User user, String name) {

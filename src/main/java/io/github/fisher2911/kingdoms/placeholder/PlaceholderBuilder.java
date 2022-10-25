@@ -3,6 +3,7 @@ package io.github.fisher2911.kingdoms.placeholder;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.economy.Price;
+import io.github.fisher2911.kingdoms.economy.TransactionResult;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
@@ -40,6 +41,7 @@ public class PlaceholderBuilder {
         put(Kingdom.class, Placeholder.KINGDOM_ID, k -> castAndParseKingdom(k, Kingdom::getId));
         put(Kingdom.class, Placeholder.KINGDOM_NAME, k -> castAndParseKingdom(k, Kingdom::getName));
         put(Kingdom.class, Placeholder.KINGDOM_DESCRIPTION, k -> castAndParseKingdom(k, Kingdom::getDescription));
+        put(Kingdom.class, Placeholder.KINGDOM_BALANCE, k -> castAndParseKingdom(k, kingdom -> kingdom.getBank().getBalance()));
         put(Kingdom.class, Placeholder.KINGDOM_MEMBERS, k -> castAndParseKingdom(k,
                 kingdom -> String.join(", ", kingdom.getMembers().stream().
                         map(user -> user.getName() + " (" + kingdom.getRole(user).displayName() + ")").
@@ -132,6 +134,11 @@ public class PlaceholderBuilder {
                 Placeholder.CHAT_CHANNEL,
                 c -> castAndParse(ChatChannel.class, c, ChatChannel::displayName)
         );
+
+        put(TransactionResult.class,
+                Placeholder.TRANSACTION_AMOUNT,
+                t -> castAndParse(TransactionResult.class, t, TransactionResult::amount
+                ));
     }
 
     private static String getRelationString(Kingdom kingdom, RelationType type) {

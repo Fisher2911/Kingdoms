@@ -4,6 +4,7 @@ import io.github.fisher2911.kingdoms.command.kingdom.KingdomCommand;
 import io.github.fisher2911.kingdoms.config.GuiDisplayItems;
 import io.github.fisher2911.kingdoms.confirm.ConfirmationManager;
 import io.github.fisher2911.kingdoms.data.DataManager;
+import io.github.fisher2911.kingdoms.economy.EconomyManager;
 import io.github.fisher2911.kingdoms.economy.PriceManager;
 import io.github.fisher2911.kingdoms.gui.GuiListener;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
@@ -20,14 +21,20 @@ import io.github.fisher2911.kingdoms.listener.PlayerJoinListener;
 import io.github.fisher2911.kingdoms.listener.ProtectionListener;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.UserManager;
+import net.milkbowl.vault.economy.Economy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.List;
 
 public final class Kingdoms extends JavaPlugin {
+
+    private final Logger logger = LogManager.getLogger(Kingdoms.class);
 
     private GlobalListener globalListener;
     private UpgradeManager upgradeManager;
@@ -42,13 +49,20 @@ public final class Kingdoms extends JavaPlugin {
     private GuiDisplayItems guiDisplayItems;
     private RelationManager relationManager;
     private ConfirmationManager confirmationManager;
+    private EconomyManager economyManager;
+    private Economy economy;
 
     @Override
     public void onEnable() {
+        if (!this.setupEconomy()) {
+            logger.error("Could not find a valid economy plugin! Disabling plugin!");
+            return;
+        }
+
         // order matters
         this.globalListener = new GlobalListener();
         this.upgradeManager = new UpgradeManager(this);
-        this.userManager = new UserManager(new HashMap<>());
+        this.userManager = new UserManager(this, new HashMap<>());
         this.priceManager = new PriceManager();
         this.roleManager = new RoleManager(this, new HashMap<>());
         this.dataManager = new DataManager(this);
@@ -59,6 +73,7 @@ public final class Kingdoms extends JavaPlugin {
         this.inviteManager = new InviteManager(this);
         this.relationManager = new RelationManager(this);
         this.confirmationManager = new ConfirmationManager(this);
+        this.economyManager = new EconomyManager(this);
 
         this.registerListeners();
         this.registerCommands();
@@ -93,6 +108,14 @@ public final class Kingdoms extends JavaPlugin {
 
     public void registerListener(Listener listener) {
         this.getServer().getPluginManager().registerEvents(listener, this);
+    }
+
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) return false;
+        final RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) return false;
+        this.economy = rsp.getProvider();
+        return this.economy != null;
     }
 
     public GlobalListener getGlobalListener() {
@@ -149,5 +172,13 @@ public final class Kingdoms extends JavaPlugin {
 
     public ConfirmationManager getConfirmationManager() {
         return confirmationManager;
+    }
+
+    public EconomyManager getEconomyManager() {
+        return economyManager;
+    }
+
+    public Economy getEconomy() {
+        return economy;
     }
 }

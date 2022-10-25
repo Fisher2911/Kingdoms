@@ -56,6 +56,11 @@ public class ConsoleUser implements User {
     }
 
     @Override
+    public void addMoney(double amount) {
+
+    }
+
+    @Override
     public int getKingdomId() {
         return -1;
     }

@@ -33,7 +33,11 @@ public enum Placeholder {
 
     ROLE_DISPLAY_NAME,
 
-    RELATION_DISPLAY_NAME
+    RELATION_DISPLAY_NAME,
+
+    TRANSACTION_AMOUNT,
+
+    KINGDOM_BALANCE,
 
     ;
 

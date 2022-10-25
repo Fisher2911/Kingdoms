@@ -1,6 +1,7 @@
 package io.github.fisher2911.kingdoms.data;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.economy.Bank;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomImpl;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
@@ -37,7 +38,8 @@ public class DataManager {
                 this.plugin.getUpgradeManager().getUpgradeHolder(),
                 new HashMap<>(),
                 new HashMap<>(),
-                new HashMap<>()
+                new HashMap<>(),
+                Bank.createKingdomBank(0)
         );
         for (var entry : this.plugin.getRelationManager().createRelations(kingdom).entrySet()) {
             kingdom.setRelation(entry.getKey(), entry.getValue());

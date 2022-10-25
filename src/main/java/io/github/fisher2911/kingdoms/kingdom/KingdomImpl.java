@@ -3,6 +3,7 @@ package io.github.fisher2911.kingdoms.kingdom;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.economy.Bank;
 import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
@@ -10,6 +11,7 @@ import io.github.fisher2911.kingdoms.kingdom.relation.Relation;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
+import io.github.fisher2911.kingdoms.kingdom.upgrade.DoubleUpgrades;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.IntUpgrades;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeHolder;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeId;
@@ -43,6 +45,7 @@ public class KingdomImpl implements Kingdom {
     private final Map<String, Integer> upgradeLevels;
     private final Map<RelationType, Relation> relations;
     private final Map<Integer, RelationInfo> kingdomRelations;
+    private final Bank<Kingdom> bank;
 
     public KingdomImpl(
             Kingdoms plugin,
@@ -57,7 +60,8 @@ public class KingdomImpl implements Kingdom {
             UpgradeHolder upgradeHolder,
             Map<String, Integer> upgradeLevels,
             Map<RelationType, Relation> relations,
-            Map<Integer, RelationInfo> kingdomRelations
+            Map<Integer, RelationInfo> kingdomRelations,
+            Bank<Kingdom> bank
     ) {
         this.plugin = plugin;
         this.id = id;
@@ -76,6 +80,7 @@ public class KingdomImpl implements Kingdom {
         this.upgradeLevels = upgradeLevels;
         this.relations = relations;
         this.kingdomRelations = kingdomRelations;
+        this.bank = bank;
     }
 
     @Override
@@ -361,6 +366,22 @@ public class KingdomImpl implements Kingdom {
     @Override
     public boolean isLeader(User user) {
         return this.getRole(user).equals(this.plugin.getRoleManager().getLeaderRole());
+    }
+
+    @Override
+    public Bank<Kingdom> getBank() {
+        return this.bank;
+    }
+
+    @Override
+    public double getBankLimit() {
+        final DoubleUpgrades bankLimitUpgrades = this.upgradeHolder.getUpgrades(UpgradeId.BANK_LIMIT.toString(), DoubleUpgrades.class);
+        if (bankLimitUpgrades == null) return 0;
+        final Integer level = this.getUpgradeLevel(UpgradeId.BANK_LIMIT.toString());
+        if (level == null) return 0;
+        final Double limit = bankLimitUpgrades.getValueAtLevel(level);
+        if (limit == null) return 0;
+        return limit;
     }
 
     @Override

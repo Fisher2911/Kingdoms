@@ -1,5 +1,6 @@
 package io.github.fisher2911.kingdoms.user;
 
+import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
@@ -14,9 +15,11 @@ import java.util.UUID;
 
 public class UserManager {
 
+    private final Kingdoms plugin;
     private final Map<UUID, User> userMap;
 
-    public UserManager(Map<UUID, User> userMap) {
+    public UserManager(Kingdoms plugin, Map<UUID, User> userMap) {
+        this.plugin = plugin;
         this.userMap = userMap;
     }
 
@@ -25,7 +28,7 @@ public class UserManager {
         if (sender instanceof ConsoleCommandSender) return User.CONSOLE;
         if (sender instanceof final Player player) {
             final UUID uuid = player.getUniqueId();
-            return this.userMap.getOrDefault(uuid, new BukkitUser(player.getUniqueId(), player.getName(), player));
+            return this.userMap.getOrDefault(uuid, new BukkitUser(this.plugin, player.getUniqueId(), player.getName(), player));
         }
         return null;
     }

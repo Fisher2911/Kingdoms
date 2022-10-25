@@ -1,5 +1,6 @@
 package io.github.fisher2911.kingdoms.user;
 
+import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.command.CommandPermission;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 public class BukkitUser implements User {
 
+    private final Kingdoms plugin;
     private final UUID uuid;
     private final String name;
     @Nullable
@@ -24,7 +26,8 @@ public class BukkitUser implements User {
     private int kingdomId;
     private ChatChannel chatChannel;
 
-    public BukkitUser(UUID uuid, String name, @Nullable Player player) {
+    public BukkitUser(Kingdoms plugin, UUID uuid, String name, @Nullable Player player) {
+        this.plugin = plugin;
         this.uuid = uuid;
         this.name = name;
         this.player = player;
@@ -61,13 +64,17 @@ public class BukkitUser implements User {
 
     @Override
     public void takeMoney(double amount) {
-
+        this.plugin.getEconomy().withdrawPlayer(this.getOfflinePlayer(), amount);
     }
 
     @Override
     public double getMoney() {
-        // todo
-        return 300;
+        return this.plugin.getEconomy().getBalance(this.getOfflinePlayer());
+    }
+
+    @Override
+    public void addMoney(double amount) {
+        this.plugin.getEconomy().depositPlayer(this.getOfflinePlayer(), amount);
     }
 
     @Override

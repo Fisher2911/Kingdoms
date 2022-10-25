@@ -4,6 +4,7 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.admin.AdminCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.bank.BankCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.chat.ChatCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.ClaimCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.UnclaimCommand;
@@ -48,6 +49,7 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         this.addSubCommand(new LeaveCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new DisbandCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new ChatCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new BankCommand(this.plugin, new HashMap<>()));
         RelationCommand.createAll(this.plugin).forEach(this::addSubCommand);
     }
 

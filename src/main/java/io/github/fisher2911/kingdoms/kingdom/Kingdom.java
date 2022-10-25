@@ -1,5 +1,6 @@
 package io.github.fisher2911.kingdoms.kingdom;
 
+import io.github.fisher2911.kingdoms.economy.Bank;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermissible;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermissionHolder;
@@ -57,5 +58,7 @@ public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder {
     void removeRelation(Integer kingdomId);
     void setRelation(RelationType type, Relation relation);
     boolean isLeader(User user);
+    Bank<Kingdom> getBank();
+    public double getBankLimit();
 
 }
