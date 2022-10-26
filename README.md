@@ -120,3 +120,10 @@ permission-items:
       previous_page:
         click-types: ["LEFT"]
 ```
+
+## [Placeholders](https://github.com/Fisher2911/Kingdoms/blob/master/src/main/java/io/github/fisher2911/kingdoms/placeholder/Placeholder.java)
+
+These are all the placeholders, you use them by converting them to lowercase
+
+Not all messages have all the types of placeholders. 
+You should be able to figure it out in context, and the default messages use the placeholders.
