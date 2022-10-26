@@ -1,4 +1,4 @@
-# Upgrades
+## [Upgrades](https://github.com/Fisher2911/Kingdoms/blob/master/src/main/java/io/github/fisher2911/kingdoms/kingdom/upgrade/UpgradeId.java)
 
 [Example File](https://github.com/Fisher2911/Kingdoms/blob/master/src/main/resources/kingdom-defaults/upgrades.yml)
 
