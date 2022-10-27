@@ -25,7 +25,8 @@ public class Gui extends BaseGui {
     protected final Consumer<InventoryEventWrapper<InventoryCloseEvent>> closeHandler;
     protected final Consumer<InventoryEventWrapper<InventoryOpenEvent>> openHandler;
 
-    public Gui(
+    private Gui(
+            String id,
             String name,
             int rows,
             Map<Integer, BaseGuiItem> guiItemsMap,
@@ -40,14 +41,15 @@ public class Gui extends BaseGui {
             int previousPageItemSlot,
             @Nullable GuiItem previousPageItem
     ) {
-        super(name, rows, guiItemsMap, filler, border, nextPageItemSlot, nextPageItem, previousPageItemSlot, previousPageItem);
+        super(id, name, rows, guiItemsMap, filler, border, nextPageItemSlot, nextPageItem, previousPageItemSlot, previousPageItem);
         this.playerInventoryClickHandler = playerInventoryClickHandler;
         this.defaultEventHandlers = defaultEventHandlers;
         this.closeHandler = closeHandler;
         this.openHandler = openHandler;
     }
 
-    public Gui(
+    private Gui(
+            String id,
             String name,
             int rows,
             Map<Integer, BaseGuiItem> guiItemsMap,
@@ -55,10 +57,11 @@ public class Gui extends BaseGui {
             Map<InventoryEventType, Consumer<InventoryEventWrapper<? extends InventoryEvent>>> defaultEventHandlers,
             Consumer<InventoryEventWrapper<InventoryCloseEvent>> closeHandler,
             Consumer<InventoryEventWrapper<InventoryOpenEvent>> openHandler,
-            @Nullable ItemBuilder filler,
-            List<ItemBuilder> border
+            @Nullable BaseGuiItem filler,
+            List<BaseGuiItem> border
     ) {
         this(
+                id,
                 name,
                 rows,
                 guiItemsMap,
@@ -132,12 +135,13 @@ public class Gui extends BaseGui {
         handler.accept(wrapper);
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(String id) {
+        return new Builder(id);
     }
 
     public static class Builder {
 
+        private final String id;
         private String name = "";
         private int rows = 1;
         private final Map<Integer, BaseGuiItem> guiItemsMap = new HashMap<>();
@@ -145,13 +149,19 @@ public class Gui extends BaseGui {
         private final Map<InventoryEventType, Consumer<InventoryEventWrapper<? extends InventoryEvent>>> defaultEventHandlers = new HashMap<>();
         private Consumer<InventoryEventWrapper<InventoryCloseEvent>> closeHandler;
         private Consumer<InventoryEventWrapper<InventoryOpenEvent>> openHandler;
-        private @Nullable ItemBuilder filler;
-        private final List<ItemBuilder> border = new ArrayList<>();
+        private @Nullable BaseGuiItem filler;
+        private final List<BaseGuiItem> border = new ArrayList<>();
+        private int nextPageItemSlot = -1;
+        private @Nullable GuiItem nextPageItem;
+        private int previousPageItemSlot = -1;
+        private @Nullable GuiItem previousPageItem;
 
-        private Builder() {}
+        private Builder(String id) {
+            this.id = id;
+        }
 
-        public static Builder builder() {
-            return new Builder();
+        private static Builder builder(String id) {
+            return new Builder(id);
         }
 
         public Builder name(String name) {
@@ -195,6 +205,11 @@ public class Gui extends BaseGui {
         }
 
         public Builder cancelAllClicks() {
+            return this.cancelAllClicks(true);
+        }
+
+        public Builder cancelAllClicks(boolean value) {
+            if (!value) return this;
             this.cancelClicks();
             this.cancelDrags();
             this.cancelPlayerClicks();
@@ -221,23 +236,24 @@ public class Gui extends BaseGui {
             return this;
         }
 
-        public Builder filler(@Nullable ItemBuilder filler) {
+        public Builder filler(@Nullable BaseGuiItem filler) {
             this.filler = filler;
             return this;
         }
 
-        public Builder border(List<ItemBuilder> border) {
+        public Builder border(List<BaseGuiItem> border) {
             this.border.addAll(border);
             return this;
         }
 
-        public Builder border(ItemBuilder... border) {
+        public Builder border(BaseGuiItem... border) {
             this.border.addAll(Arrays.asList(border));
             return this;
         }
 
         public Gui build() {
             return new Gui(
+                    this.id,
                     this.name,
                     this.rows,
                     this.guiItemsMap,

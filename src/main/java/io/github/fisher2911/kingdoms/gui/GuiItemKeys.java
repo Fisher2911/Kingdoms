@@ -7,6 +7,8 @@ public enum GuiItemKeys {
     ROLE,
     CHUNK,
     UPGRADE,
+    DELETE_RUNNABLE,
+    INCREASE_LEVEL_RUNNABLE
 
 
     ;

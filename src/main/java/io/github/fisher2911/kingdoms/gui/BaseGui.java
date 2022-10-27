@@ -2,7 +2,6 @@ package io.github.fisher2911.kingdoms.gui;
 
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.placeholder.PlaceholderBuilder;
-import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -19,14 +18,14 @@ import java.util.Map;
 
 public abstract class BaseGui implements InventoryHolder {
 
+    protected final String id;
     protected final String name;
     protected final int rows;
     protected final Map<Integer, BaseGuiItem> guiItemsMap;
     protected final Inventory inventory;
     private int currentPage = 0;
-    @Nullable
-    private final ItemBuilder filler;
-    private final List<ItemBuilder> border;
+    private final List<BaseGuiItem> fillers;
+    private final List<BaseGuiItem> border;
     protected final int nextPageItemSlot;
     protected final int previousPageItemSlot;
     @Nullable
@@ -36,16 +35,18 @@ public abstract class BaseGui implements InventoryHolder {
     private int maxPageSlot;
 
     public BaseGui(
+            String id,
             String name,
             int rows,
             Map<Integer, BaseGuiItem> guiItemsMap,
-            @Nullable ItemBuilder filler,
-            List<ItemBuilder> border,
+            List<BaseGuiItem> fillers,
+            List<BaseGuiItem> border,
             int nextPageItemSlot,
             @Nullable GuiItem nextPageItem,
             int previousPageItemSlot,
             @Nullable GuiItem previousPageItem
     ) {
+        this.id = id;
         this.name = name;
         this.rows = rows;
         this.guiItemsMap = guiItemsMap;
@@ -54,7 +55,7 @@ public abstract class BaseGui implements InventoryHolder {
                 this.rows * 9,
                 PlaceholderBuilder.apply(MessageHandler.serialize(this.name), this)
         );
-        this.filler = filler;
+        this.fillers = fillers;
         this.border = border;
         this.nextPageItemSlot = nextPageItemSlot;
         this.nextPageItem = nextPageItem;
@@ -63,8 +64,8 @@ public abstract class BaseGui implements InventoryHolder {
         this.reset();
     }
 
-    public BaseGui(String name, int rows, Map<Integer, BaseGuiItem> guiItemsMap, @Nullable ItemBuilder filler, List<ItemBuilder> border) {
-        this(name, rows, guiItemsMap, filler, border, -1, null, -1, null);
+    public BaseGui(String id, String name, int rows, Map<Integer, BaseGuiItem> guiItemsMap, @Nullable BaseGuiItem filler, List<BaseGuiItem> border) {
+        this(id, name, rows, guiItemsMap, filler, border, -1, null, -1, null);
     }
 
     public void open(HumanEntity human) {
@@ -88,7 +89,7 @@ public abstract class BaseGui implements InventoryHolder {
         for (int i = 0; i < this.inventory.getSize(); i++) {
             if (this.guiItemsMap.containsKey(this.getItemPageSlot(i))) continue;
             if (this.isOnBorder(i) && !this.border.isEmpty()) continue;
-            this.setItem(i, GuiItem.builder(this.filler).build());
+            this.setItem(i, this.filler);
         }
     }
 
@@ -96,7 +97,7 @@ public abstract class BaseGui implements InventoryHolder {
         if (this.border.isEmpty()) return;
         for (int i = 0; i < this.inventory.getSize(); i++) {
             if (!this.isOnBorder(i)) continue;
-            this.inventory.setItem(i, this.border.get(i % this.border.size()).build());
+            this.set(i, this.border.get(i % this.border.size()));
         }
     }
 
@@ -161,6 +162,10 @@ public abstract class BaseGui implements InventoryHolder {
     public void set(int slot, BaseGuiItem item) {
         this.guiItemsMap.put(slot, item);
         if (item != null) this.setItem(this.getItemPageSlot(slot), item);
+    }
+
+    public String getId() {
+        return id;
     }
 
     @Nullable

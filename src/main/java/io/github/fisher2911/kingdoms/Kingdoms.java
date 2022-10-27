@@ -8,6 +8,7 @@ import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.economy.EconomyManager;
 import io.github.fisher2911.kingdoms.economy.PriceManager;
 import io.github.fisher2911.kingdoms.gui.GuiListener;
+import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
@@ -52,6 +53,7 @@ public final class Kingdoms extends JavaPlugin {
     private RelationManager relationManager;
     private ConfirmationManager confirmationManager;
     private EconomyManager economyManager;
+    private GuiManager guiManager;
     private Economy economy;
 
     @Override
@@ -77,6 +79,7 @@ public final class Kingdoms extends JavaPlugin {
         this.relationManager = new RelationManager(this);
         this.confirmationManager = new ConfirmationManager(this);
         this.economyManager = new EconomyManager(this);
+        this.guiManager = new GuiManager(this);
 
         this.registerListeners();
         this.registerCommands();
@@ -186,6 +189,10 @@ public final class Kingdoms extends JavaPlugin {
 
     public EconomyManager getEconomyManager() {
         return economyManager;
+    }
+
+    public GuiManager getGuiManager() {
+        return guiManager;
     }
 
     public Economy getEconomy() {

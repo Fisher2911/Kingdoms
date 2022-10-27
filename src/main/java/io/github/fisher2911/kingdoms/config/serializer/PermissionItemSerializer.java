@@ -1,6 +1,7 @@
 package io.github.fisher2911.kingdoms.config.serializer;
 
 import io.github.fisher2911.kingdoms.gui.BaseGuiItem;
+import io.github.fisher2911.kingdoms.gui.ClickAction;
 import io.github.fisher2911.kingdoms.gui.GuiItem;
 import io.github.fisher2911.kingdoms.gui.GuiItemKeys;
 import io.github.fisher2911.kingdoms.gui.InventoryEventWrapper;
@@ -77,15 +78,6 @@ public class PermissionItemSerializer implements TypeSerializer<BaseGuiItem> {
 
     @Override
     public void serialize(Type type, @Nullable BaseGuiItem obj, ConfigurationNode node) throws SerializationException {
-
-    }
-
-    private enum ClickAction {
-
-        SWAP_VALUE,
-        NEXT_PAGE,
-        PREVIOUS_PAGE,
-        NONE
 
     }
 

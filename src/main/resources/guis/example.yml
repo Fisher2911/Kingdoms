@@ -1,0 +1,73 @@
+title: test
+rows: 3
+border-items:
+  1:
+    item:
+      material: "RED_STAINED_GLASS_PANE"
+      amount: 1
+      name: " "
+      lore:
+        - " "
+filler-item:
+  material: "BLUE_STAINED_GLASS_PANE"
+  amount: 1
+  name: " "
+  lore:
+    - " "
+gui-fillers:
+  1:
+    type: permissions
+    item:
+      material: "PAPER"
+      amount: 1
+      name: "<blue>Value: %permission_display_value"
+      lore:
+        - ""
+        - "<blue>Value: %permission_display_value"
+    actions:
+      swap_value:
+        click-types: [ "RIGHT", "LEFT" ]
+  2:
+    type: upgrades
+    item:
+      material: "EMERALD_BLOCK"
+      amount: 1
+      name: "<green>%upgrade_display_name"
+      lore:
+        - ""
+        - "<green>Cost: %upgrade_display_cost"
+        - "<green>Value: %upgrade_display_value"
+    actions:
+      increase_level:
+        click-types: [ "LEFT" ]
+      show_cost:
+        click-types: [ "RIGHT" ]
+  3:
+    type: roles
+    item:
+      material: "SKELTON_SKULL"
+        amount: 1
+        name: "%role_display_value"
+        lore:
+          - ""
+          - "<green>Weight: %role_display_weight"
+      actions:
+        open_menu:
+          menu_title: "role_editor"
+          gui_metadata:
+            role: %role_id%
+          click-types: [ "LEFT" ]
+        set_temp_item:
+          click-types: [ "RIGHT" ]
+          # in ticks
+          duration: 60
+          confirm:
+            item:
+            material: "RED_STAINED_GLASS_PANE"
+            amount: 1
+            name: "<red>Confirm"
+            lore:
+              - "<red>Click to confirm"
+            actions:
+            delete:
+              click-types: [ "LEFT" ]
