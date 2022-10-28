@@ -1,35 +1,30 @@
 package io.github.fisher2911.kingdoms.gui.type;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.config.GuiDisplayItems;
+import io.github.fisher2911.kingdoms.config.serializer.GuiSerializer;
 import io.github.fisher2911.kingdoms.gui.BaseGui;
 import io.github.fisher2911.kingdoms.gui.BaseGuiItem;
-import io.github.fisher2911.kingdoms.gui.Gui;
 import io.github.fisher2911.kingdoms.gui.GuiItemKeys;
-import io.github.fisher2911.kingdoms.gui.InventoryEventWrapper;
+import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
-import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContext;
 import io.github.fisher2911.kingdoms.kingdom.permission.RolePermissionHolder;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
-import io.github.fisher2911.kingdoms.placeholder.wrapper.PermissionWrapper;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class PermissionGui {
 
@@ -39,44 +34,59 @@ public class PermissionGui {
         this.gui = gui;
     }
 
-    public static PermissionGui create(final Kingdoms plugin, Role role, Kingdom kingdom, ClaimedChunk chunk) {
-        final GuiDisplayItems displayItems = plugin.getGuiDisplayItems();
-        final Map<Integer, BaseGuiItem> items = new HashMap<>();
-        int index = 0;
-        for (var entry : displayItems.getPermissionItems().entrySet()) {
-            final int slot = entry.getKey();
-            final BaseGuiItem guiItem = entry.getValue();
-            final KPermission permission = guiItem.getMetadata(GuiItemKeys.PERMISSION, KPermission.class);
-            if (permission == null) {
-                items.put(slot, guiItem);
-                continue;
-            }
-            if (chunk == null && !permission.hasContext(PermissionContext.KINGDOM)) continue;
-            if (chunk != null && !permission.hasContext(PermissionContext.CLAIM)) continue;
-
-            final List<Supplier<Object>> placeholders = new ArrayList<>();
-            if (chunk == null) {
-                placeholders.add(() -> new PermissionWrapper(permission, kingdom.hasPermission(role, permission)));
-            } else {
-                placeholders.add(() -> new PermissionWrapper(permission, kingdom.hasPermission(role, permission, chunk)));
-            }
-
-            guiItem.setMetadata(GuiItemKeys.PERMISSION, permission);
-            guiItem.setMetadata(GuiItemKeys.KINGDOM, kingdom);
-            guiItem.setMetadata(GuiItemKeys.ROLE, role);
-            guiItem.setMetadata(GuiItemKeys.CHUNK, chunk);
-
-            items.put(index, guiItem.withPlaceholders(placeholders));
-            index++;
+    public static BaseGui create(User user, Kingdoms plugin, Role role, Kingdom kingdom, ClaimedChunk chunk) {
+        final Path path = plugin.getDataFolder().toPath().resolve("guis").resolve("permissions.yml");
+        final YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(path).build();
+        try {
+            final BaseGui gui = GuiSerializer.deserialize(
+                    loader.load()
+            ).metadata(GuiItemKeys.KINGDOM, kingdom)
+                    .metadata(GuiItemKeys.ROLE, role)
+                    .metadata(GuiItemKeys.CHUNK, chunk).
+                    metadata(GuiItemKeys.USER, user).
+                    build();
+            return gui;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return new PermissionGui(
-                Gui.builder().
-                        name("<gray>Permissions").
-                        items(items).
-                        rows(items.size() / 9 + 1).
-                        cancelAllClicks().
-                        build()
-        );
+        return null;
+//        final GuiDisplayItems displayItems = plugin.getGuiDisplayItems();
+//        final Map<Integer, BaseGuiItem> items = new HashMap<>();
+//        int index = 0;
+//        for (var entry : displayItems.getPermissionItems().entrySet()) {
+//            final int slot = entry.getKey();
+//            final BaseGuiItem guiItem = entry.getValue();
+//            final KPermission permission = guiItem.getMetadata(GuiItemKeys.PERMISSION, KPermission.class);
+//            if (permission == null) {
+//                items.put(slot, guiItem);
+//                continue;
+//            }
+//            if (chunk == null && !permission.hasContext(PermissionContext.KINGDOM)) continue;
+//            if (chunk != null && !permission.hasContext(PermissionContext.CLAIM)) continue;
+//
+//            final List<Supplier<Object>> placeholders = new ArrayList<>();
+//            if (chunk == null) {
+//                placeholders.add(() -> new PermissionWrapper(permission, kingdom.hasPermission(role, permission)));
+//            } else {
+//                placeholders.add(() -> new PermissionWrapper(permission, kingdom.hasPermission(role, permission, chunk)));
+//            }
+//
+//            guiItem.setMetadata(GuiItemKeys.PERMISSION, permission);
+//            guiItem.setMetadata(GuiItemKeys.KINGDOM, kingdom);
+//            guiItem.setMetadata(GuiItemKeys.ROLE, role);
+//            guiItem.setMetadata(GuiItemKeys.CHUNK, chunk);
+//
+//            items.put(index, guiItem.withPlaceholders(placeholders));
+//            index++;
+//        }
+//        return new PermissionGui(
+//                Gui.builder("permissions").
+//                        name("<gray>Permissions").
+//                        items(items).
+//                        rows(items.size() / 9 + 1).
+//                        cancelAllClicks().
+//                        build()
+//        );
     }
 
     public static Consumer<InventoryEventWrapper<InventoryClickEvent>> swapValueItem(Collection<ClickType> clickTypes) {

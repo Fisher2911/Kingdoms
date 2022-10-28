@@ -33,12 +33,14 @@ public abstract class BaseGui implements InventoryHolder {
     @Nullable
     private final GuiItem previousPageItem;
     private int maxPageSlot;
+    protected final Map<Object, Object> metadata;
 
     public BaseGui(
             String id,
             String name,
             int rows,
             Map<Integer, BaseGuiItem> guiItemsMap,
+            final Map<Object, Object> metadata,
             List<BaseGuiItem> fillers,
             List<BaseGuiItem> border,
             int nextPageItemSlot,
@@ -61,11 +63,20 @@ public abstract class BaseGui implements InventoryHolder {
         this.nextPageItem = nextPageItem;
         this.previousPageItemSlot = previousPageItemSlot;
         this.previousPageItem = previousPageItem;
+        this.metadata = metadata;
         this.reset();
     }
 
-    public BaseGui(String id, String name, int rows, Map<Integer, BaseGuiItem> guiItemsMap, @Nullable BaseGuiItem filler, List<BaseGuiItem> border) {
-        this(id, name, rows, guiItemsMap, filler, border, -1, null, -1, null);
+    public BaseGui(
+            String id,
+            String name,
+            int rows,
+            Map<Integer, BaseGuiItem> guiItemsMap,
+            List<BaseGuiItem> filler,
+            List<BaseGuiItem> border,
+            final Map<Object, Object> metadata
+    ) {
+        this(id, name, rows, guiItemsMap, metadata, filler, border, -1, null, -1, null);
     }
 
     public void open(HumanEntity human) {
@@ -77,19 +88,23 @@ public abstract class BaseGui implements InventoryHolder {
      */
     public void reset() {
         this.inventory.clear();
+        this.setBorder();
         for (int i = 0; i < this.inventory.getSize(); i++) {
             final BaseGuiItem item = this.guiItemsMap.get(this.getItemPageSlot(i));
             if (item == null) continue;
             this.setItem(i, item);
         }
+        this.setFillers();
     }
 
-    public void setFiller() {
-        if (this.filler == null) return;
-        for (int i = 0; i < this.inventory.getSize(); i++) {
-            if (this.guiItemsMap.containsKey(this.getItemPageSlot(i))) continue;
-            if (this.isOnBorder(i) && !this.border.isEmpty()) continue;
-            this.setItem(i, this.filler);
+    public void setFillers() {
+        if (this.fillers.isEmpty()) return;
+        for (BaseGuiItem item : this.fillers) {
+            this.maxPageSlot++;
+            while (this.isOnBorder(this.maxPageSlot)) {
+                this.maxPageSlot++;
+            }
+            this.setItem(this.maxPageSlot, item);
         }
     }
 
@@ -109,11 +124,11 @@ public abstract class BaseGui implements InventoryHolder {
         final int pageSlot = this.getItemPageSlot(slot);
         this.maxPageSlot = Math.max(this.maxPageSlot, pageSlot);
         if (slot == this.nextPageItemSlot && this.nextPageItem != null) {
-            this.inventory.setItem(slot, this.nextPageItem.getItemStack());
+            this.inventory.setItem(slot, this.nextPageItem.getItemStack(this));
             return;
         }
         if (slot == this.previousPageItemSlot && this.previousPageItem != null) {
-            this.inventory.setItem(slot, this.previousPageItem.getItemStack());
+            this.inventory.setItem(slot, this.previousPageItem.getItemStack(this));
             return;
         }
         if (item == null) {
@@ -121,7 +136,7 @@ public abstract class BaseGui implements InventoryHolder {
             this.guiItemsMap.remove(pageSlot);
             return;
         }
-        this.inventory.setItem(slot, item.getItemStack());
+        this.inventory.setItem(slot, item.getItemStack(this));
     }
 
     public boolean hasNextPage() {
@@ -209,4 +224,17 @@ public abstract class BaseGui implements InventoryHolder {
     public @NotNull Inventory getInventory() {
         return this.inventory;
     }
+
+    public void setMetadata(Object key, Object value) {
+        this.metadata.put(key, value);
+    }
+
+    @Nullable
+    public <T> T getMetadata(Object key, Class<T> clazz) {
+        final Object o = this.metadata.get(key);
+        if (o == null) return null;
+        if (!clazz.isInstance(o)) return null;
+        return clazz.cast(o);
+    }
+
 }

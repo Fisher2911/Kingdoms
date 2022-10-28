@@ -40,14 +40,19 @@ public class EditPermissionsCommand extends KCommand {
             MessageHandler.sendMessage(user, Message.NO_ROLE_FOUND);
             return;
         }
-        this.kingdomManager.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
-            PermissionGui.create(
-                    this.plugin,
-                    role,
-                    kingdom,
-                    null
-            ).open(user.getPlayer());
-        }, () -> MessageHandler.sendMessage(user, "Could not find kingdom"));
+        try {
+            this.kingdomManager.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
+                PermissionGui.create(
+                        user,
+                        this.plugin,
+                        role,
+                        kingdom,
+                        null
+                ).open(user.getPlayer());
+            }, () -> MessageHandler.sendMessage(user, "Could not find kingdom"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

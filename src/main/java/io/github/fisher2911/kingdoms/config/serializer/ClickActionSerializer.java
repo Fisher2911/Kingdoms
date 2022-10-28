@@ -6,7 +6,7 @@ import io.github.fisher2911.kingdoms.gui.BaseGuiItem;
 import io.github.fisher2911.kingdoms.gui.ClickAction;
 import io.github.fisher2911.kingdoms.gui.GuiItemKeys;
 import io.github.fisher2911.kingdoms.gui.GuiManager;
-import io.github.fisher2911.kingdoms.gui.InventoryEventWrapper;
+import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
 import io.github.fisher2911.kingdoms.util.EnumUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.inventory.ClickType;
@@ -16,6 +16,8 @@ import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -25,22 +27,42 @@ import java.util.stream.Collectors;
 public class ClickActionSerializer {
 
     private static final Map<ClickAction, BiFunction<ConfigurationNode, Set<ClickType>, Consumer<InventoryEventWrapper<InventoryClickEvent>>>> LOADERS =
-            Map.of(
-                    ClickAction.NEXT_PAGE, ClickActionSerializer::loadNextPage,
-                    ClickAction.PREVIOUS_PAGE, ClickActionSerializer::loadPreviousPage,
-                    ClickAction.PLAYER_COMMAND, ClickActionSerializer::loadPlayerCommand,
-                    ClickAction.CONSOLE_COMMAND, ClickActionSerializer::loadConsoleCommand,
-                    ClickAction.OPEN_MENU, ClickActionSerializer::loadOpenMenu,
-                    ClickAction.DELETE, ClickActionSerializer::loadDelete,
-                    ClickAction.INCREASE_LEVEL, ClickActionSerializer::loadIncreaseLevel,
-                    ClickAction.SET_ITEMS, ClickActionSerializer::loadSetItems,
-                    ClickAction.SET_ITEM, ClickActionSerializer::loadSetItem
-                    );
+            new HashMap<>();
+
+    static {
+        LOADERS.put(ClickAction.NEXT_PAGE, ClickActionSerializer::loadNextPage);
+        LOADERS.put(ClickAction.PREVIOUS_PAGE, ClickActionSerializer::loadPreviousPage);
+        LOADERS.put(ClickAction.PLAYER_COMMAND, ClickActionSerializer::loadPlayerCommand);
+        LOADERS.put(ClickAction.CONSOLE_COMMAND, ClickActionSerializer::loadConsoleCommand);
+        LOADERS.put(ClickAction.OPEN_MENU, ClickActionSerializer::loadOpenMenu);
+        LOADERS.put(ClickAction.DELETE, ClickActionSerializer::loadDelete);
+        LOADERS.put(ClickAction.INCREASE_LEVEL, ClickActionSerializer::loadIncreaseLevel);
+        LOADERS.put(ClickAction.SET_ITEMS, ClickActionSerializer::loadSetItems);
+        LOADERS.put(ClickAction.SET_ITEM, ClickActionSerializer::loadSetItem);
+        LOADERS.put(ClickAction.SWAP_VALUE, ClickActionSerializer::loadSwapValue);
+        LOADERS.put(ClickAction.CLOSE_MENU, ClickActionSerializer::loadCloseMenu);
+    }
 
     private static final String CLICK_TYPES_PATH = "click-types";
     private static final String COMMAND_PATH = "command";
     private static final String MENU_PATH = "menu";
     private static final String RESET_DELAY_PATH = "reset-delay";
+
+    public static List<Consumer<InventoryEventWrapper<InventoryClickEvent>>> deserializeAll(ConfigurationNode source) throws SerializationException {
+        final List<Consumer<InventoryEventWrapper<InventoryClickEvent>>> actions = new ArrayList<>();
+        for (var entry : source.childrenMap().entrySet()) {
+            System.out.println("Loading action: " + entry.getKey());
+            if (!(entry.getKey() instanceof final String action)) continue;
+            final var consumer = deserialize(entry.getValue(), action.toUpperCase(Locale.ROOT));
+            if (consumer == null) {
+                System.out.println("Consumer is null: " + action);
+                continue;
+            }
+            System.out.println("Consumer not null: " + action);
+            actions.add(consumer);
+        }
+        return actions;
+    }
 
     public static Consumer<InventoryEventWrapper<InventoryClickEvent>> deserialize(
             ConfigurationNode source,
@@ -124,9 +146,9 @@ public class ClickActionSerializer {
             final int clicked = event.getSlot();
             final BaseGuiItem item = wrapper.gui().getItem(clicked);
             if (item == null) return;
-            final Runnable deleter = item.getMetadata(GuiItemKeys.DELETE_RUNNABLE, Runnable.class);
+            final Consumer<InventoryEventWrapper<InventoryClickEvent>> deleter = item.getMetadata(GuiItemKeys.DELETE_CONSUMER, Consumer.class);
             if (deleter == null) return;
-            deleter.run();
+            deleter.accept(wrapper);
         };
     }
 
@@ -138,9 +160,33 @@ public class ClickActionSerializer {
             final int clicked = event.getSlot();
             final BaseGuiItem item = wrapper.gui().getItem(clicked);
             if (item == null) return;
-            final Runnable increaser = item.getMetadata(GuiItemKeys.INCREASE_LEVEL_RUNNABLE, Runnable.class);
+            final Consumer<InventoryEventWrapper<InventoryClickEvent>> increaser = item.getMetadata(GuiItemKeys.INCREASE_LEVEL_CONSUMER, Consumer.class);
             if (increaser == null) return;
-            increaser.run();
+            increaser.accept(wrapper);
+        };
+    }
+
+    private static Consumer<InventoryEventWrapper<InventoryClickEvent>> loadSwapValue(ConfigurationNode source, Set<ClickType> clickTypes) {
+        return wrapper -> {
+            final var event = wrapper.event();
+            event.setCancelled(true);
+            if (!clickTypes.contains(event.getClick())) return;
+            final int clicked = event.getSlot();
+            final BaseGuiItem item = wrapper.gui().getItem(clicked);
+            if (item == null) return;
+            final Consumer<InventoryEventWrapper<InventoryClickEvent>> swapper = item.getMetadata(GuiItemKeys.SWAP_VALUE_CONSUMER, Consumer.class);
+            if (swapper == null) return;
+            swapper.accept(wrapper);
+        };
+    }
+
+    private static Consumer<InventoryEventWrapper<InventoryClickEvent>> loadCloseMenu(ConfigurationNode source, Set<ClickType> clickTypes) {
+        return wrapper -> {
+            final var event = wrapper.event();
+            event.setCancelled(true);
+            if (!clickTypes.contains(event.getClick())) return;
+            event.getWhoClicked().sendMessage("Closing menu");
+            event.getWhoClicked().closeInventory();
         };
     }
 
@@ -194,6 +240,7 @@ public class ClickActionSerializer {
         try {
             final int duration = source.node(RESET_DELAY_PATH).getInt(-1);
             final BaseGuiItem item = GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, source.node(ITEM_PATH));
+            System.out.println("Loaded set item: " + item + " - " + source.node(ITEM_PATH).toString());
             if (item == null) throw new SerializationException("Item cannot be null");
             final Kingdoms plugin = Kingdoms.getPlugin(Kingdoms.class);
             return wrapper -> {

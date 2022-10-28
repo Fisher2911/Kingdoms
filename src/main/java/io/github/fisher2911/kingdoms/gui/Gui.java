@@ -1,7 +1,6 @@
 package io.github.fisher2911.kingdoms.gui;
 
-import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
-import org.bukkit.Bukkit;
+import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -30,18 +29,19 @@ public class Gui extends BaseGui {
             String name,
             int rows,
             Map<Integer, BaseGuiItem> guiItemsMap,
+            Map<Object, Object> metadata,
             Consumer<InventoryEventWrapper<InventoryClickEvent>> playerInventoryClickHandler,
             Map<InventoryEventType, Consumer<InventoryEventWrapper<? extends InventoryEvent>>> defaultEventHandlers,
             Consumer<InventoryEventWrapper<InventoryCloseEvent>> closeHandler,
             Consumer<InventoryEventWrapper<InventoryOpenEvent>> openHandler,
-            @Nullable ItemBuilder filler,
-            List<ItemBuilder> border,
+            List<BaseGuiItem> filler,
+            List<BaseGuiItem> border,
             int nextPageItemSlot,
             @Nullable GuiItem nextPageItem,
             int previousPageItemSlot,
             @Nullable GuiItem previousPageItem
     ) {
-        super(id, name, rows, guiItemsMap, filler, border, nextPageItemSlot, nextPageItem, previousPageItemSlot, previousPageItem);
+        super(id, name, rows, guiItemsMap, metadata, filler, border, nextPageItemSlot, nextPageItem, previousPageItemSlot, previousPageItem);
         this.playerInventoryClickHandler = playerInventoryClickHandler;
         this.defaultEventHandlers = defaultEventHandlers;
         this.closeHandler = closeHandler;
@@ -53,11 +53,12 @@ public class Gui extends BaseGui {
             String name,
             int rows,
             Map<Integer, BaseGuiItem> guiItemsMap,
+            Map<Object, Object> metadata,
             Consumer<InventoryEventWrapper<InventoryClickEvent>> playerInventoryClickHandler,
             Map<InventoryEventType, Consumer<InventoryEventWrapper<? extends InventoryEvent>>> defaultEventHandlers,
             Consumer<InventoryEventWrapper<InventoryCloseEvent>> closeHandler,
             Consumer<InventoryEventWrapper<InventoryOpenEvent>> openHandler,
-            @Nullable BaseGuiItem filler,
+            List<BaseGuiItem> filler,
             List<BaseGuiItem> border
     ) {
         this(
@@ -65,6 +66,7 @@ public class Gui extends BaseGui {
                 name,
                 rows,
                 guiItemsMap,
+                metadata,
                 playerInventoryClickHandler,
                 defaultEventHandlers,
                 closeHandler,
@@ -84,11 +86,9 @@ public class Gui extends BaseGui {
         final Inventory clickedInventory = event.getClickedInventory();
         final var wrapper = InventoryEventWrapper.wrap(this, event);
         if (event.getView().getBottomInventory().equals(clickedInventory)) {
-            Bukkit.broadcastMessage("Clicked bottom inventory in GUI class");
             if (this.playerInventoryClickHandler != null) {
                 this.playerInventoryClickHandler.accept(wrapper);
             }
-            Bukkit.broadcastMessage("Is handler null? " + (this.playerInventoryClickHandler == null));
             return;
         }
         if (!event.getView().getTopInventory().equals(clickedInventory)) {
@@ -145,11 +145,12 @@ public class Gui extends BaseGui {
         private String name = "";
         private int rows = 1;
         private final Map<Integer, BaseGuiItem> guiItemsMap = new HashMap<>();
+        private final Map<Object, Object> metadata = new HashMap<>();
         private Consumer<InventoryEventWrapper<InventoryClickEvent>> playerInventoryClickHandler;
         private final Map<InventoryEventType, Consumer<InventoryEventWrapper<? extends InventoryEvent>>> defaultEventHandlers = new HashMap<>();
         private Consumer<InventoryEventWrapper<InventoryCloseEvent>> closeHandler;
         private Consumer<InventoryEventWrapper<InventoryOpenEvent>> openHandler;
-        private @Nullable BaseGuiItem filler;
+        private final List<BaseGuiItem> filler = new ArrayList<>();
         private final List<BaseGuiItem> border = new ArrayList<>();
         private int nextPageItemSlot = -1;
         private @Nullable GuiItem nextPageItem;
@@ -181,6 +182,11 @@ public class Gui extends BaseGui {
 
         public Builder items(Map<Integer, BaseGuiItem> items) {
             this.guiItemsMap.putAll(items);
+            return this;
+        }
+
+        public Builder metadata(Object key, Object value) {
+            this.metadata.put(key, value);
             return this;
         }
 
@@ -236,8 +242,8 @@ public class Gui extends BaseGui {
             return this;
         }
 
-        public Builder filler(@Nullable BaseGuiItem filler) {
-            this.filler = filler;
+        public Builder filler(List<BaseGuiItem> filler) {
+            this.filler.addAll(filler);
             return this;
         }
 
@@ -257,6 +263,7 @@ public class Gui extends BaseGui {
                     this.name,
                     this.rows,
                     this.guiItemsMap,
+                    this.metadata,
                     this.playerInventoryClickHandler,
                     this.defaultEventHandlers,
                     this.closeHandler,

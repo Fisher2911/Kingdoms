@@ -51,6 +51,7 @@ public class EditChunkPermissionsCommand extends KCommand {
         }
         this.kingdomManager.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
             PermissionGui.create(
+                    user,
                     this.plugin,
                     role,
                     kingdom,

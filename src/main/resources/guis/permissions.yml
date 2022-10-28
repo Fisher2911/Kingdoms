@@ -1,0 +1,54 @@
+title: test
+id: test
+rows: 3
+border:
+  1:
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+items:
+  1:
+    item:
+      material: LEVER
+      name: "<blue>%permission_display_name%"
+      lore:
+        - "%permission_display_value%"
+    type: permission
+    permission: mine-block
+    actions:
+      swap_value:
+        click-types: [ LEFT, RIGHT ]
+  2:
+    item:
+      material: GRASS_BLOCK
+      name: "<blue>%upgrade_display_name%"
+      lore:
+        - ""
+        - "<blue>Price: $%upgrade_display_price%"
+        - "<blue>Max Claims: %upgrade_display_value%"
+    type: upgrade
+    upgrade: max_claims
+    actions:
+      increase_level:
+        click-types: [ LEFT, RIGHT ]
+  3:
+    item:
+      material: RED_WOOL
+      name: "<red>Delete Kingdom"
+      lore:
+        - "<red>Click to delete your kingdom"
+    actions:
+      set_item:
+        reset-delay: 40
+        click-types: [ LEFT, RIGHT ]
+        item:
+          item:
+            material: REDSTONE_BLOCK
+            name: "<red>Confirm Delete"
+            lore:
+              - ""
+              - "<red>Click to confirm deletion"
+          actions:
+            close_menu:
+              click-types: [ LEFT, RIGHT ]
+            delete_kingdom:
+              click-types: [ LEFT, RIGHT ]

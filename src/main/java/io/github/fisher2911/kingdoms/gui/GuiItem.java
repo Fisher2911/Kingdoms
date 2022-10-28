@@ -1,5 +1,6 @@
 package io.github.fisher2911.kingdoms.gui;
 
+import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
 import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -12,8 +13,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public class GuiItem extends BaseGuiItem {
 
@@ -26,7 +28,7 @@ public class GuiItem extends BaseGuiItem {
             Map<Object, Object> metadata,
             @Nullable Consumer<InventoryEventWrapper<InventoryClickEvent>> clickHandler,
             @Nullable Consumer<InventoryEventWrapper<InventoryDragEvent>> dragHandler,
-            List<Supplier<Object>> placeholders
+            List<BiFunction<BaseGui, BaseGuiItem, Object>> placeholders
     ) {
         super(itemBuilder, metadata, placeholders);
         this.clickHandler = clickHandler;
@@ -86,7 +88,7 @@ public class GuiItem extends BaseGuiItem {
     }
 
     @Override
-    public BaseGuiItem withPlaceholders(List<Supplier<Object>> placeholders) {
+    public BaseGuiItem withPlaceholders(List<BiFunction<BaseGui, BaseGuiItem, Object>> placeholders) {
         return new GuiItem(this.itemBuilder, new HashMap<>(this.metadata), this.clickHandler, this.dragHandler, placeholders);
     }
 
@@ -106,11 +108,11 @@ public class GuiItem extends BaseGuiItem {
     public static class Builder {
 
         private final ItemBuilder itemBuilder;
-        private Map<Object, Object> metadata;
+        private final Map<Object, Object> metadata = new HashMap<>();
         private Consumer<InventoryEventWrapper<InventoryClickEvent>> clickHandler;
         @Nullable
         private Consumer<InventoryEventWrapper<InventoryDragEvent>> dragHandler;
-        private final List<Supplier<Object>> placeholders = new ArrayList<>();
+        private final List<BiFunction<BaseGui, BaseGuiItem, Object>> placeholders = new ArrayList<>();
 
         private Builder(ItemBuilder itemBuilder) {
             this.itemBuilder = itemBuilder;
@@ -118,7 +120,7 @@ public class GuiItem extends BaseGuiItem {
 
         private Builder(GuiItem guiItem) {
             this.itemBuilder = guiItem.itemBuilder;
-            this.metadata = guiItem.metadata;
+            this.metadata.putAll(guiItem.metadata);
             this.clickHandler = guiItem.clickHandler;
             this.dragHandler = guiItem.dragHandler;
             this.placeholders.addAll(guiItem.placeholders);
@@ -133,7 +135,7 @@ public class GuiItem extends BaseGuiItem {
         }
 
         public Builder metadata(Map<Object, Object> metadata) {
-            this.metadata = metadata;
+            this.metadata.putAll(metadata);
             return this;
         }
 
@@ -147,18 +149,17 @@ public class GuiItem extends BaseGuiItem {
             return this;
         }
 
-        public Builder placeholder(Supplier<Object> placeholder) {
+        public Builder placeholder(BiFunction<BaseGui, BaseGuiItem, Object> placeholder) {
             this.placeholders.add(placeholder);
             return this;
         }
 
-        public Builder placeholders(Collection<Supplier<Object>> placeholders) {
+        public Builder placeholders(Collection<BiFunction<BaseGui, BaseGuiItem, Object>> placeholders) {
             this.placeholders.addAll(placeholders);
             return this;
         }
 
         public GuiItem build() {
-            if (this.metadata == null) this.metadata = new HashMap<>();
             return new GuiItem(this.itemBuilder, this.metadata, this.clickHandler, this.dragHandler, this.placeholders);
         }
     }

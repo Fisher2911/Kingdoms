@@ -45,12 +45,12 @@ gui-fillers:
   3:
     type: roles
     item:
-      material: "SKELTON_SKULL"
-        amount: 1
-        name: "%role_display_value"
-        lore:
-          - ""
-          - "<green>Weight: %role_display_weight"
+      material: "SKELETON_SKULL"
+      amount: 1
+      name: "%role_display_value"
+      lore:
+        - ""
+        - "<green>Weight: %role_display_weight"
       actions:
         open_menu:
           menu_title: "role_editor"
@@ -69,5 +69,5 @@ gui-fillers:
             lore:
               - "<red>Click to confirm"
             actions:
-            delete:
-              click-types: [ "LEFT" ]
+              delete:
+                click-types: [ "LEFT" ]

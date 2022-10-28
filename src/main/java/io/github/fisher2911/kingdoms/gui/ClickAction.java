@@ -9,6 +9,7 @@ public enum ClickAction {
     SET_ITEMS,
     SET_ITEM,
     OPEN_MENU,
+    CLOSE_MENU,
     CONSOLE_COMMAND,
     PLAYER_COMMAND,
     INCREASE_LEVEL,
