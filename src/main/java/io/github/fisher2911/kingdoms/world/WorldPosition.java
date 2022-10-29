@@ -12,7 +12,7 @@ public record WorldPosition(UUID world, Position position) {
     }
 
     public Location toLocation() {
-        return new Location(Bukkit.getWorld(this.world), this.position.x(), this.position.y(), this.position.z());
+        return new Location(Bukkit.getWorld(this.world), this.position.x(), this.position.y(), this.position.z(), this.position.yaw(), this.position.pitch());
     }
 
     public boolean isSameBlock(WorldPosition other) {

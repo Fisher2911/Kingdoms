@@ -4,10 +4,14 @@ import org.bukkit.Location;
 
 import java.util.UUID;
 
-public record Position(double x, double y, double z) {
+public record Position(double x, double y, double z, float yaw, float pitch) {
 
     public static Position fromLocation(Location location) {
-        return new Position(location.getX(), location.getY(), location.getZ());
+        return new Position(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+    }
+
+    public Position(double x, double y, double z) {
+        this(x, y, z, 0, 0);
     }
 
     public WorldPosition toWorldPosition(UUID world) {
