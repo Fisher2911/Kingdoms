@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
 
@@ -106,9 +105,6 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
                 if (permission == null) return;
                 final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
                 final Role role = roleManager.getRole(gui.getMetadata(GuiKeys.ROLE_ID, String.class), kingdom);
-                System.out.println("Kingdom roles: " + kingdom.getRoles());
-                System.out.println("role: " + gui.getMetadata().keySet().stream().map(o -> String.valueOf(o) + " - " + o.getClass().getName()).collect(Collectors.toList()));
-                System.out.println("Clicked GUI metadata: " + gui.getMetadata());
                 final ClaimedChunk chunk = gui.getMetadata(GuiKeys.CHUNK, ClaimedChunk.class);
                 event.setCancelled(true);
                 final User user = userManager.wrap(event.getWhoClicked());

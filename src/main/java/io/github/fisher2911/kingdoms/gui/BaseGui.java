@@ -65,12 +65,10 @@ public abstract class BaseGui implements InventoryHolder {
                 .stream()
                 .map(o -> {
                     final var function = PLACEHOLDER_MAPPERS.get(o);
-                    System.out.println("Function null for " + o + "? " + (function == null));
                     if (function == null) return null;
                     return function.apply(this);
                 })
                 .filter(o -> o != null)
-                .peek(o -> System.out.println("Placeholder: " + o))
                 .collect(Collectors.toList());
         placeholders.add(this);
         this.inventory = Bukkit.createInventory(

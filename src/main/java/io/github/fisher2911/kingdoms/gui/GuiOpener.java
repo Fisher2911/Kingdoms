@@ -35,14 +35,12 @@ public class GuiOpener {
     public void open(User user, Map<Object, Object> metadata) {
         final Gui.Builder copy = this.builder.copy().metadata(metadata);
         copy.metadata(GuiKeys.USER, user);
-        copy.metadata(GuiKeys.PREVIOUS_MENU_ID, this.id);
         if (!user.isOnline()) return;
         PLUGIN.getKingdomManager().getKingdom(user.getKingdomId()).ifPresent(kingdom -> {
             for (final GuiKeys key : this.requiredMetadata) {
                 METADATA_MAP.get(key).accept(copy, user, kingdom);
             }
         });
-        System.out.println("GUI metadata: " + copy.getMetadata());
         copy.build().open(user.getPlayer());
     }
 

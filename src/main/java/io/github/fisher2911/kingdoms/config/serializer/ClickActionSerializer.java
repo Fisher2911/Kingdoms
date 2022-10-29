@@ -137,6 +137,14 @@ public class ClickActionSerializer {
             if (!clickTypes.contains(event.getClick())) return;
             final BaseGui gui = wrapper.gui();
             final Map<Object, Object> metadata = new HashMap<>();
+            List<String> previousIds = gui.getMetadata(GuiKeys.PREVIOUS_MENU_ID, List.class);
+            if (previousIds == null) previousIds = new ArrayList<>();
+            if (previousIds.contains(gui.getId())) {
+                previousIds.remove(gui.getId());
+            } else {
+                previousIds.add(gui.getId());
+            }
+            metadata.put(GuiKeys.PREVIOUS_MENU_ID, previousIds);
             final BaseGuiItem item = gui.getItem(event.getSlot());
             if (item != null) {
                 final List<String> keys = item.getMetadata(GuiKeys.SEND_DATA_KEYS, List.class);
@@ -330,10 +338,11 @@ public class ClickActionSerializer {
             final var event = wrapper.event();
             event.setCancelled(true);
             if (!clickTypes.contains(event.getClick())) return;
-            final String previousGui = wrapper.gui().getMetadata(GuiKeys.PREVIOUS_MENU_ID, String.class);
-            System.out.println("Going back to: " + previousGui);
+            final List<String> previousGuis = wrapper.gui().getMetadata(GuiKeys.PREVIOUS_MENU_ID, List.class);
+            if (previousGuis == null || previousGuis.isEmpty()) return;
+            final String previousGui = previousGuis.remove(previousGuis.size() - 1);
             if (previousGui == null) return;
-            plugin.getGuiManager().open(previousGui, userManager.wrap(event.getWhoClicked()));
+            plugin.getGuiManager().open(previousGui, userManager.wrap(event.getWhoClicked()), Map.of(GuiKeys.PREVIOUS_MENU_ID, previousGuis));
         };
 
     }

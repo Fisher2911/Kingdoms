@@ -35,7 +35,7 @@ items:
       name: "<blue>Go back"
     actions:
       previous_gui:
-        click-types: [ [ LEFT, RIGHT ] ]
+        click-types: [ LEFT, RIGHT ]
   44:
     item:
       material: ARROW

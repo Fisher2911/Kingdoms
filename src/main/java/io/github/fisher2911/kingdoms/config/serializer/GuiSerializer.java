@@ -11,6 +11,7 @@ import io.github.fisher2911.kingdoms.gui.GuiOpener;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
+import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.util.EnumUtil;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -124,7 +125,15 @@ public class GuiSerializer {
                 if (kingdom == null) return new ArrayList<>();
                 final List<BaseGuiItem> items = new ArrayList<>();
                 for (String id : kingdom.getUpgradeHolder().getUpgradeIdOrder()) {
-                    final GuiItem.Builder builder = GuiItem.builder(filler);
+                    final Upgrades<?> upgrades = kingdom.getUpgradeHolder().getUpgrades(id);
+                    final Integer level = kingdom.getUpgradeLevel(id);
+                    if (level == null || upgrades == null) continue;
+                    final GuiItem.Builder builder;
+                    if (level >= upgrades.getMaxLevel()) {
+                        builder = GuiItem.builder(maxLevelItem);
+                    } else {
+                        builder = GuiItem.builder(filler);
+                    }
                     GuiItemSerializer.applyUpgradesItemData(builder, id, maxLevelItem);
                     items.add(builder.build());
                 }
@@ -144,7 +153,6 @@ public class GuiSerializer {
                 final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
                 if (kingdom == null) return items;
                 for (Role role : PLUGIN.getRoleManager().getRoles(kingdom)) {
-                    System.out.println("role = " + role);
                     final GuiItem.Builder builder = GuiItem.builder(filler);
                     GuiItemSerializer.applyRoleItemData(builder, role.id());
                     items.add(builder.build());
