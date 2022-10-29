@@ -1,7 +1,6 @@
 package io.github.fisher2911.kingdoms.kingdom.relation;
 
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
-import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.RolePermissionHolder;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
@@ -10,13 +9,11 @@ import java.util.Map;
 
 public class Relation implements RolePermissionHolder {
 
-    private final Kingdom kingdom;
     private final RelationType relationType;
     private final Role role;
     private final Map<KPermission, Boolean> permissions;
 
-    public Relation(Kingdom kingdom, RelationType relationType, Role role, Map<KPermission, Boolean> permissions) {
-        this.kingdom = kingdom;
+    public Relation(RelationType relationType, Role role, Map<KPermission, Boolean> permissions) {
         this.relationType = relationType;
         this.role = role;
         this.permissions = permissions;

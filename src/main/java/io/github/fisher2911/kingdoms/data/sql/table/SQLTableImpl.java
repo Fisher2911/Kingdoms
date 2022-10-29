@@ -29,6 +29,9 @@ public class SQLTableImpl implements SQLTable {
         this.keys = Multimaps.newListMultimap(new HashMap<>(), ArrayList::new);
         for (SQLField field : fields) {
             this.keys.put(field.getKeyType(), field);
+            if (field.isUnique() && field.getKeyType() != SQLKeyType.UNIQUE) {
+                this.keys.put(SQLKeyType.UNIQUE, field);
+            }
         }
     }
 

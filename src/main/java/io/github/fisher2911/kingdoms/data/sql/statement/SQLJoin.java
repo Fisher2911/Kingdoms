@@ -15,6 +15,10 @@ public class SQLJoin implements SQLObject {
         this.type = type;
     }
 
+    public static SQLJoin join(SQLField field, SQLField otherField, SQLJoinType type) {
+        return new SQLJoin(field, otherField, type);
+    }
+
     @Override
     public String createStatement() {
         return this.type.toString() + " `" + otherField.getTableName() + "` ON " + this.field.getTableName() + ".`" + this.field.getName() + "`=" + this.otherField.getTableName() + ".`" + this.otherField.getName() + "`";

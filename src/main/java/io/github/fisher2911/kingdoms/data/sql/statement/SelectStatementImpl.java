@@ -8,7 +8,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 public class SelectStatementImpl<T> implements SQLQuery<T> {
@@ -69,7 +68,7 @@ public class SelectStatementImpl<T> implements SQLQuery<T> {
         return builder.toString();
     }
 
-    public Collection<T> mapTo(Connection connection, SQLMapper<T> mapper) throws SQLException {
+    public T mapTo(Connection connection, SQLMapper<T> mapper) throws SQLException {
         try (var statement = connection.prepareStatement(this.createStatement())) {
             int currentIndex = 0;
             for (var condition : this.conditions) {

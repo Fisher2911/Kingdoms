@@ -301,6 +301,11 @@ public class KingdomImpl implements Kingdom {
     }
 
     @Override
+    public Map<String, Integer> getUpgradeLevels() {
+        return this.upgradeLevels;
+    }
+
+    @Override
     public int getAvailableChunks() {
         return this.getTotalPossibleChunks() - this.claims.size();
     }

@@ -93,6 +93,7 @@ public final class Kingdoms extends JavaPlugin {
 
     public void load() {
         MessageHandler.load();
+        this.dataManager.load();
         this.roleManager.load();
         this.kingdomSettings.load();
         this.upgradeManager.load();

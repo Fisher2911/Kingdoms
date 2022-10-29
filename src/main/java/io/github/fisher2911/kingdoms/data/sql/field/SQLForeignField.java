@@ -26,7 +26,21 @@ public class SQLForeignField extends SQLField {
     }
 
     public SQLForeignField(String tableName, SQLField field, String referencesTable, List<SQLField> references, ForeignKeyAction... foreignKeyActions) {
-        super(tableName, field.getName(), field.getType(), field.isNullable(), SQLKeyType.FOREIGN_KEY);
+        super(tableName, field.getName(), field.getType(), field.isNullable(), SQLKeyType.FOREIGN_KEY, field.isUnique());
+        this.referencesTable = referencesTable;
+        this.references = references;
+        this.foreignKeyActions = foreignKeyActions;
+    }
+
+    public SQLForeignField(String tableName, String name, SQLType type, boolean nullable, boolean includeInUnique, String referencesTable, List<SQLField> references, ForeignKeyAction... foreignKeyActions) {
+        super(tableName, name, type, nullable, SQLKeyType.FOREIGN_KEY, includeInUnique);
+        this.referencesTable = referencesTable;
+        this.references = references;
+        this.foreignKeyActions = foreignKeyActions;
+    }
+
+    public SQLForeignField(String tableName, String name, boolean includeInUnique, SQLType type, String referencesTable, List<SQLField> references, ForeignKeyAction... foreignKeyActions) {
+        super(tableName, name, type, SQLKeyType.FOREIGN_KEY, includeInUnique);
         this.referencesTable = referencesTable;
         this.references = references;
         this.foreignKeyActions = foreignKeyActions;

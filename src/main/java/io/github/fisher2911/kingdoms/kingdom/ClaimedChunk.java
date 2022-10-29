@@ -56,7 +56,7 @@ public class ClaimedChunk implements Claim, RolePermissionHolder {
         return relations;
     }
 
-    protected PermissionContainer getPermissions() {
+    public PermissionContainer getPermissions() {
         return permissions;
     }
 

@@ -8,7 +8,13 @@ public interface SQLType {
 
     SQLType DOUBLE = () -> "DOUBLE";
 
+    SQLType FLOAT = () -> "FLOAT";
+
+    SQLType LONG = () -> "BIGINT";
+
     SQLType BOOLEAN = () -> "BOOLEAN";
+
+    SQLType UUID= () -> "BINARY(16)";
 
     static SQLType text(int length) {
         return () -> "TEXT(" + length + ")";

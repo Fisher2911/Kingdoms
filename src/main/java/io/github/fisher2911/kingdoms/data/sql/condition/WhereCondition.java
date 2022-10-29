@@ -17,6 +17,10 @@ public class WhereCondition implements SQLCondition {
         this.conditions = conditions;
     }
 
+    public static WhereCondition of(SQLField field, SQLObject object) {
+        return new WhereCondition(List.of(new Pair<>(field, object)));
+    }
+
     @Override
     public String createStatement() {
         final StringBuilder builder = new StringBuilder();

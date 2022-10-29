@@ -36,6 +36,18 @@ public class BukkitUser implements User {
         this.chatChannel = ChatChannel.GLOBAL;
     }
 
+    public BukkitUser(Kingdoms plugin, UUID uuid, String name, @Nullable Player player, int kingdomId, ChatChannel chatChannel) {
+        this(plugin, uuid, name, player);
+        this.kingdomId = kingdomId;
+        this.chatChannel = chatChannel;
+    }
+
+    public BukkitUser(Kingdoms plugin, Player player, int kingdomId, ChatChannel chatChannel) {
+        this(plugin, player.getUniqueId(), player.getName(), player);
+        this.kingdomId = kingdomId;
+        this.chatChannel = chatChannel;
+    }
+
     @Override
     public UUID getId() {
         return this.uuid;

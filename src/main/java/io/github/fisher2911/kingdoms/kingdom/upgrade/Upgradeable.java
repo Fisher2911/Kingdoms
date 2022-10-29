@@ -3,6 +3,8 @@ package io.github.fisher2911.kingdoms.kingdom.upgrade;
 import io.github.fisher2911.kingdoms.economy.Price;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+
 public interface Upgradeable {
 
     UpgradeHolder getUpgradeHolder();
@@ -15,5 +17,7 @@ public interface Upgradeable {
     Price getUpgradePrice(String id);
 
     <T> T getUpgradesValue(String id, Class<? extends Upgrades<T>> clazz);
+
+    Map<String, Integer> getUpgradeLevels();
 
 }

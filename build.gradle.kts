@@ -26,6 +26,7 @@ dependencies {
     implementation("net.kyori:adventure-api:4.11.0")
     implementation("net.kyori:adventure-text-minimessage:4.11.0")
     implementation("net.kyori:adventure-platform-bukkit:4.1.2")
+    implementation("com.zaxxer:HikariCP:3.3.0")
 }
 
 tasks {
@@ -42,6 +43,7 @@ tasks {
         relocate("org.spongepowered.configurate", "io.github.fisher2911.kindomgs.configurate.yaml")
         relocate("net.objecthunter.exp4j", "io.github.fisher2911.kingdoms.exp4j")
         relocate("net.kyori.adventure", "io.github.fisher2911.kingdoms.adventure")
+        relocate("com.zaxxer.hikari", "io.github.fisher2911.kingdoms.hikari")
         archiveFileName.set("Kingdoms.jar")
 
         dependencies {

@@ -137,7 +137,7 @@ public class RelationManager {
                 type,
                 KPermission.mapOfAll()
         ));
-        return new Relation(kingdom, type, type.getRole(kingdom, this.plugin.getRoleManager()), defaultPerms);
+        return new Relation(type, type.getRole(kingdom, this.plugin.getRoleManager()), defaultPerms);
     }
 
     public int getMaxRelations(Kingdom kingdom, RelationType type, int def) {

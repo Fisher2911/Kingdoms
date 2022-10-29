@@ -16,7 +16,7 @@ public interface SQLTable extends SQLObject {
     SQLForeignField createForeignReference(SQLField field, List<SQLField> idFields, ForeignKeyAction... actions);
     void create(Connection connection) throws SQLException;
 
-    static SQLTableImpl.Builder sqlite(String name) {
+    static SQLTableImpl.Builder builder(String name) {
         return SQLTableImpl.builder(name);
     }
 
