@@ -32,6 +32,7 @@ public enum Placeholder {
     CHAT_CHANNEL,
 
     ROLE_DISPLAY_NAME,
+    ROLE_WEIGHT,
 
     RELATION_DISPLAY_NAME,
 

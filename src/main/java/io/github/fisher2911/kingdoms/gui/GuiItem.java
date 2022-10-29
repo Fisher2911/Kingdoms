@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class GuiItem extends BaseGuiItem {
 
@@ -105,6 +104,10 @@ public class GuiItem extends BaseGuiItem {
         return Builder.of(guiItem);
     }
 
+    public static Builder builder(BaseGuiItem guiItem) {
+        return Builder.of(guiItem);
+    }
+
     public static class Builder {
 
         private final ItemBuilder itemBuilder;
@@ -126,6 +129,16 @@ public class GuiItem extends BaseGuiItem {
             this.placeholders.addAll(guiItem.placeholders);
         }
 
+        private Builder(BaseGuiItem guiItem) {
+            this.itemBuilder = guiItem.itemBuilder;
+            this.metadata.putAll(guiItem.metadata);
+            this.placeholders.addAll(guiItem.placeholders);
+            if (guiItem instanceof GuiItem item) {
+                this.clickHandler = item.clickHandler;
+                this.dragHandler = item.dragHandler;
+            }
+        }
+
         private static Builder of(ItemBuilder itemBuilder) {
             return new Builder(itemBuilder);
         }
@@ -134,9 +147,8 @@ public class GuiItem extends BaseGuiItem {
             return new Builder(guiItem);
         }
 
-        public Builder metadata(Map<Object, Object> metadata) {
-            this.metadata.putAll(metadata);
-            return this;
+        private static Builder of(BaseGuiItem guiItem) {
+            return new Builder(guiItem);
         }
 
         public Builder clickHandler(Consumer<InventoryEventWrapper<InventoryClickEvent>> handler) {
@@ -156,6 +168,16 @@ public class GuiItem extends BaseGuiItem {
 
         public Builder placeholders(Collection<BiFunction<BaseGui, BaseGuiItem, Object>> placeholders) {
             this.placeholders.addAll(placeholders);
+            return this;
+        }
+
+        public Builder metadata(Object key, Object value) {
+            this.metadata.put(key, value);
+            return this;
+        }
+
+        public Builder metadata(Map<Object, Object> metadata) {
+            this.metadata.putAll(metadata);
             return this;
         }
 

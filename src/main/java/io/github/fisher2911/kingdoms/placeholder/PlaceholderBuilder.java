@@ -125,6 +125,11 @@ public class PlaceholderBuilder {
                 r -> castAndParseKRole(r, Role::displayName)
         );
 
+        put(Role.class,
+                Placeholder.ROLE_WEIGHT,
+                r -> castAndParseKRole(r, Role::weight)
+        );
+
         put(RelationType.class,
                 Placeholder.RELATION_DISPLAY_NAME,
                 r -> castAndParseRelationType(r, RelationType::displayName)

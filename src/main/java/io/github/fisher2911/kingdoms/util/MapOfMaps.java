@@ -76,7 +76,7 @@ public class MapOfMaps<K, E, V> implements Map<K, Map<E, V>> {
 
     @Override
     public Map<E, V> get(Object key) {
-        return this.map.get(key);
+        return this.map.computeIfAbsent((K) key, i -> this.mapFactory.get());
     }
 
     @Nullable

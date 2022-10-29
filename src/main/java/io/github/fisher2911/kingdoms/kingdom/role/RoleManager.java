@@ -2,8 +2,10 @@ package io.github.fisher2911.kingdoms.kingdom.role;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.config.Config;
+import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import io.github.fisher2911.kingdoms.util.SortedList;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
@@ -11,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +35,15 @@ public class RoleManager extends Config {
         this.plugin = plugin;
         this.roles = roles;
         this.rolesByWeight = new SortedList<>(new ArrayList<>(), Comparator.comparingInt(Role::weight));
+    }
+
+    @Nullable
+    public Role getRole(String id, Kingdom kingdom) {
+        return kingdom.getRole(id);
+    }
+
+    public List<Role> getRoles(Kingdom kingdom) {
+        return new SortedList<>(new ArrayList<>(kingdom.getRoles().values()), Comparator.comparingInt(Role::weight));
     }
 
     private static final String ROLES_PATH = "roles";
@@ -85,36 +97,63 @@ public class RoleManager extends Config {
         return role;
     }
     
-    public Role getLeaderRole() {
-        return this.leaderRole;
+    public Role getLeaderRole(Kingdom kingdom) {
+        return kingdom.getRole(this.leaderRole.id());
     }
 
-    public Role getDefaultRole() {
-        if (this.rolesByWeight.isEmpty()) throw new IllegalStateException("No roles found");
-        return this.defaultRole;
+    public Role getDefaultRole(Kingdom kingdom) {
+        return kingdom.getRole(this.defaultRole.id());
     }
 
-    public Role getEnemyRole() {
-        return enemyRole;
+    public Role getEnemyRole(Kingdom kingdom) {
+        return kingdom.getRole(this.enemyRole.id());
     }
 
-    public Role getNeutralRole() {
-        return neutralRole;
+    public Role getNeutralRole(Kingdom kingdom) {
+        return kingdom.getRole(this.neutralRole.id());
     }
 
-    public Role getTruceRole() {
-        return truceRole;
+    public Role getTruceRole(Kingdom kingdom) {
+        return kingdom.getRole(this.truceRole.id());
     }
 
-    public Role getAllyRole() {
-        return allyRole;
+    public Role getAllyRole(Kingdom kingdom) {
+        return kingdom.getRole(this.allyRole.id());
     }
 
-    public Role getById(String id) {
-        return this.roles.get(id);
+    public String getLeaderRoleId() {
+        return this.leaderRole.id();
     }
 
-    public void addRole(Role role) {
+    public String getDefaultRoleId() {
+        return this.defaultRole.id();
+    }
+
+    public String getEnemyRoleId() {
+        return this.enemyRole.id();
+    }
+
+    public String getNeutralRoleId() {
+        return this.neutralRole.id();
+    }
+
+    public String getTruceRoleId() {
+        return this.truceRole.id();
+    }
+
+    public String getAllyRoleId() {
+        return this.allyRole.id();
+    }
+
+    public Map<String, Role> createKingdomRoles() {
+        return new HashMap<>(this.roles);
+    }
+
+//    public Role getById(String id) {
+//        return this.roles.get(id);
+//    }
+
+    private void addRole(Role role) {
         this.roles.put(role.id(), role);
         this.rolesByWeight.add(role);
     }

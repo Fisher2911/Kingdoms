@@ -59,6 +59,8 @@ public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder {
     void setRelation(RelationType type, Relation relation);
     boolean isLeader(User user);
     Bank<Kingdom> getBank();
-    public double getBankLimit();
+    double getBankLimit();
+    Map<String, Role> getRoles();
+    Role getRole(String id);
 
 }

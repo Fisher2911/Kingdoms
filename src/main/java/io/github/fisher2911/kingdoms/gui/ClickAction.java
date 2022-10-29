@@ -13,6 +13,9 @@ public enum ClickAction {
     CONSOLE_COMMAND,
     PLAYER_COMMAND,
     INCREASE_LEVEL,
+    DELETE_KINGDOM,
+    SEND_DATA,
+    PREVIOUS_GUI,
     NONE
 
 }

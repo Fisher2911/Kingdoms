@@ -18,6 +18,8 @@ import io.github.fisher2911.kingdoms.command.kingdom.permission.PermissionComman
 import io.github.fisher2911.kingdoms.command.kingdom.relation.RelationCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.role.SetRoleCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.upgrade.UpgradeCommand;
+import io.github.fisher2911.kingdoms.gui.GuiManager;
+import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
 import org.bukkit.command.Command;
@@ -33,8 +35,13 @@ import java.util.Map;
 
 public class KingdomCommand extends KCommand implements TabExecutor, TabCompleter {
 
+    private final KingdomManager kingdomManager;
+    private final GuiManager guiManager;
+
     public KingdomCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
         super(plugin, "kingdom", null, CommandSenderType.ANY, -1, -1, subCommands);
+        this.kingdomManager = plugin.getKingdomManager();
+        this.guiManager = this.plugin.getGuiManager();
         this.addSubCommand(new CreateCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new ClaimCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new UnclaimCommand(this.plugin, new HashMap<>()));
@@ -61,7 +68,12 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
 
     @Override
     public void execute(User user, String[] args, String[] previous) {
-        this.sendHelp(user, args, previous);
+        try {
+            this.guiManager.open(GuiManager.MAIN_GUI, user);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        this.sendHelp(user, args, previous);
     }
 
     @Override

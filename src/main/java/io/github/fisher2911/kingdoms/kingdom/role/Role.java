@@ -13,6 +13,15 @@ public record Role(String id, String displayName, int weight) {
     }
 
     @Override
+    public String toString() {
+        return "Role{" +
+                "id='" + id + '\'' +
+                ", displayName='" + displayName + '\'' +
+                ", weight=" + weight +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

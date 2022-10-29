@@ -43,6 +43,8 @@ public abstract class BaseGuiItem {
 
     public abstract BaseGuiItem copy();
 
+//    public
+
     @Nullable
     public <T> T getMetadata(Object key, Class<T> clazz) {
         final Object o = this.metadata.get(key);
@@ -51,8 +53,21 @@ public abstract class BaseGuiItem {
         return clazz.cast(o);
     }
 
+    @Nullable
+    public Object getMetadata(Object key) {
+        return this.metadata.get(key);
+    }
+
+    public Map<Object, Object> getMetadata() {
+        return metadata;
+    }
+
     public void setMetadata(Object key, Object value) {
         this.metadata.put(key, value);
+    }
+
+    public void setMetadata(Map<Object, Object> metadata) {
+        this.metadata.putAll(metadata);
     }
 
     @Override
@@ -63,4 +78,5 @@ public abstract class BaseGuiItem {
                 ", metadata=" + metadata +
                 '}';
     }
+
 }

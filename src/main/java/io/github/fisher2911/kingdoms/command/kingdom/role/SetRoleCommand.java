@@ -4,7 +4,6 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
-import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
@@ -31,9 +30,8 @@ public class SetRoleCommand extends KCommand {
 
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
-        final Role role = this.roleManager.getById(args[0]);
         final User toSet = this.userManager.getUserByName(args[1]);
-        this.kingdomManager.trySetRole(user, toSet, role);
+        this.kingdomManager.trySetRole(user, toSet, args[0]);
     }
 
     @Override

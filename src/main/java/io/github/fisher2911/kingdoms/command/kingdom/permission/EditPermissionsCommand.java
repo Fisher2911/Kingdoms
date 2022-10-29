@@ -3,11 +3,10 @@ package io.github.fisher2911.kingdoms.command.kingdom.permission;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import io.github.fisher2911.kingdoms.gui.type.PermissionGui;
+import io.github.fisher2911.kingdoms.gui.GuiKeys;
+import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
-import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
-import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
@@ -21,38 +20,46 @@ public class EditPermissionsCommand extends KCommand {
 
     private final RoleManager roleManager;
     private final KingdomManager kingdomManager;
+    private final GuiManager guiManager;
 
     public EditPermissionsCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
         super(plugin, "edit", null, CommandSenderType.PLAYER, 1, -1, subCommands);
         this.roleManager = this.plugin.getRoleManager();
         this.kingdomManager = this.plugin.getKingdomManager();
+        this.guiManager = this.plugin.getGuiManager();
         this.addSubCommand(new EditChunkPermissionsCommand(this.plugin, new HashMap<>()));
     }
 
     @Override
     public void execute(User user, String[] args, String[] previous) {
-        if (!user.hasKingdom()) {
-            MessageHandler.sendNotInKingdom(user);
-            return;
-        }
-        final Role role = this.roleManager.getById(args[0]);
-        if (role == null) {
-            MessageHandler.sendMessage(user, Message.NO_ROLE_FOUND);
-            return;
-        }
-        try {
-            this.kingdomManager.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
-                PermissionGui.create(
-                        user,
-                        this.plugin,
-                        role,
-                        kingdom,
-                        null
-                ).open(user.getPlayer());
-            }, () -> MessageHandler.sendMessage(user, "Could not find kingdom"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.kingdomManager.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
+            this.guiManager.open(
+                    GuiManager.PERMISSIONS_GUI,
+                    user,
+                    Map.of(
+                            GuiKeys.USER, user,
+                            GuiKeys.KINGDOM, kingdom,
+                            GuiKeys.ROLE_ID, args[0]
+                    ));
+        }, () -> MessageHandler.sendNotInKingdom(user));
+//        final Role role = this.roleManager.getById(args[0]);
+//        if (role == null) {
+//            MessageHandler.sendMessage(user, Message.NO_ROLE_FOUND);
+//            return;
+//        }
+//        try {
+//            this.kingdomManager.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
+//                PermissionGui.create(
+//                        user,
+//                        this.plugin,
+//                        role,
+//                        kingdom,
+//                        null
+//                ).open(user);
+//            }, () -> MessageHandler.sendMessage(user, "Could not find kingdom"));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
@@ -67,9 +74,9 @@ public class EditPermissionsCommand extends KCommand {
         final String lastArg = previousArgs[previousArgs.length - 1];
         if (!lastArg.equalsIgnoreCase("edit")) return tabs;
         if (args.length != 1) return tabs;
-        final String arg = args[args.length - 1];
+        final String arg = args[0];
         for (String role : this.roleManager.getAllRoleIds()) {
-            if (!role.equals(this.roleManager.getLeaderRole().id()) && role.startsWith(arg)) tabs.add(role);
+            if (!role.equals(this.roleManager.getLeaderRoleId()) && role.startsWith(arg)) tabs.add(role);
         }
         return tabs;
     }

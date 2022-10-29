@@ -7,14 +7,17 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Gui extends BaseGui {
 
@@ -29,55 +32,20 @@ public class Gui extends BaseGui {
             String name,
             int rows,
             Map<Integer, BaseGuiItem> guiItemsMap,
+            Set<Integer> repeatPageSlots,
             Map<Object, Object> metadata,
             Consumer<InventoryEventWrapper<InventoryClickEvent>> playerInventoryClickHandler,
             Map<InventoryEventType, Consumer<InventoryEventWrapper<? extends InventoryEvent>>> defaultEventHandlers,
             Consumer<InventoryEventWrapper<InventoryCloseEvent>> closeHandler,
             Consumer<InventoryEventWrapper<InventoryOpenEvent>> openHandler,
-            List<BaseGuiItem> filler,
-            List<BaseGuiItem> border,
-            int nextPageItemSlot,
-            @Nullable GuiItem nextPageItem,
-            int previousPageItemSlot,
-            @Nullable GuiItem previousPageItem
+            List<Function<BaseGui, List<BaseGuiItem>>> filler,
+            List<BaseGuiItem> border
     ) {
-        super(id, name, rows, guiItemsMap, metadata, filler, border, nextPageItemSlot, nextPageItem, previousPageItemSlot, previousPageItem);
+        super(id, name, rows, guiItemsMap, repeatPageSlots, metadata, filler, border);
         this.playerInventoryClickHandler = playerInventoryClickHandler;
         this.defaultEventHandlers = defaultEventHandlers;
         this.closeHandler = closeHandler;
         this.openHandler = openHandler;
-    }
-
-    private Gui(
-            String id,
-            String name,
-            int rows,
-            Map<Integer, BaseGuiItem> guiItemsMap,
-            Map<Object, Object> metadata,
-            Consumer<InventoryEventWrapper<InventoryClickEvent>> playerInventoryClickHandler,
-            Map<InventoryEventType, Consumer<InventoryEventWrapper<? extends InventoryEvent>>> defaultEventHandlers,
-            Consumer<InventoryEventWrapper<InventoryCloseEvent>> closeHandler,
-            Consumer<InventoryEventWrapper<InventoryOpenEvent>> openHandler,
-            List<BaseGuiItem> filler,
-            List<BaseGuiItem> border
-    ) {
-        this(
-                id,
-                name,
-                rows,
-                guiItemsMap,
-                metadata,
-                playerInventoryClickHandler,
-                defaultEventHandlers,
-                closeHandler,
-                openHandler,
-                filler,
-                border,
-                -1,
-                null,
-                -1,
-                null
-        );
     }
 
     @Override
@@ -94,7 +62,7 @@ public class Gui extends BaseGui {
         if (!event.getView().getTopInventory().equals(clickedInventory)) {
             return;
         }
-        final BaseGuiItem item = this.guiItemsMap.get(slot);
+        final BaseGuiItem item = this.getItem(this.getItemPageSlot(slot), true);
         if (item == null) {
             final var handler = this.defaultEventHandlers.get(InventoryEventType.CLICK);
             if (handler == null) return;
@@ -145,17 +113,14 @@ public class Gui extends BaseGui {
         private String name = "";
         private int rows = 1;
         private final Map<Integer, BaseGuiItem> guiItemsMap = new HashMap<>();
+        private final Set<Integer> repeatPageSlots = new HashSet<>();
         private final Map<Object, Object> metadata = new HashMap<>();
         private Consumer<InventoryEventWrapper<InventoryClickEvent>> playerInventoryClickHandler;
         private final Map<InventoryEventType, Consumer<InventoryEventWrapper<? extends InventoryEvent>>> defaultEventHandlers = new HashMap<>();
         private Consumer<InventoryEventWrapper<InventoryCloseEvent>> closeHandler;
         private Consumer<InventoryEventWrapper<InventoryOpenEvent>> openHandler;
-        private final List<BaseGuiItem> filler = new ArrayList<>();
+        private final List<Function<BaseGui, List<BaseGuiItem>>> filler = new ArrayList<>();
         private final List<BaseGuiItem> border = new ArrayList<>();
-        private int nextPageItemSlot = -1;
-        private @Nullable GuiItem nextPageItem;
-        private int previousPageItemSlot = -1;
-        private @Nullable GuiItem previousPageItem;
 
         private Builder(String id) {
             this.id = id;
@@ -185,8 +150,18 @@ public class Gui extends BaseGui {
             return this;
         }
 
+        public Builder repeatPageSlots(Collection<Integer> slots) {
+            this.repeatPageSlots.addAll(slots);
+            return this;
+        }
+
         public Builder metadata(Object key, Object value) {
             this.metadata.put(key, value);
+            return this;
+        }
+
+        public Builder metadata(Map<Object, Object> metadata) {
+            this.metadata.putAll(metadata);
             return this;
         }
 
@@ -242,7 +217,7 @@ public class Gui extends BaseGui {
             return this;
         }
 
-        public Builder filler(List<BaseGuiItem> filler) {
+        public Builder filler(List<Function<BaseGui, List<BaseGuiItem>>> filler) {
             this.filler.addAll(filler);
             return this;
         }
@@ -257,12 +232,17 @@ public class Gui extends BaseGui {
             return this;
         }
 
+        public Map<Object, Object> getMetadata() {
+            return metadata;
+        }
+
         public Gui build() {
             return new Gui(
                     this.id,
                     this.name,
                     this.rows,
                     this.guiItemsMap,
+                    this.repeatPageSlots,
                     this.metadata,
                     this.playerInventoryClickHandler,
                     this.defaultEventHandlers,
@@ -271,6 +251,21 @@ public class Gui extends BaseGui {
                     this.filler,
                     this.border
             );
+        }
+
+        public Builder copy() {
+            return builder(this.id)
+                    .name(this.name)
+                    .rows(this.rows)
+                    .items(this.guiItemsMap)
+                    .repeatPageSlots(this.repeatPageSlots)
+                    .metadata(this.metadata)
+                    .playerInventoryClickHandler(this.playerInventoryClickHandler)
+                    .defaultEventHandlers(this.defaultEventHandlers)
+                    .closeHandler(this.closeHandler)
+                    .openHandler(this.openHandler)
+                    .filler(this.filler)
+                    .border(this.border);
         }
     }
 }

@@ -2,11 +2,14 @@ package io.github.fisher2911.kingdoms.config.serializer;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
+import io.github.fisher2911.kingdoms.gui.BaseGui;
 import io.github.fisher2911.kingdoms.gui.BaseGuiItem;
 import io.github.fisher2911.kingdoms.gui.ClickAction;
-import io.github.fisher2911.kingdoms.gui.GuiItemKeys;
+import io.github.fisher2911.kingdoms.gui.GuiKeys;
 import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
+import io.github.fisher2911.kingdoms.user.User;
+import io.github.fisher2911.kingdoms.user.UserManager;
 import io.github.fisher2911.kingdoms.util.EnumUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.inventory.ClickType;
@@ -41,6 +44,9 @@ public class ClickActionSerializer {
         LOADERS.put(ClickAction.SET_ITEM, ClickActionSerializer::loadSetItem);
         LOADERS.put(ClickAction.SWAP_VALUE, ClickActionSerializer::loadSwapValue);
         LOADERS.put(ClickAction.CLOSE_MENU, ClickActionSerializer::loadCloseMenu);
+        LOADERS.put(ClickAction.DELETE_KINGDOM, ClickActionSerializer::loadDeleteKingdom);
+        LOADERS.put(ClickAction.SEND_DATA, ClickActionSerializer::loadSendData);
+        LOADERS.put(ClickAction.PREVIOUS_GUI, ClickActionSerializer::loadPreviousGui);
     }
 
     private static final String CLICK_TYPES_PATH = "click-types";
@@ -51,14 +57,9 @@ public class ClickActionSerializer {
     public static List<Consumer<InventoryEventWrapper<InventoryClickEvent>>> deserializeAll(ConfigurationNode source) throws SerializationException {
         final List<Consumer<InventoryEventWrapper<InventoryClickEvent>>> actions = new ArrayList<>();
         for (var entry : source.childrenMap().entrySet()) {
-            System.out.println("Loading action: " + entry.getKey());
             if (!(entry.getKey() instanceof final String action)) continue;
             final var consumer = deserialize(entry.getValue(), action.toUpperCase(Locale.ROOT));
-            if (consumer == null) {
-                System.out.println("Consumer is null: " + action);
-                continue;
-            }
-            System.out.println("Consumer not null: " + action);
+            if (consumer == null) continue;
             actions.add(consumer);
         }
         return actions;
@@ -134,7 +135,20 @@ public class ClickActionSerializer {
             final var event = wrapper.event();
             event.setCancelled(true);
             if (!clickTypes.contains(event.getClick())) return;
-            guiManager.open(menu, event.getWhoClicked());
+            final BaseGui gui = wrapper.gui();
+            final Map<Object, Object> metadata = new HashMap<>();
+            final BaseGuiItem item = gui.getItem(event.getSlot());
+            if (item != null) {
+                final List<String> keys = item.getMetadata(GuiKeys.SEND_DATA_KEYS, List.class);
+                if (keys != null) {
+                    for (String key : keys) {
+                        final GuiKeys guiKey = EnumUtil.valueOf(GuiKeys.class, key);
+                        if (guiKey == null) continue;
+                        metadata.put(guiKey, item.getMetadata(guiKey));
+                    }
+                }
+            }
+            guiManager.open(menu, wrapper.gui().getMetadata(GuiKeys.USER, User.class), metadata);
         };
     }
 
@@ -146,7 +160,7 @@ public class ClickActionSerializer {
             final int clicked = event.getSlot();
             final BaseGuiItem item = wrapper.gui().getItem(clicked);
             if (item == null) return;
-            final Consumer<InventoryEventWrapper<InventoryClickEvent>> deleter = item.getMetadata(GuiItemKeys.DELETE_CONSUMER, Consumer.class);
+            final Consumer<InventoryEventWrapper<InventoryClickEvent>> deleter = item.getMetadata(GuiKeys.DELETE_CONSUMER, Consumer.class);
             if (deleter == null) return;
             deleter.accept(wrapper);
         };
@@ -160,7 +174,7 @@ public class ClickActionSerializer {
             final int clicked = event.getSlot();
             final BaseGuiItem item = wrapper.gui().getItem(clicked);
             if (item == null) return;
-            final Consumer<InventoryEventWrapper<InventoryClickEvent>> increaser = item.getMetadata(GuiItemKeys.INCREASE_LEVEL_CONSUMER, Consumer.class);
+            final Consumer<InventoryEventWrapper<InventoryClickEvent>> increaser = item.getMetadata(GuiKeys.INCREASE_LEVEL_CONSUMER, Consumer.class);
             if (increaser == null) return;
             increaser.accept(wrapper);
         };
@@ -174,7 +188,7 @@ public class ClickActionSerializer {
             final int clicked = event.getSlot();
             final BaseGuiItem item = wrapper.gui().getItem(clicked);
             if (item == null) return;
-            final Consumer<InventoryEventWrapper<InventoryClickEvent>> swapper = item.getMetadata(GuiItemKeys.SWAP_VALUE_CONSUMER, Consumer.class);
+            final Consumer<InventoryEventWrapper<InventoryClickEvent>> swapper = item.getMetadata(GuiKeys.SWAP_VALUE_CONSUMER, Consumer.class);
             if (swapper == null) return;
             swapper.accept(wrapper);
         };
@@ -240,7 +254,6 @@ public class ClickActionSerializer {
         try {
             final int duration = source.node(RESET_DELAY_PATH).getInt(-1);
             final BaseGuiItem item = GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, source.node(ITEM_PATH));
-            System.out.println("Loaded set item: " + item + " - " + source.node(ITEM_PATH).toString());
             if (item == null) throw new SerializationException("Item cannot be null");
             final Kingdoms plugin = Kingdoms.getPlugin(Kingdoms.class);
             return wrapper -> {
@@ -260,6 +273,69 @@ public class ClickActionSerializer {
         } catch (SerializationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static Consumer<InventoryEventWrapper<InventoryClickEvent>> loadDeleteKingdom(
+            ConfigurationNode source,
+            Set<ClickType> clickTypes
+    ) {
+        final Kingdoms plugin = Kingdoms.getPlugin(Kingdoms.class);
+        return wrapper -> {
+            final var event = wrapper.event();
+            event.setCancelled(true);
+            if (!clickTypes.contains(event.getClick())) return;
+            final int clicked = event.getSlot();
+            final BaseGuiItem item = wrapper.gui().getItem(clicked);
+            if (item == null) return;
+            final BaseGui gui = wrapper.gui();
+            final User user = gui.getMetadata(GuiKeys.USER, User.class);
+            if (user == null) return;
+            plugin.getKingdomManager().tryDisband(user, true);
+        };
+    }
+
+    private static final String DATA_PATH = "data";
+
+    private static Consumer<InventoryEventWrapper<InventoryClickEvent>> loadSendData(
+            ConfigurationNode source,
+            Set<ClickType> clickTypes
+    ) {
+        // stupid checked exceptions not working with lambdas
+        try {
+            final List<String> keys = source.node(DATA_PATH).getList(String.class, new ArrayList<>())
+                    .stream()
+                    .map(String::toUpperCase).
+                    collect(Collectors.toList());
+            return wrapper -> {
+                final var event = wrapper.event();
+                event.setCancelled(true);
+                if (!clickTypes.contains(event.getClick())) return;
+                final int clicked = event.getSlot();
+                final BaseGuiItem item = wrapper.gui().getItem(clicked);
+                if (item == null) return;
+                item.setMetadata(GuiKeys.SEND_DATA_KEYS, keys);
+            };
+        } catch (SerializationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Consumer<InventoryEventWrapper<InventoryClickEvent>> loadPreviousGui(
+            ConfigurationNode source,
+            Set<ClickType> clickTypes
+    ) {
+        final Kingdoms plugin = Kingdoms.getPlugin(Kingdoms.class);
+        final UserManager userManager = plugin.getUserManager();
+        return wrapper -> {
+            final var event = wrapper.event();
+            event.setCancelled(true);
+            if (!clickTypes.contains(event.getClick())) return;
+            final String previousGui = wrapper.gui().getMetadata(GuiKeys.PREVIOUS_MENU_ID, String.class);
+            System.out.println("Going back to: " + previousGui);
+            if (previousGui == null) return;
+            plugin.getGuiManager().open(previousGui, userManager.wrap(event.getWhoClicked()));
+        };
+
     }
 
 }

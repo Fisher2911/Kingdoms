@@ -3,28 +3,16 @@ package io.github.fisher2911.kingdoms.gui.type;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.config.serializer.GuiSerializer;
 import io.github.fisher2911.kingdoms.gui.BaseGui;
-import io.github.fisher2911.kingdoms.gui.BaseGuiItem;
-import io.github.fisher2911.kingdoms.gui.GuiItemKeys;
-import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
+import io.github.fisher2911.kingdoms.gui.GuiOpener;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
-import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
-import io.github.fisher2911.kingdoms.kingdom.permission.RolePermissionHolder;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
-import io.github.fisher2911.kingdoms.message.Message;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.user.UserManager;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.function.Consumer;
 
 public class PermissionGui {
 
@@ -34,18 +22,21 @@ public class PermissionGui {
         this.gui = gui;
     }
 
-    public static BaseGui create(User user, Kingdoms plugin, Role role, Kingdom kingdom, ClaimedChunk chunk) {
+    public static GuiOpener create(User user, Kingdoms plugin, Role role, Kingdom kingdom, ClaimedChunk chunk) {
         final Path path = plugin.getDataFolder().toPath().resolve("guis").resolve("permissions.yml");
         final YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(path).build();
         try {
-            final BaseGui gui = GuiSerializer.deserialize(
+            return GuiSerializer.deserialize(
                     loader.load()
-            ).metadata(GuiItemKeys.KINGDOM, kingdom)
-                    .metadata(GuiItemKeys.ROLE, role)
-                    .metadata(GuiItemKeys.CHUNK, chunk).
-                    metadata(GuiItemKeys.USER, user).
-                    build();
-            return gui;
+            );
+//            final BaseGui gui = GuiSerializer.deserialize(
+//                    loader.load()
+//            ).metadata(GuiKeys.KINGDOM, kingdom)
+//                    .metadata(GuiKeys.ROLE, role)
+//                    .metadata(GuiKeys.CHUNK, chunk).
+//                    metadata(GuiKeys.USER, user).
+//                    build();
+//            return gui;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -88,41 +79,41 @@ public class PermissionGui {
 //                        build()
 //        );
     }
-
-    public static Consumer<InventoryEventWrapper<InventoryClickEvent>> swapValueItem(Collection<ClickType> clickTypes) {
-        return wrapper -> {
-            if (!clickTypes.contains(wrapper.event().getClick())) return;
-            final Kingdoms plugin = Kingdoms.getPlugin(Kingdoms.class);
-            final UserManager userManager = plugin.getUserManager();
-            final InventoryClickEvent event = wrapper.event();
-            final BaseGui gui = wrapper.gui();
-            final int slot = event.getSlot();
-            final BaseGuiItem clicked = gui.getItem(slot);
-            if (clicked == null) return;
-            final KPermission permission = clicked.getMetadata(GuiItemKeys.PERMISSION, KPermission.class);
-            if (permission == null) return;
-            final Kingdom kingdom = clicked.getMetadata(GuiItemKeys.KINGDOM, Kingdom.class);
-            final Role role = clicked.getMetadata(GuiItemKeys.ROLE, Role.class);
-            final ClaimedChunk chunk = clicked.getMetadata(GuiItemKeys.CHUNK, ClaimedChunk.class);
-            event.setCancelled(true);
-            final User user = userManager.wrap(event.getWhoClicked());
-            if ((chunk != null && !kingdom.hasPermission(user, KPermission.EDIT_LOWER_ROLES_PERMISSIONS, chunk)) &&
-                    (!kingdom.hasPermission(user, KPermission.EDIT_LOWER_ROLES_PERMISSIONS))) {
-                MessageHandler.sendMessage(user, Message.CANNOT_EDIT_KINGDOM_PERMISSION);
-                return;
-            }
-
-            if (chunk != null && !kingdom.hasPermission(user, permission, chunk) || (chunk == null && !kingdom.hasPermission(user, permission))) {
-                MessageHandler.sendMessage(user, Message.CANNOT_EDIT_KINGDOM_PERMISSION);
-                return;
-            }
-            final boolean newValue = chunk == null ? !kingdom.hasPermission(role, permission) : !kingdom.hasPermission(role, permission, chunk);
-            final RolePermissionHolder permissions;
-            permissions = Objects.requireNonNullElse(chunk, kingdom);
-            permissions.setPermission(role, permission, newValue);
-            gui.refresh(slot);
-        };
-    }
+//
+//    public static Consumer<InventoryEventWrapper<InventoryClickEvent>> swapValueItem(Collection<ClickType> clickTypes) {
+//        return wrapper -> {
+//            if (!clickTypes.contains(wrapper.event().getClick())) return;
+//            final Kingdoms plugin = Kingdoms.getPlugin(Kingdoms.class);
+//            final UserManager userManager = plugin.getUserManager();
+//            final InventoryClickEvent event = wrapper.event();
+//            final BaseGui gui = wrapper.gui();
+//            final int slot = event.getSlot();
+//            final BaseGuiItem clicked = gui.getItem(slot);
+//            if (clicked == null) return;
+//            final KPermission permission = clicked.getMetadata(GuiKeys.PERMISSION, KPermission.class);
+//            if (permission == null) return;
+//            final Kingdom kingdom = clicked.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
+//            final Role role = clicked.getMetadata(GuiKeys.ROLE, Role.class);
+//            final ClaimedChunk chunk = clicked.getMetadata(GuiKeys.CHUNK, ClaimedChunk.class);
+//            event.setCancelled(true);
+//            final User user = userManager.wrap(event.getWhoClicked());
+//            if ((chunk != null && !kingdom.hasPermission(user, KPermission.EDIT_LOWER_ROLES_PERMISSIONS, chunk)) &&
+//                    (!kingdom.hasPermission(user, KPermission.EDIT_LOWER_ROLES_PERMISSIONS))) {
+//                MessageHandler.sendMessage(user, Message.CANNOT_EDIT_KINGDOM_PERMISSION);
+//                return;
+//            }
+//
+//            if (chunk != null && !kingdom.hasPermission(user, permission, chunk) || (chunk == null && !kingdom.hasPermission(user, permission))) {
+//                MessageHandler.sendMessage(user, Message.CANNOT_EDIT_KINGDOM_PERMISSION);
+//                return;
+//            }
+//            final boolean newValue = chunk == null ? !kingdom.hasPermission(role, permission) : !kingdom.hasPermission(role, permission, chunk);
+//            final RolePermissionHolder permissions;
+//            permissions = Objects.requireNonNullElse(chunk, kingdom);
+//            permissions.setPermission(role, permission, newValue);
+//            gui.refresh(slot);
+//        };
+//    }
 
     public void open(HumanEntity human) {
         this.gui.open(human);

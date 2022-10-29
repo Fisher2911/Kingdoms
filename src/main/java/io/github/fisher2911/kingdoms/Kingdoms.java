@@ -1,7 +1,6 @@
 package io.github.fisher2911.kingdoms;
 
 import io.github.fisher2911.kingdoms.command.kingdom.KingdomCommand;
-import io.github.fisher2911.kingdoms.config.GuiDisplayItems;
 import io.github.fisher2911.kingdoms.config.KingdomSettings;
 import io.github.fisher2911.kingdoms.confirm.ConfirmationManager;
 import io.github.fisher2911.kingdoms.data.DataManager;
@@ -49,7 +48,6 @@ public final class Kingdoms extends JavaPlugin {
     private KingdomSettings kingdomSettings;
     private WorldManager worldManager;
     private ClaimManager claimManager;
-    private GuiDisplayItems guiDisplayItems;
     private RelationManager relationManager;
     private ConfirmationManager confirmationManager;
     private EconomyManager economyManager;
@@ -74,7 +72,6 @@ public final class Kingdoms extends JavaPlugin {
         this.kingdomManager = new KingdomManager(this, new HashMap<>());
         this.worldManager = new WorldManager(this, new HashMap<>());
         this.claimManager = new ClaimManager(this);
-        this.guiDisplayItems = new GuiDisplayItems(this);
         this.inviteManager = new InviteManager(this);
         this.relationManager = new RelationManager(this);
         this.confirmationManager = new ConfirmationManager(this);
@@ -96,8 +93,8 @@ public final class Kingdoms extends JavaPlugin {
         this.roleManager.load();
         this.kingdomSettings.load();
         this.upgradeManager.load();
-        this.guiDisplayItems.load();
         this.relationManager.load();
+        this.guiManager.load();
         Bukkit.getScheduler().runTaskLater(this, this.worldManager::populate, 20);
     }
 
@@ -133,6 +130,7 @@ public final class Kingdoms extends JavaPlugin {
     public void reload() {
         MessageHandler.reload();
         this.upgradeManager.reload();
+        this.guiManager.reload();
     }
 
     public UpgradeManager getUpgradeManager() {
@@ -169,10 +167,6 @@ public final class Kingdoms extends JavaPlugin {
 
     public ClaimManager getClaimManager() {
         return claimManager;
-    }
-
-    public GuiDisplayItems getGuiDisplayItems() {
-        return guiDisplayItems;
     }
 
     public InviteManager getInviteManager() {

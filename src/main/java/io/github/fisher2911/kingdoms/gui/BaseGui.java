@@ -1,7 +1,9 @@
 package io.github.fisher2911.kingdoms.gui;
 
+import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.placeholder.PlaceholderBuilder;
+import io.github.fisher2911.kingdoms.util.MapOfMaps;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -13,8 +15,12 @@ import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class BaseGui implements InventoryHolder {
 
@@ -22,48 +28,60 @@ public abstract class BaseGui implements InventoryHolder {
     protected final String name;
     protected final int rows;
     protected final Map<Integer, BaseGuiItem> guiItemsMap;
+    private final Set<Integer> repeatPageSlots;
     protected final Inventory inventory;
     private int currentPage = 0;
-    private final List<BaseGuiItem> fillers;
+    private final MapOfMaps<Integer, Integer, BaseGuiItem> pageFillers;
+    private final List<Function<BaseGui, List<BaseGuiItem>>> fillers;
     private final List<BaseGuiItem> border;
-    protected final int nextPageItemSlot;
-    protected final int previousPageItemSlot;
-    @Nullable
-    private final GuiItem nextPageItem;
-    @Nullable
-    private final GuiItem previousPageItem;
     private int maxPageSlot;
     protected final Map<Object, Object> metadata;
+
+    private static final Map<Object, Function<BaseGui, Object>> PLACEHOLDER_MAPPERS = Map.of(
+            GuiKeys.ROLE_ID, gui -> {
+                final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
+                if (kingdom == null) return null;
+                return kingdom.getRole(gui.getMetadata(GuiKeys.ROLE_ID, String.class));
+            }
+    );
 
     public BaseGui(
             String id,
             String name,
             int rows,
             Map<Integer, BaseGuiItem> guiItemsMap,
+            Set<Integer> repeatPageSlots,
             final Map<Object, Object> metadata,
-            List<BaseGuiItem> fillers,
-            List<BaseGuiItem> border,
-            int nextPageItemSlot,
-            @Nullable GuiItem nextPageItem,
-            int previousPageItemSlot,
-            @Nullable GuiItem previousPageItem
+            List<Function<BaseGui, List<BaseGuiItem>>> fillers,
+            List<BaseGuiItem> border
     ) {
+        this.metadata = metadata;
         this.id = id;
         this.name = name;
         this.rows = rows;
         this.guiItemsMap = guiItemsMap;
+        this.repeatPageSlots = repeatPageSlots;
+        final List<Object> placeholders = this.metadata.keySet()
+                .stream()
+                .map(o -> {
+                    final var function = PLACEHOLDER_MAPPERS.get(o);
+                    System.out.println("Function null for " + o + "? " + (function == null));
+                    if (function == null) return null;
+                    return function.apply(this);
+                })
+                .filter(o -> o != null)
+                .peek(o -> System.out.println("Placeholder: " + o))
+                .collect(Collectors.toList());
+        placeholders.add(this);
         this.inventory = Bukkit.createInventory(
                 this,
                 this.rows * 9,
-                PlaceholderBuilder.apply(MessageHandler.serialize(this.name), this)
+                MessageHandler.serialize(PlaceholderBuilder.apply(this.name, placeholders.toArray()))
         );
         this.fillers = fillers;
+        this.pageFillers = new MapOfMaps<>(new HashMap<>(), HashMap::new);
+        this.initFillers();
         this.border = border;
-        this.nextPageItemSlot = nextPageItemSlot;
-        this.nextPageItem = nextPageItem;
-        this.previousPageItemSlot = previousPageItemSlot;
-        this.previousPageItem = previousPageItem;
-        this.metadata = metadata;
         this.reset();
     }
 
@@ -72,11 +90,12 @@ public abstract class BaseGui implements InventoryHolder {
             String name,
             int rows,
             Map<Integer, BaseGuiItem> guiItemsMap,
-            List<BaseGuiItem> filler,
+            Set<Integer> repeatPageSlots,
+            List<Function<BaseGui, List<BaseGuiItem>>> filler,
             List<BaseGuiItem> border,
             final Map<Object, Object> metadata
     ) {
-        this(id, name, rows, guiItemsMap, metadata, filler, border, -1, null, -1, null);
+        this(id, name, rows, guiItemsMap, repeatPageSlots, metadata, filler, border);
     }
 
     public void open(HumanEntity human) {
@@ -90,7 +109,12 @@ public abstract class BaseGui implements InventoryHolder {
         this.inventory.clear();
         this.setBorder();
         for (int i = 0; i < this.inventory.getSize(); i++) {
-            final BaseGuiItem item = this.guiItemsMap.get(this.getItemPageSlot(i));
+            final BaseGuiItem item;
+            if (!this.repeatPageSlots.contains(i)) {
+                item = this.guiItemsMap.get(this.getItemPageSlot(i));
+            } else {
+                item = this.guiItemsMap.get(i);
+            }
             if (item == null) continue;
             this.setItem(i, item);
         }
@@ -98,13 +122,37 @@ public abstract class BaseGui implements InventoryHolder {
     }
 
     public void setFillers() {
+        final Map<Integer, BaseGuiItem> fillers = this.pageFillers.get(this.currentPage);
+        if (fillers == null) return;
+        for (var entry : fillers.entrySet()) {
+            final int slot = entry.getKey();
+            final BaseGuiItem item = entry.getValue();
+            this.setItem(slot, item);
+        }
+    }
+
+    public void initFillers() {
         if (this.fillers.isEmpty()) return;
-        for (BaseGuiItem item : this.fillers) {
-            this.maxPageSlot++;
-            while (this.isOnBorder(this.maxPageSlot)) {
-                this.maxPageSlot++;
+        this.pageFillers.clear();
+        int currentSlot = 0;
+        final List<BaseGuiItem> fillers = this.fillers
+                .stream()
+                .map(function -> function.apply(this))
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        for (BaseGuiItem item : fillers) {
+            while (
+                    this.guiItemsMap.get(currentSlot) != null ||
+                            this.isOnBorder(this.getIndexFromPageSlot(currentSlot)) ||
+                            this.repeatPageSlots.contains(currentSlot)
+            ) {
+                currentSlot++;
             }
-            this.setItem(this.maxPageSlot, item);
+            final int page = this.getPageFromPageSlot(currentSlot);
+            final Map<Integer, BaseGuiItem> items = this.pageFillers.get(page);
+            items.put(this.getIndexFromPageSlot(currentSlot), item);
+            this.maxPageSlot = Math.max(this.maxPageSlot, currentSlot);
+            currentSlot++;
         }
     }
 
@@ -112,25 +160,18 @@ public abstract class BaseGui implements InventoryHolder {
         if (this.border.isEmpty()) return;
         for (int i = 0; i < this.inventory.getSize(); i++) {
             if (!this.isOnBorder(i)) continue;
-            this.set(i, this.border.get(i % this.border.size()));
+            this.inventory.setItem(i, this.border.get(i % this.border.size()).getItemStack(this));
         }
     }
 
     private boolean isOnBorder(int slot) {
-        return slot < 9 || slot > 44 || slot % 9 == 0 || slot % 9 == 8;
+        return slot < 9 || slot % 9 == 0 || slot % 9 == 8 || slot > this.inventory.getSize() - 9;
     }
 
     private void setItem(int slot, @Nullable BaseGuiItem item) {
+        if (slot >= this.inventory.getSize()) return;
         final int pageSlot = this.getItemPageSlot(slot);
         this.maxPageSlot = Math.max(this.maxPageSlot, pageSlot);
-        if (slot == this.nextPageItemSlot && this.nextPageItem != null) {
-            this.inventory.setItem(slot, this.nextPageItem.getItemStack(this));
-            return;
-        }
-        if (slot == this.previousPageItemSlot && this.previousPageItem != null) {
-            this.inventory.setItem(slot, this.previousPageItem.getItemStack(this));
-            return;
-        }
         if (item == null) {
             this.inventory.setItem(slot, null);
             this.guiItemsMap.remove(pageSlot);
@@ -169,13 +210,14 @@ public abstract class BaseGui implements InventoryHolder {
     }
 
     public void refresh(int slot) {
-        final BaseGuiItem item = this.guiItemsMap.get(slot);
+        final BaseGuiItem item = this.getItem(slot);
         if (item == null) return;
         this.setItem(slot, item);
     }
 
     public void set(int slot, BaseGuiItem item) {
-        this.guiItemsMap.put(slot, item);
+        final BaseGuiItem previous = this.guiItemsMap.put(slot, item);
+        if (previous != null) this.initFillers();
         if (item != null) this.setItem(this.getItemPageSlot(slot), item);
     }
 
@@ -185,7 +227,17 @@ public abstract class BaseGui implements InventoryHolder {
 
     @Nullable
     public BaseGuiItem getItem(int slot) {
-        return this.guiItemsMap.get(this.getItemPageSlot(slot));
+        return this.getItem(slot, true);
+    }
+
+    @Nullable
+    public BaseGuiItem getItem(int slot, boolean includeFillers) {
+        final BaseGuiItem item = this.guiItemsMap.get(slot);
+        if (item != null) return item;
+        if (!includeFillers) return null;
+        final Map<Integer, BaseGuiItem> fillers = this.pageFillers.get(this.currentPage);
+        if (fillers == null) return null;
+        return fillers.get(slot);
     }
 
     public int getCurrentPage() {
@@ -205,11 +257,15 @@ public abstract class BaseGui implements InventoryHolder {
     }
 
     public int getItemPageSlot(int slot) {
-        return slot + (this.currentPage * this.inventory.getSize());
+        return this.getPageFromPageSlot(slot) * (this.rows * 9) + slot;
     }
 
-    public int getIndexFromSlot(int slot) {
-        return slot - (this.currentPage * this.inventory.getSize());
+    public int getIndexFromPageSlot(int slot) {
+        return slot - this.getPageFromPageSlot(slot) * (this.rows * 9);
+    }
+
+    public int getPageFromPageSlot(int slot) {
+        return slot / (this.rows * 9);
     }
 
     public abstract void handleClick(InventoryClickEvent event);
@@ -237,4 +293,12 @@ public abstract class BaseGui implements InventoryHolder {
         return clazz.cast(o);
     }
 
+    @Nullable
+    public Object getMetadata(Object key) {
+        return this.metadata.get(key);
+    }
+
+    public Map<Object, Object> getMetadata() {
+        return metadata;
+    }
 }

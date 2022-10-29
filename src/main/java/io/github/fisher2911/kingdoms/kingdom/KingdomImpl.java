@@ -37,7 +37,7 @@ public class KingdomImpl implements Kingdom {
     private String description;
     private final Map<UUID, User> members;
     private final Map<UUID, Role> userRoles;
-    private final Multimap<Role, UUID> roles;
+    private final Multimap<Role, UUID> roleUsers;
     private final PermissionContainer permissions;
     private final PermissionContainer defaultChunkPermissions;
     private final Set<ClaimedChunk> claims;
@@ -46,6 +46,7 @@ public class KingdomImpl implements Kingdom {
     private final Map<RelationType, Relation> relations;
     private final Map<Integer, RelationInfo> kingdomRelations;
     private final Bank<Kingdom> bank;
+    private final Map<String, Role> roles;
 
     public KingdomImpl(
             Kingdoms plugin,
@@ -61,7 +62,8 @@ public class KingdomImpl implements Kingdom {
             Map<String, Integer> upgradeLevels,
             Map<RelationType, Relation> relations,
             Map<Integer, RelationInfo> kingdomRelations,
-            Bank<Kingdom> bank
+            Bank<Kingdom> bank,
+            Map<String, Role> roles
     ) {
         this.plugin = plugin;
         this.id = id;
@@ -69,9 +71,9 @@ public class KingdomImpl implements Kingdom {
         this.description = description;
         this.members = members;
         this.userRoles = userRoles;
-        this.roles = Multimaps.newSetMultimap(new HashMap<>(), HashSet::new);
+        this.roleUsers = Multimaps.newSetMultimap(new HashMap<>(), HashSet::new);
         for (var entry : this.userRoles.entrySet()) {
-            this.roles.put(entry.getValue(), entry.getKey());
+            this.roleUsers.put(entry.getValue(), entry.getKey());
         }
         this.permissions = permissions;
         this.defaultChunkPermissions = defaultPermissions;
@@ -81,6 +83,7 @@ public class KingdomImpl implements Kingdom {
         this.relations = relations;
         this.kingdomRelations = kingdomRelations;
         this.bank = bank;
+        this.roles = roles;
     }
 
     @Override
@@ -122,7 +125,7 @@ public class KingdomImpl implements Kingdom {
     @Override
     public void consumeRoles(Consumer<User> consumer, Role... roles) {
         for (Role role : roles) {
-            for (UUID uuid : this.roles.get(role)) {
+            for (UUID uuid : this.roleUsers.get(role)) {
                 final User user = this.members.get(uuid);
                 if (user == null) continue;
                 consumer.accept(user);
@@ -171,7 +174,7 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public void setPermission(Role role, KPermission permission, boolean value) {
-        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role));
+        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role.id()));
         if (relation == null) {
             this.permissions.setPermission(role, permission, value);
             return;
@@ -182,7 +185,7 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public boolean hasPermission(Role role, KPermission permission) {
-        final RelationType relationType = this.plugin.getRelationManager().fromRole(role);
+        final RelationType relationType = this.plugin.getRelationManager().fromRole(role.id());
         final Relation relation = this.relations.get(relationType);
         if (relation != null) return relation.hasPermission(role, permission);
         return this.permissions.hasPermission(role, permission);
@@ -190,7 +193,7 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public boolean hasPermission(Role role, KPermission permission, ClaimedChunk chunk) {
-        final RelationType relationType = this.plugin.getRelationManager().fromRole(role);
+        final RelationType relationType = this.plugin.getRelationManager().fromRole(role.id());
         Relation relation = chunk.getRelations().get(relationType);
         if (relation != null && relation.hasPermission(role, permission, chunk)) {
             return true;
@@ -221,7 +224,7 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public void setRole(User user, Role role) {
-        this.roles.put(role, user.getId());
+        this.roleUsers.put(role, user.getId());
         this.userRoles.put(user.getId(), role);
     }
 
@@ -229,14 +232,14 @@ public class KingdomImpl implements Kingdom {
     public void addMember(User user) {
         this.members.put(user.getId(), user);
         user.setKingdomId(this.id);
-        this.setRole(user, this.plugin.getRoleManager().getDefaultRole());
+        this.setRole(user, this.plugin.getRoleManager().getDefaultRole(this));
     }
 
     @Override
     public void removeMember(User user) {
         final UUID uuid = user.getId();
         this.members.remove(uuid);
-        this.roles.remove(this.getRole(user), uuid);
+        this.roleUsers.remove(this.getRole(user), uuid);
         this.userRoles.remove(uuid);
         user.setKingdomId(Kingdom.WILDERNESS_ID);
     }
@@ -247,8 +250,8 @@ public class KingdomImpl implements Kingdom {
         final Role role = this.userRoles.get(uuid);
         if (role != null) return role;
         final RelationInfo relation = this.kingdomRelations.get(user.getKingdomId());
-        if (relation == null) return this.plugin.getRoleManager().getNeutralRole();
-        return relation.relationType().getRole(this.plugin.getRoleManager());
+        if (relation == null) return this.plugin.getRoleManager().getNeutralRole(this);
+        return relation.relationType().getRole(this, this.plugin.getRoleManager());
     }
 
     @Override
@@ -375,7 +378,7 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public boolean isLeader(User user) {
-        return this.getRole(user).equals(this.plugin.getRoleManager().getLeaderRole());
+        return this.getRole(user).equals(this.plugin.getRoleManager().getLeaderRole(this));
     }
 
     @Override
@@ -392,6 +395,16 @@ public class KingdomImpl implements Kingdom {
         final Double limit = bankLimitUpgrades.getValueAtLevel(level);
         if (limit == null) return 0;
         return limit;
+    }
+
+    @Override
+    public Map<String, Role> getRoles() {
+        return this.roles;
+    }
+
+    @Override
+    public Role getRole(String id) {
+        return this.roles.get(id);
     }
 
     @Override

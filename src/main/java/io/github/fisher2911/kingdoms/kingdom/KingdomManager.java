@@ -145,12 +145,13 @@ public class KingdomManager {
         }, () -> MessageHandler.sendMessage(kicker, Message.NOT_IN_KINGDOM));
     }
 
-    public void trySetRole(User user, User toSet, Role role) {
+    public void trySetRole(User user, User toSet, String roleId) {
         this.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
             if (toSet.getKingdomId() != user.getKingdomId()) {
                 MessageHandler.sendMessage(user, Message.NOT_IN_SAME_KINGDOM, toSet);
                 return;
             }
+            final Role role = this.plugin.getRoleManager().getRole(roleId, kingdom);
             final Role setterRole = kingdom.getRole(user);
             final Role previousRole = kingdom.getRole(toSet);
             if (!kingdom.hasPermission(user, KPermission.SET_MEMBER_ROLE) || previousRole.isHigherRankedThan(setterRole)) {
@@ -167,7 +168,7 @@ public class KingdomManager {
         this.getKingdom(user.getKingdomId()).
                 ifPresentOrElse(kingdom -> {
                     final Role role = kingdom.getRole(user);
-                    if (role.equals(this.plugin.getRoleManager().getLeaderRole())) {
+                    if (role.equals(this.plugin.getRoleManager().getLeaderRole(kingdom))) {
                         MessageHandler.sendMessage(user, Message.LEADER_CANNOT_LEAVE_KINGDOM);
                         return;
                     }
@@ -178,6 +179,10 @@ public class KingdomManager {
     }
 
     public void tryDisband(User user) {
+        this.tryDisband(user, false);
+    }
+
+    public void tryDisband(User user, boolean force) {
         this.getKingdom(user.getKingdomId()).
                 ifPresentOrElse(kingdom -> {
                     if (!kingdom.isLeader(user)) {
@@ -185,7 +190,7 @@ public class KingdomManager {
                         return;
                     }
                     final ConfirmationManager confirmationManager = this.plugin.getConfirmationManager();
-                    if (!confirmationManager.hasConfirmation(Confirmation.DISBAND_KINGDOM, user.getId(), true)) {
+                    if (!confirmationManager.hasConfirmation(Confirmation.DISBAND_KINGDOM, user.getId(), true) && !force) {
                         MessageHandler.sendMessage(user, Message.CONFIRM_DISBAND_KINGDOM, kingdom);
                         confirmationManager.addConfirmation(
                                 Confirmation.DISBAND_KINGDOM,

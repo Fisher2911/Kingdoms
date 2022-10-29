@@ -4,7 +4,7 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.gui.BaseGui;
 import io.github.fisher2911.kingdoms.gui.BaseGuiItem;
 import io.github.fisher2911.kingdoms.gui.GuiItem;
-import io.github.fisher2911.kingdoms.gui.GuiItemKeys;
+import io.github.fisher2911.kingdoms.gui.GuiKeys;
 import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
@@ -12,6 +12,7 @@ import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.RolePermissionHolder;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
+import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
 
@@ -53,6 +55,9 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
 
     private static final String TYPE_UPGRADE = "upgrade";
     private static final String UPGRADE_PATH = "upgrade";
+
+    private static final String TYPE_ROLE = "role";
+    private static final String ROLE_PATH = "role-id";
 //    static {
 //        metadataSupplier.put(PERMISSION_TYPE, PermissionItemSerializer::getPermissionItemMetaData);
 //    }
@@ -68,18 +73,17 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
             wrapper.cancel();
         });
         if (typeString == null) return builder.build();
-//        final var metadata = metadataSupplier.get(typeString);
-//        System.out.println("Is metadata null? " + (metadata == null));
-//        if (metadata != null) {
-//            builder.metadata(metadata.get());
-//        }
         switch (typeString) {
             case TYPE_PERMISSION -> GuiItemSerializer.applyPermissionItemData(builder, node.node(PERMISSION_PATH).getString());
-            case TYPE_UPGRADE -> GuiItemSerializer.applyUpgradesItemData(builder, node.node(UPGRADE_PATH).getString());
+            case TYPE_UPGRADE -> GuiItemSerializer.applyUpgradesItemData(
+                    builder,
+                    node.node(UPGRADE_PATH).getString(),
+                    GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, node.node(MAX_LEVEL_ITEM_PATH))
+            );
+            case TYPE_ROLE -> GuiItemSerializer.applyRoleItemData(builder, node.node(ROLE_PATH).getString());
             default -> {
             }
         }
-//        final String actions = node.node(ACTIONS_PATH).getString();
         return builder.build();
     }
 
@@ -92,18 +96,27 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
             wrapper -> {
                 final Kingdoms plugin = Kingdoms.getPlugin(Kingdoms.class);
                 final UserManager userManager = plugin.getUserManager();
+                final RoleManager roleManager = plugin.getRoleManager();
                 final InventoryClickEvent event = wrapper.event();
                 final BaseGui gui = wrapper.gui();
                 final int slot = event.getSlot();
                 final BaseGuiItem clicked = gui.getItem(slot);
                 if (clicked == null) return;
-                final KPermission permission = clicked.getMetadata(GuiItemKeys.PERMISSION, KPermission.class);
+                final KPermission permission = clicked.getMetadata(GuiKeys.PERMISSION, KPermission.class);
                 if (permission == null) return;
-                final Kingdom kingdom = gui.getMetadata(GuiItemKeys.KINGDOM, Kingdom.class);
-                final Role role = gui.getMetadata(GuiItemKeys.ROLE, Role.class);
-                final ClaimedChunk chunk = gui.getMetadata(GuiItemKeys.CHUNK, ClaimedChunk.class);
+                final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
+                final Role role = roleManager.getRole(gui.getMetadata(GuiKeys.ROLE_ID, String.class), kingdom);
+                System.out.println("Kingdom roles: " + kingdom.getRoles());
+                System.out.println("role: " + gui.getMetadata().keySet().stream().map(o -> String.valueOf(o) + " - " + o.getClass().getName()).collect(Collectors.toList()));
+                System.out.println("Clicked GUI metadata: " + gui.getMetadata());
+                final ClaimedChunk chunk = gui.getMetadata(GuiKeys.CHUNK, ClaimedChunk.class);
                 event.setCancelled(true);
                 final User user = userManager.wrap(event.getWhoClicked());
+                final Role userRole = kingdom.getRole(user);
+                if (userRole == null || role == null || role.isAtLeastRank(userRole)) {
+                    MessageHandler.sendMessage(user, Message.CANNOT_EDIT_KINGDOM_PERMISSION, role);
+                    return;
+                }
                 if ((chunk != null && !kingdom.hasPermission(user, KPermission.EDIT_LOWER_ROLES_PERMISSIONS, chunk)) &&
                         (!kingdom.hasPermission(user, KPermission.EDIT_LOWER_ROLES_PERMISSIONS))) {
                     MessageHandler.sendMessage(user, Message.CANNOT_EDIT_KINGDOM_PERMISSION);
@@ -122,19 +135,24 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
             };
 
     public static void applyPermissionItemData(GuiItem.Builder builder, String permissionId) {
-        final Map<Object, Object> metadata = new HashMap<>();
-        metadata.put(GuiItemKeys.SWAP_VALUE_CONSUMER, PERMISSION_SWAP_VALUE_CLICK_ACTION);
-        builder.metadata(metadata);
         final KPermission permission = KPermission.get(permissionId);
         if (permission == null) return;
-        metadata.put(GuiItemKeys.PERMISSION, permission);
+        applyPermissionItemData(builder, permission);
+    }
+
+    public static void applyPermissionItemData(GuiItem.Builder builder, KPermission permission) {
+        final RoleManager roleManager = Kingdoms.getPlugin(Kingdoms.class).getRoleManager();
+        final Map<Object, Object> metadata = new HashMap<>();
+        metadata.put(GuiKeys.SWAP_VALUE_CONSUMER, PERMISSION_SWAP_VALUE_CLICK_ACTION);
+        builder.metadata(metadata);
+        metadata.put(GuiKeys.PERMISSION, permission);
         builder.metadata(metadata);
         builder.placeholder((gui, item) -> {
-            final Kingdom kingdom = gui.getMetadata(GuiItemKeys.KINGDOM, Kingdom.class);
+            final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
             if (kingdom == null) return false;
-            final Role role = gui.getMetadata(GuiItemKeys.ROLE, Role.class);
+            final Role role = roleManager.getRole(gui.getMetadata(GuiKeys.ROLE_ID, String.class), kingdom);
             if (role == null) return false;
-            final ClaimedChunk chunk = gui.getMetadata(GuiItemKeys.CHUNK, ClaimedChunk.class);
+            final ClaimedChunk chunk = gui.getMetadata(GuiKeys.CHUNK, ClaimedChunk.class);
             if (chunk == null) {
                 return new PermissionWrapper(permission, kingdom.hasPermission(role, permission));
             }
@@ -148,41 +166,41 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
                 final InventoryClickEvent event = wrapper.event();
                 event.setCancelled(true);
                 final BaseGui gui = wrapper.gui();
-                final User user = gui.getMetadata(GuiItemKeys.USER, User.class);
+                final User user = gui.getMetadata(GuiKeys.USER, User.class);
                 final int slot = event.getSlot();
                 final BaseGuiItem clicked = gui.getItem(slot);
                 if (clicked == null) return;
-                final String upgradeId = clicked.getMetadata(GuiItemKeys.UPGRADE_ID, String.class);
-                final Kingdom kingdom = gui.getMetadata(GuiItemKeys.KINGDOM, Kingdom.class);
+                final String upgradeId = clicked.getMetadata(GuiKeys.UPGRADE_ID, String.class);
+                final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
                 final Upgrades<?> upgrades = kingdom.getUpgradeHolder().getUpgrades(upgradeId);
-//                Bukkit.broadcastMessage("Upgrade id: " + upgradeId + " - is null " + (upgrades == null));
                 if (upgrades == null) return;
                 kingdomManager.tryLevelUpUpgrade(kingdom, user, upgrades);
                 final Integer newLevel = kingdom.getUpgradeLevel(upgrades.getId());
-//                Bukkit.broadcastMessage("New level: " + newLevel);
                 if (newLevel != null && newLevel >= upgrades.getMaxLevel()) {
-                    gui.set(slot, clicked.withItem(getUpgradeItem(upgrades, newLevel)));
+                    gui.set(slot, getUpgradeItem(upgrades, newLevel, clicked));
                 }
                 gui.refresh(slot);
             };
 
-    private static ItemBuilder getUpgradeItem(Upgrades<?> upgrades, int upgradeLevel) {
-        final ItemBuilder builder;
+    private static BaseGuiItem getUpgradeItem(Upgrades<?> upgrades, int upgradeLevel, BaseGuiItem clicked) {
         if (upgradeLevel >= upgrades.getMaxLevel()) {
-            builder = upgrades.getMaxLevelGuiItem();
-        } else {
-            builder = upgrades.getGuiItem();
+            final BaseGuiItem maxLevelItem = clicked.getMetadata(GuiKeys.MAX_LEVEL_ITEM, BaseGuiItem.class);
+            if (maxLevelItem == null) return clicked;
+            return maxLevelItem;
         }
-        return builder;
+        return clicked;
     }
 
-    public static void applyUpgradesItemData(GuiItem.Builder builder, String upgradeId) {
+    public static final String MAX_LEVEL_ITEM_PATH = "max-level-item";
+
+    public static void applyUpgradesItemData(GuiItem.Builder builder, String upgradeId, BaseGuiItem maxLevelItem) {
         final Map<Object, Object> metadata = new HashMap<>();
-        metadata.put(GuiItemKeys.INCREASE_LEVEL_CONSUMER, UPGRADES_INCREASE_LEVEL_ACTION);
-        metadata.put(GuiItemKeys.UPGRADE_ID, upgradeId);
+        metadata.put(GuiKeys.INCREASE_LEVEL_CONSUMER, UPGRADES_INCREASE_LEVEL_ACTION);
+        metadata.put(GuiKeys.UPGRADE_ID, upgradeId);
+        metadata.put(GuiKeys.MAX_LEVEL_ITEM, maxLevelItem);
         builder.metadata(metadata);
         builder.placeholder((gui, item) -> {
-            final Kingdom kingdom = gui.getMetadata(GuiItemKeys.KINGDOM, Kingdom.class);
+            final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
             if (kingdom == null) return false;
             final Integer upgradeLevel = kingdom.getUpgradeLevel(upgradeId);
             if (upgradeLevel == null) return false;
@@ -190,11 +208,22 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
             return new UpgradesWrapper(upgrades, upgradeLevel);
         });
         builder.placeholder((gui, item) -> {
-            final Kingdom kingdom = gui.getMetadata(GuiItemKeys.KINGDOM, Kingdom.class);
+            final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
             if (kingdom == null) return false;
             final Integer upgradeLevel = kingdom.getUpgradeLevel(upgradeId);
             if (upgradeLevel == null) return false;
             return new UpgradeLevelWrapper(kingdom, upgradeId);
+        });
+    }
+
+    public static void applyRoleItemData(GuiItem.Builder builder, String roleId) {
+        final Map<Object, Object> metadata = new HashMap<>();
+        metadata.put(GuiKeys.ROLE_ID, roleId);
+        builder.metadata(metadata);
+        builder.placeholder((gui, item) -> {
+            final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
+            if (kingdom == null) return false;
+            return kingdom.getRole(roleId);
         });
     }
 

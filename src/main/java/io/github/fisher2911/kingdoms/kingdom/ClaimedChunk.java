@@ -76,14 +76,14 @@ public class ClaimedChunk implements Claim, RolePermissionHolder {
 
     @Override
     public boolean hasPermission(Role role, KPermission permission) {
-        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role));
+        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role.id()));
         if (relation == null) return this.permissions.hasPermission(role, permission);
         return relation.hasPermission(role, permission);
     }
 
     @Override
     public void setPermission(Role role, KPermission permission, boolean value) {
-        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role));
+        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role.id()));
         if (relation == null) {
             this.permissions.setPermission(role, permission, value);
             return;

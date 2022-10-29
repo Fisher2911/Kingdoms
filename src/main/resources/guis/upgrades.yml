@@ -1,5 +1,5 @@
-title: <blue>Permissions
-id: permissions
+title: <blue>Roles
+id: upgrades
 rows: 5
 required-metadata:
   - KINGDOM
@@ -11,15 +11,23 @@ border:
       material: BLACK_STAINED_GLASS_PANE
       name: " "
 gui-fillers:
-  permissions:
+  upgrades:
     item:
-      material: LEVER
-      name: "<blue>%permission_display_name%"
+      material: GRASS_BLOCK
+      name: "<blue>%upgrade_display_name%"
       lore:
-        - "%permission_display_value%"
-    type: permission
+        - ""
+        - "<blue>Price: $%upgrade_display_price%"
+        - "<blue>%upgrade_display_name%: %upgrade_display_value%"
+    max-level-item:
+      item:
+        material: RED_STAINED_GLASS_PANE
+        name: "<red>Max Level Reached"
+        lore:
+          - ""
+          - "<red>Max Level Reached"
     actions:
-      swap_value:
+      increase_level:
         click-types: [ LEFT, RIGHT ]
 items:
   36:

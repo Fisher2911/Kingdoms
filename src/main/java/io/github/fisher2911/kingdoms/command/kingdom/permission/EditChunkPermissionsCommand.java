@@ -3,11 +3,11 @@ package io.github.fisher2911.kingdoms.command.kingdom.permission;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import io.github.fisher2911.kingdoms.gui.type.PermissionGui;
+import io.github.fisher2911.kingdoms.gui.GuiKeys;
+import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
-import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
@@ -23,6 +23,7 @@ public class EditChunkPermissionsCommand extends KCommand {
 
     private final RoleManager roleManager;
     private final KingdomManager kingdomManager;
+    private final GuiManager guiManager;
     private final WorldManager worldManager;
 
     public EditChunkPermissionsCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
@@ -30,19 +31,11 @@ public class EditChunkPermissionsCommand extends KCommand {
         this.roleManager = this.plugin.getRoleManager();
         this.kingdomManager = this.plugin.getKingdomManager();
         this.worldManager = this.plugin.getWorldManager();
+        this.guiManager = this.plugin.getGuiManager();
     }
 
     @Override
     public void execute(User user, String[] args, String[] previous) {
-        if (!user.hasKingdom()) {
-            MessageHandler.sendNotInKingdom(user);
-            return;
-        }
-        final Role role = this.roleManager.getById(args[0]);
-        if (role == null) {
-            MessageHandler.sendMessage(user, Message.NO_ROLE_FOUND);
-            return;
-        }
         final Player player = user.getPlayer();
         final ClaimedChunk chunk = this.worldManager.getAt(player.getLocation());
         if (chunk.isWilderness()) {
@@ -50,14 +43,30 @@ public class EditChunkPermissionsCommand extends KCommand {
             return;
         }
         this.kingdomManager.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
-            PermissionGui.create(
+            this.guiManager.open(
+                    GuiManager.PERMISSIONS_GUI,
                     user,
-                    this.plugin,
-                    role,
-                    kingdom,
-                    chunk
-            ).open(player);
-        }, () -> MessageHandler.sendMessage(user, "Could not find kingdom"));
+                    Map.of(
+                            GuiKeys.KINGDOM, kingdom,
+                            GuiKeys.USER, user,
+                            GuiKeys.ROLE_ID, args[0],
+                            GuiKeys.CHUNK, chunk
+                    ));
+        }, () -> MessageHandler.sendNotInKingdom(user));
+//        final Role role = this.roleManager.getRole(args[0]);
+//        if (role == null) {
+//            MessageHandler.sendMessage(user, Message.NO_ROLE_FOUND);
+//            return;
+//        }
+//        this.kingdomManager.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
+//            PermissionGui.create(
+//                    user,
+//                    this.plugin,
+//                    role,
+//                    kingdom,
+//                    chunk
+//            ).open(user);
+//        }, () -> MessageHandler.sendMessage(user, "Could not find kingdom"));
     }
 
     @Override
@@ -74,7 +83,7 @@ public class EditChunkPermissionsCommand extends KCommand {
         if (args.length != 1) return tabs;
         final String arg = args[0];
         for (String role : this.roleManager.getAllRoleIds()) {
-            if (!role.equals(this.roleManager.getLeaderRole().id()) && role.startsWith(arg)) tabs.add(role);
+            if (!role.equals(this.roleManager.getLeaderRoleId()) && role.startsWith(arg)) tabs.add(role);
         }
         return tabs;
     }

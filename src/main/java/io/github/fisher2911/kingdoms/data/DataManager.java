@@ -4,7 +4,6 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.economy.Bank;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomImpl;
-import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +22,6 @@ public class DataManager {
     }
 
     public Kingdom newKingdom(User creator, String name) {
-        final Role leader = this.roleManager.getLeaderRole();
         final Kingdom kingdom = new KingdomImpl(
                 this.plugin,
                 this.plugin.getKingdomManager().countKingdoms(),
@@ -38,13 +36,14 @@ public class DataManager {
                 new HashMap<>(),
                 new HashMap<>(),
                 new HashMap<>(),
-                Bank.createKingdomBank(0)
+                Bank.createKingdomBank(0),
+                this.roleManager.createKingdomRoles()
         );
         for (var entry : this.plugin.getRelationManager().createRelations(kingdom).entrySet()) {
             kingdom.setRelation(entry.getKey(), entry.getValue());
         }
         kingdom.addMember(creator);
-        kingdom.setRole(creator, leader);
+        kingdom.setRole(creator, this.roleManager.getLeaderRole(kingdom));
         return kingdom;
     }
 

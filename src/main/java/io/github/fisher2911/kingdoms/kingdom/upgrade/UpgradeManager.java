@@ -7,7 +7,9 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -56,12 +58,14 @@ public class UpgradeManager extends Config {
             final var source = loader.load();
             final var upgradesNode = source.node(UPGRADES);
             final Map<String, Upgrades<?>> upgrades = new HashMap<>();
+            final List<String> upgradeIdOrder = new ArrayList<>();
             for (final var entry : upgradesNode.childrenMap().entrySet()) {
                 final var upgrade = this.load(entry.getValue());
                 if (upgrade == null) continue;
+                upgradeIdOrder.add(upgrade.getId());
                 upgrades.put(upgrade.getId(), upgrade);
             }
-            this.upgradeHolder = new UpgradeHolder(upgrades);
+            this.upgradeHolder = new UpgradeHolder(upgrades, upgradeIdOrder);
         } catch (IOException e) {
             throw new RuntimeException("Could not load upgrades", e);
         }

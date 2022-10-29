@@ -6,7 +6,6 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
-import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.IntUpgrades;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeId;
@@ -138,7 +137,7 @@ public class RelationManager {
                 type,
                 KPermission.mapOfAll()
         ));
-        return new Relation(kingdom, type, type.getRole(this.plugin.getRoleManager()), defaultPerms);
+        return new Relation(kingdom, type, type.getRole(kingdom, this.plugin.getRoleManager()), defaultPerms);
     }
 
     public int getMaxRelations(Kingdom kingdom, RelationType type, int def) {
@@ -155,28 +154,29 @@ public class RelationManager {
     }
 
     @Nullable
-    public RelationType fromRole(Role role) {
-        return this.roleRelationMap.get(role.id());
+    public RelationType fromRole(String roleId) {
+        return this.roleRelationMap.get(roleId);
     }
 
     private static final String RELATIONS_PATH = "relations";
 
     public void load() {
         final RoleManager roleManager = this.plugin.getRoleManager();
+        final String enemyRoleId = roleManager.getEnemyRoleId();
+        final String neutralRoleId = roleManager.getNeutralRoleId();
+        final String truceRoleId = roleManager.getTruceRoleId();
+        final String allyRoleId = roleManager.getAllyRoleId();
         this.roleRelationMap = Map.of(
-                roleManager.getEnemyRole().id(), RelationType.ENEMY,
-                roleManager.getNeutralRole().id(), RelationType.NEUTRAL,
-                roleManager.getTruceRole().id(), RelationType.TRUCE,
-                roleManager.getAllyRole().id(), RelationType.ALLY
+                enemyRoleId, RelationType.ENEMY,
+                neutralRoleId, RelationType.NEUTRAL,
+                truceRoleId, RelationType.TRUCE,
+                allyRoleId, RelationType.ALLY
         );
-        final Role allyRole = roleManager.getAllyRole();
-        this.defaultRelationPermissions.put(this.fromRole(allyRole), roleManager.getDefaultRolePermissions().getPermissions().get(allyRole.id()));
-        final Role truceRole = roleManager.getTruceRole();
-        this.defaultRelationPermissions.put(this.fromRole(truceRole), roleManager.getDefaultRolePermissions().getPermissions().get(truceRole.id()));
-        final Role enemyRole = roleManager.getEnemyRole();
-        this.defaultRelationPermissions.put(this.fromRole(enemyRole), roleManager.getDefaultRolePermissions().getPermissions().get(enemyRole.id()));
-        final Role neutralRole = roleManager.getNeutralRole();
-        this.defaultRelationPermissions.put(this.fromRole(neutralRole), roleManager.getDefaultRolePermissions().getPermissions().get(neutralRole.id()));
+
+        this.defaultRelationPermissions.put(this.fromRole(allyRoleId), roleManager.getDefaultRolePermissions().getPermissions().get(allyRoleId));
+        this.defaultRelationPermissions.put(this.fromRole(truceRoleId), roleManager.getDefaultRolePermissions().getPermissions().get(truceRoleId));
+        this.defaultRelationPermissions.put(this.fromRole(enemyRoleId), roleManager.getDefaultRolePermissions().getPermissions().get(enemyRoleId));
+        this.defaultRelationPermissions.put(this.fromRole(neutralRoleId), roleManager.getDefaultRolePermissions().getPermissions().get(neutralRoleId));
 
     }
 }

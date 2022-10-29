@@ -1,5 +1,5 @@
-title: <blue>Permissions
-id: permissions
+title: <blue>Roles
+id: roles
 rows: 5
 required-metadata:
   - KINGDOM
@@ -11,15 +11,19 @@ border:
       material: BLACK_STAINED_GLASS_PANE
       name: " "
 gui-fillers:
-  permissions:
+  roles:
     item:
       material: LEVER
-      name: "<blue>%permission_display_name%"
+      name: "<blue>%role_display_name%"
       lore:
-        - "%permission_display_value%"
-    type: permission
+        - "<blue>Weight: %role_weight%"
     actions:
-      swap_value:
+      send_data:
+        click-types: [ LEFT, RIGHT ]
+        data:
+          - "role_id"
+      open_menu:
+        menu: permissions
         click-types: [ LEFT, RIGHT ]
 items:
   36:

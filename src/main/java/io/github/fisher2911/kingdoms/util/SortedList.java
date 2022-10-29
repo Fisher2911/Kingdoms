@@ -16,6 +16,7 @@ public class SortedList<E> implements List<E> {
     public SortedList(List<E> list, Comparator<E> comparator) {
         this.list = list;
         this.comparator = comparator;
+        this.sort();
     }
 
     @Override

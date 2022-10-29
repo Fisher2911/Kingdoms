@@ -1,0 +1,33 @@
+title: main
+id: main
+rows: 3
+border:
+  1:
+    item:
+      material: BLACK_STAINED_GLASS_PANE
+      name: " "
+items:
+  10:
+    item:
+      material: EMERALD
+      name: "<blue>View Upgrades"
+    actions:
+      open_menu:
+        menu: upgrades
+        click-types: [ LEFT, RIGHT ]
+  11:
+    item:
+      material: DIAMOND
+      name: "<blue>Roles"
+    actions:
+      open_menu:
+        menu: roles
+        click-types: [ LEFT, RIGHT ]
+  12:
+    item:
+      material: ANVIL
+      name: "<blue>Upgrades"
+    actions:
+      open_menu:
+        menu: upgrades
+        click-types: [ LEFT, RIGHT ]
