@@ -16,8 +16,10 @@ import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.util.MapOfMaps;
 import io.github.fisher2911.kingdoms.world.KChunk;
+import io.github.fisher2911.kingdoms.world.WorldPosition;
 import net.kyori.adventure.text.Component;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -25,6 +27,8 @@ import java.util.function.Function;
 public class PlaceholderBuilder {
 
     private static final MapOfMaps<Class<?>, Placeholder, Function<Object, Object>> placeholders = new MapOfMaps<>(new HashMap<>(), HashMap::new);
+
+    private static final DecimalFormat POSITION_FORMAT = new DecimalFormat("#.0");
 
     static {
         final Kingdoms plugin = Kingdoms.getPlugin(Kingdoms.class);
@@ -144,6 +148,19 @@ public class PlaceholderBuilder {
                 Placeholder.TRANSACTION_AMOUNT,
                 t -> castAndParse(TransactionResult.class, t, TransactionResult::amount
                 ));
+
+        put(WorldPosition.class,
+                Placeholder.POSITION_X,
+                w -> castAndParse(WorldPosition.class, w, p -> POSITION_FORMAT.format(p.position().x()))
+        );
+        put(WorldPosition.class,
+                Placeholder.POSITION_Y,
+                w -> castAndParse(WorldPosition.class, w, p -> POSITION_FORMAT.format(p.position().y()))
+        );
+        put(WorldPosition.class,
+                Placeholder.POSITION_Z,
+                w -> castAndParse(WorldPosition.class, w, p -> POSITION_FORMAT.format(p.position().z()))
+        );
     }
 
     private static String getRelationString(Kingdom kingdom, RelationType type) {

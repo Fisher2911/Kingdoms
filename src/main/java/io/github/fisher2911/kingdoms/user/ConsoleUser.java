@@ -2,6 +2,7 @@ package io.github.fisher2911.kingdoms.user;
 
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.command.CommandPermission;
+import io.github.fisher2911.kingdoms.world.WorldPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -97,5 +98,11 @@ public class ConsoleUser implements User {
     @Override
     public void setChatChannel(ChatChannel chatChannel) {
 
+    }
+
+    @Override
+    @Nullable
+    public WorldPosition getPosition() {
+        return null;
     }
 }

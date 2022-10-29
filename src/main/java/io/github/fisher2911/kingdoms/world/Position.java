@@ -1,11 +1,17 @@
 package io.github.fisher2911.kingdoms.world;
 
-import javax.xml.stream.Location;
+import org.bukkit.Location;
+
+import java.util.UUID;
 
 public record Position(double x, double y, double z) {
 
-    Position fromLocation(Location location) {
-        return new Position(x, y, z);
+    public static Position fromLocation(Location location) {
+        return new Position(location.getX(), location.getY(), location.getZ());
+    }
+
+    public WorldPosition toWorldPosition(UUID world) {
+        return new WorldPosition(world, this);
     }
 
     public Position add(double x, double y, double z) {
@@ -46,6 +52,10 @@ public record Position(double x, double y, double z) {
 
     public int getBlockZ() {
         return (int) this.z;
+    }
+
+    public boolean isSameBlock(Position position) {
+        return this.getBlockX() == position.getBlockX() && this.getBlockY() == position.getBlockY() && this.getBlockZ() == position.getBlockZ();
     }
 
 }

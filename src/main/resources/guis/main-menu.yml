@@ -36,12 +36,22 @@ items:
       material: RED_WOOL
       name: "<red>Delete Kingdom"
     actions:
-      set_item:
+      set_items:
         duration: 40
-        item:
-          material: BARRIER
-          name: "<red>Confirm"
-        click-types: [ LEFT, RIGHT ]
-        actions:
-          delete_kingdom:
+        items:
+          12:
+            item:
+              material: BARRIER
+              name: "<red>Confirm"
             click-types: [ LEFT, RIGHT ]
+            actions:
+              delete_kingdom:
+                click-types: [ LEFT, RIGHT ]
+          13:
+            item:
+              material: BARRIER
+              name: "<red>Some other item"
+            click-types: [ LEFT, RIGHT ]
+            actions:
+              delete_kingdom:
+                click-types: [ LEFT, RIGHT ]

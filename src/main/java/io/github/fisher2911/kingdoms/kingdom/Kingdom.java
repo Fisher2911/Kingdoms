@@ -1,6 +1,7 @@
 package io.github.fisher2911.kingdoms.kingdom;
 
 import io.github.fisher2911.kingdoms.economy.Bank;
+import io.github.fisher2911.kingdoms.kingdom.location.KingdomLocations;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermissible;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermissionHolder;
@@ -62,5 +63,6 @@ public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder {
     double getBankLimit();
     Map<String, Role> getRoles();
     Role getRole(String id);
+    KingdomLocations getLocations();
 
 }

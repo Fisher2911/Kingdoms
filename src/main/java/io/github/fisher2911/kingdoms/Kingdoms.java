@@ -1,7 +1,7 @@
 package io.github.fisher2911.kingdoms;
 
 import io.github.fisher2911.kingdoms.command.kingdom.KingdomCommand;
-import io.github.fisher2911.kingdoms.config.KingdomSettings;
+import io.github.fisher2911.kingdoms.config.KingdomsSettings;
 import io.github.fisher2911.kingdoms.confirm.ConfirmationManager;
 import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.economy.EconomyManager;
@@ -21,6 +21,7 @@ import io.github.fisher2911.kingdoms.listener.GlobalListener;
 import io.github.fisher2911.kingdoms.listener.PlayerJoinListener;
 import io.github.fisher2911.kingdoms.listener.ProtectionListener;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.teleport.TeleportManager;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import net.milkbowl.vault.economy.Economy;
 import org.apache.logging.log4j.LogManager;
@@ -37,6 +38,7 @@ public final class Kingdoms extends JavaPlugin {
 
     private final Logger logger = LogManager.getLogger(Kingdoms.class);
 
+    private TeleportManager teleportManager;
     private GlobalListener globalListener;
     private UpgradeManager upgradeManager;
     private KingdomManager kingdomManager;
@@ -45,7 +47,7 @@ public final class Kingdoms extends JavaPlugin {
     private DataManager dataManager;
     private PriceManager priceManager;
     private RoleManager roleManager;
-    private KingdomSettings kingdomSettings;
+    private KingdomsSettings kingdomSettings;
     private WorldManager worldManager;
     private ClaimManager claimManager;
     private RelationManager relationManager;
@@ -62,12 +64,13 @@ public final class Kingdoms extends JavaPlugin {
         }
 
         // order matters
+        this.teleportManager = new TeleportManager(this);
         this.globalListener = new GlobalListener();
         this.upgradeManager = new UpgradeManager(this);
         this.userManager = new UserManager(this, new HashMap<>());
         this.priceManager = new PriceManager();
         this.roleManager = new RoleManager(this, new HashMap<>());
-        this.kingdomSettings = new KingdomSettings(this);
+        this.kingdomSettings = new KingdomsSettings(this);
         this.dataManager = new DataManager(this);
         this.kingdomManager = new KingdomManager(this, new HashMap<>());
         this.worldManager = new WorldManager(this, new HashMap<>());
@@ -123,6 +126,10 @@ public final class Kingdoms extends JavaPlugin {
         return this.economy != null;
     }
 
+    public TeleportManager getTeleportManager() {
+        return teleportManager;
+    }
+
     public GlobalListener getGlobalListener() {
         return globalListener;
     }
@@ -157,7 +164,7 @@ public final class Kingdoms extends JavaPlugin {
         return roleManager;
     }
 
-    public KingdomSettings getKingdomSettings() {
+    public KingdomsSettings getKingdomSettings() {
         return kingdomSettings;
     }
 

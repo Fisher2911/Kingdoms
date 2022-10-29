@@ -48,6 +48,8 @@ public class KPermission {
     public static final KPermission DEPOSIT_MONEY = register("deposit-money", PermissionContext.KINGDOM);
     public static final KPermission WITHDRAW_MONEY = register("withdraw-money", PermissionContext.KINGDOM);
     public static final KPermission VIEW_BANK_BALANCE = register("view-bank-balance", PermissionContext.KINGDOM);
+    public static final KPermission SET_KINGDOM_HOME = register("set-kingdom-home", PermissionContext.KINGDOM);
+    public static final KPermission TELEPORT_TO_KINGDOM_HOME = register("teleport-to-kingdom-home", PermissionContext.KINGDOM);
 
     public static Collection<KPermission> values() {
         return allPermissions.values();

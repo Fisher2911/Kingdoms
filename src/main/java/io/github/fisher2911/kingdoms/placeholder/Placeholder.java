@@ -40,6 +40,10 @@ public enum Placeholder {
 
     KINGDOM_BANK_BALANCE,
 
+    POSITION_X,
+    POSITION_Y,
+    POSITION_Z,
+
     ;
 
     public String toString() {

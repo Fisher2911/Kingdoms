@@ -17,6 +17,8 @@ import io.github.fisher2911.kingdoms.command.kingdom.leave.LeaveCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.permission.PermissionCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.relation.RelationCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.role.SetRoleCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.teleport.HomeCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.teleport.SetHomeCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.upgrade.UpgradeCommand;
 import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
@@ -57,6 +59,8 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         this.addSubCommand(new DisbandCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new ChatCommand(this.plugin, new HashMap<>()));
         this.addSubCommand(new BankCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new HomeCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new SetHomeCommand(this.plugin, new HashMap<>()));
         RelationCommand.createAll(this.plugin).forEach(this::addSubCommand);
     }
 

@@ -5,6 +5,7 @@ import com.google.common.collect.Multimaps;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.economy.Bank;
 import io.github.fisher2911.kingdoms.economy.Price;
+import io.github.fisher2911.kingdoms.kingdom.location.KingdomLocations;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import io.github.fisher2911.kingdoms.kingdom.relation.Relation;
@@ -47,6 +48,7 @@ public class KingdomImpl implements Kingdom {
     private final Map<Integer, RelationInfo> kingdomRelations;
     private final Bank<Kingdom> bank;
     private final Map<String, Role> roles;
+    private final KingdomLocations locations;
 
     public KingdomImpl(
             Kingdoms plugin,
@@ -63,7 +65,8 @@ public class KingdomImpl implements Kingdom {
             Map<RelationType, Relation> relations,
             Map<Integer, RelationInfo> kingdomRelations,
             Bank<Kingdom> bank,
-            Map<String, Role> roles
+            Map<String, Role> roles,
+            KingdomLocations locations
     ) {
         this.plugin = plugin;
         this.id = id;
@@ -84,6 +87,7 @@ public class KingdomImpl implements Kingdom {
         this.kingdomRelations = kingdomRelations;
         this.bank = bank;
         this.roles = roles;
+        this.locations = locations;
     }
 
     @Override
@@ -405,6 +409,11 @@ public class KingdomImpl implements Kingdom {
     @Override
     public Role getRole(String id) {
         return this.roles.get(id);
+    }
+
+    @Override
+    public KingdomLocations getLocations() {
+        return this.locations;
     }
 
     @Override

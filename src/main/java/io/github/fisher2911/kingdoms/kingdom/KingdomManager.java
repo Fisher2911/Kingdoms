@@ -8,13 +8,17 @@ import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.economy.PriceManager;
 import io.github.fisher2911.kingdoms.economy.PriceType;
+import io.github.fisher2911.kingdoms.kingdom.location.KingdomLocations;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
+import io.github.fisher2911.kingdoms.teleport.TeleportInfo;
 import io.github.fisher2911.kingdoms.user.User;
+import io.github.fisher2911.kingdoms.world.WorldPosition;
+import org.bukkit.Location;
 
 import java.util.Map;
 import java.util.Optional;
@@ -211,6 +215,47 @@ public class KingdomManager {
         );
         kingdom.getMembers().forEach(member -> member.setKingdomId(Kingdom.WILDERNESS_ID));
         this.kingdoms.remove(kingdom.getId());
+    }
+
+    public void trySetHome(User user) {
+        if (!user.isOnline()) return;
+        final Location location = user.getPlayer().getLocation();
+        this.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
+            if (!kingdom.hasPermission(user, KPermission.SET_KINGDOM_HOME)) {
+                MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
+                return;
+            }
+            final WorldPosition worldPosition = WorldPosition.fromLocation(location);
+            kingdom.getLocations().setPosition(KingdomLocations.HOME, worldPosition);
+            MessageHandler.sendMessage(user, Message.SET_KINGDOM_HOME, kingdom, worldPosition);
+        }, () -> MessageHandler.sendNotInKingdom(user));
+
+    }
+
+    public void tryTeleportTo(User user, String id, KPermission requiredPerm) {
+        this.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
+            final WorldPosition worldPosition = kingdom.getLocations().getPosition(id);
+            if (worldPosition == null) {
+                MessageHandler.sendMessage(user, Message.KINGDOM_LOCATION_NOT_SET, id);
+                return;
+            }
+            if (!kingdom.hasPermission(user, requiredPerm)) {
+                MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
+                return;
+            }
+            if (!user.isOnline()) return;
+            final WorldPosition currentPosition = user.getPosition();
+            if (currentPosition == null) return;
+            this.plugin.getTeleportManager().tryTeleport(
+                    new TeleportInfo(
+                            user,
+                            worldPosition,
+                            this.plugin.getKingdomSettings().getTeleportDelay(),
+                            currentPosition
+                    )
+            );
+
+        }, () -> MessageHandler.sendNotInKingdom(user));
     }
 
     public int countKingdoms() {

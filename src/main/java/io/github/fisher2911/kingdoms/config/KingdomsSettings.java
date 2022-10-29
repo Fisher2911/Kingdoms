@@ -5,15 +5,17 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.IOException;
 
-public class KingdomSettings extends Config {
+public class KingdomsSettings extends Config {
 
-    public KingdomSettings(Kingdoms plugin) {
+    public KingdomsSettings(Kingdoms plugin) {
         super(plugin, "kingdom-defaults", "settings.yml");
     }
 
-    public static final String DEFAULT_KINGDOM_DESCRIPTION = "default-kingdom-description";
+    private static final String DEFAULT_KINGDOM_DESCRIPTION_PATH = "default-kingdom-description";
+    private static final String TELEPORT_DELAY_PATH = "teleport-delay";
 
     private String defaultKingdomDescription;
+    private int teleportDelay;
 
     public void load() {
         final YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
@@ -22,7 +24,8 @@ public class KingdomSettings extends Config {
 
         try {
             final var source = loader.load();
-            this.defaultKingdomDescription = source.node(DEFAULT_KINGDOM_DESCRIPTION).getString("");
+            this.defaultKingdomDescription = source.node(DEFAULT_KINGDOM_DESCRIPTION_PATH).getString("");
+            this.teleportDelay = source.node(TELEPORT_DELAY_PATH).getInt(3);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -30,5 +33,9 @@ public class KingdomSettings extends Config {
 
     public String getDefaultKingdomDescription() {
         return this.defaultKingdomDescription;
+    }
+
+    public int getTeleportDelay() {
+        return teleportDelay;
     }
 }
