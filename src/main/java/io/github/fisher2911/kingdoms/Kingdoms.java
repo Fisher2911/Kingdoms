@@ -136,6 +136,7 @@ public final class Kingdoms extends JavaPlugin {
 
     public void reload() {
         MessageHandler.reload();
+        this.roleManager.reload();
         this.upgradeManager.reload();
         this.guiManager.reload();
     }

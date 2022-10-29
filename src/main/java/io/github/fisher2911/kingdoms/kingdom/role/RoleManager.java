@@ -59,6 +59,11 @@ public class RoleManager extends Config {
 
     public static final String PERMISSIONS = "permissions";
 
+    public void reload() {
+        this.roles.clear();
+        this.rolesByWeight.clear();
+    }
+
     public void load() {
         final YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
                 .path(this.path)
