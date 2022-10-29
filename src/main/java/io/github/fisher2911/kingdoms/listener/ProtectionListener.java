@@ -114,13 +114,15 @@ public class ProtectionListener extends KListener {
     }
 
     private boolean isAllowed(Player player, Location location, KPermission permission) {
-        return this.isAllowed(this.userManager.wrap(player), location, permission);
+        final User user = this.userManager.forceGet(player.getUniqueId());
+        if (user == null) return false;
+        return this.isAllowed(user, location, permission);
     }
 
     private boolean isAllowed(User user, Location location, KPermission permission) {
         final ClaimedChunk chunk = this.worldManager.getAt(location);
         if (chunk.isWilderness()) return true;
-        return this.kingdomManager.getKingdom(chunk.getOwnedBy()).map(k ->
+        return this.kingdomManager.getKingdom(chunk.getOwnedBy(), false).map(k ->
                         k.hasPermission(user, permission, chunk)).
                 orElse(false);
     }

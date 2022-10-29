@@ -10,6 +10,7 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.command.CommandSender;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
@@ -93,6 +94,17 @@ public class MessageHandler extends Config {
     public static void sendMessage(User user, Component component) {
         if (!user.isOnline()) return;
         final Audience audience = INSTANCE.audiences.player(user.getPlayer());
+        audience.sendMessage(component);
+    }
+
+    public static void sendMessage(CommandSender sender, Message message) {
+        final String value = INSTANCE.getMessage(message);
+        if (value.isBlank()) return;
+        sendMessage(sender, MINI_MESSAGE.deserialize(value));
+    }
+
+    public static void sendMessage(CommandSender sender, Component component) {
+        final Audience audience = INSTANCE.audiences.sender(sender);
         audience.sendMessage(component);
     }
 

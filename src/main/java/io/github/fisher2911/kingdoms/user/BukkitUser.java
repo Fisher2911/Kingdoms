@@ -21,9 +21,9 @@ public class BukkitUser implements User {
 
     private final Kingdoms plugin;
     private final UUID uuid;
-    private final String name;
+    private String name;
     @Nullable
-    private final Player player;
+    private Player player;
     private int kingdomId;
     private ChatChannel chatChannel;
 
@@ -46,6 +46,12 @@ public class BukkitUser implements User {
         this(plugin, player.getUniqueId(), player.getName(), player);
         this.kingdomId = kingdomId;
         this.chatChannel = chatChannel;
+    }
+
+    @Override
+    public void onJoin(Player player) {
+        this.player = player;
+        this.name = this.player.getName();
     }
 
     @Override

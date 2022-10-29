@@ -2,35 +2,67 @@ package io.github.fisher2911.kingdoms.user;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
+import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
-import org.bukkit.Bukkit;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class UserManager {
 
     private final Kingdoms plugin;
+    private final DataManager dataManager;
     private final Map<UUID, User> userMap;
+    private final Map<String, User> byName;
 
     public UserManager(Kingdoms plugin, Map<UUID, User> userMap) {
         this.plugin = plugin;
+        this.dataManager = this.plugin.getDataManager();
         this.userMap = userMap;
+        this.byName = new HashMap<>();
     }
 
-    // todo
-    public User wrap(CommandSender sender) {
+    public Optional<User> get(UUID uuid) {
+        return Optional.ofNullable(this.userMap.get(uuid));
+    }
+
+    @Nullable
+    public User forceGet(CommandSender sender) {
         if (sender instanceof ConsoleCommandSender) return User.CONSOLE;
         if (sender instanceof final Player player) {
             final UUID uuid = player.getUniqueId();
-            return this.userMap.getOrDefault(uuid, new BukkitUser(this.plugin, player.getUniqueId(), player.getName(), player));
+            return this.forceGet(uuid);
         }
         return null;
+    }
+
+    @Nullable
+    public User forceGet(UUID uuid) {
+        return this.userMap.get(uuid);
+    }
+
+    public void loadUser(Player player) {
+        TaskChain.create(this.plugin)
+                .supplyAsync(() -> this.dataManager.loadUser(player.getUniqueId()))
+                .consumeSync(opt -> opt.ifPresentOrElse(this::addUser, () -> this.createUser(player)))
+                .execute();
+    }
+
+
+    public User createUser(Player player) {
+        final UUID uuid = player.getUniqueId();
+        final User user = new BukkitUser(this.plugin, player.getUniqueId(), player.getName(), player);
+        this.userMap.put(uuid, user);
+        this.byName.put(player.getName(), user);
+        return user;
     }
 
     public void changeChatChannel(User user, ChatChannel channel) {
@@ -42,17 +74,32 @@ public class UserManager {
         MessageHandler.sendMessage(user, Message.CHAT_CHANNEL_CHANGED, channel);
     }
 
-    public User getUserByName(String name) {
-        return this.wrap(Bukkit.getPlayer(name));
+    public Optional<User> getUserByName(String name, boolean searchDatabase) {
+        final User user = this.byName.get(name);
+        if (user != null || !searchDatabase) return Optional.ofNullable(user);
+        return this.dataManager.loadUserByName(name);
     }
 
     public void addUser(User user) {
         this.userMap.put(user.getId(), user);
+        this.byName.put(user.getName(), user);
+    }
+
+    public void saveAndRemove(UUID uuid) {
+        final User user = this.removeUser(uuid);
+        if (user == null) return;
+        this.byName.remove(user.getName());
+        TaskChain.create(this.plugin)
+                .runAsync(() -> this.dataManager.saveUser(user))
+                .execute();
     }
 
     @Nullable
     public User removeUser(UUID uuid) {
-        return this.userMap.remove(uuid);
+        final User user = this.userMap.remove(uuid);
+        if (user == null) return null;
+        this.byName.remove(user.getName());
+        return user;
     }
 
 }

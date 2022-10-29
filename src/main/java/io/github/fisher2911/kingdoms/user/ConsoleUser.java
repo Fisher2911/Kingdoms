@@ -105,4 +105,9 @@ public class ConsoleUser implements User {
     public WorldPosition getPosition() {
         return null;
     }
+
+    @Override
+    public void onJoin(Player player) {
+
+    }
 }

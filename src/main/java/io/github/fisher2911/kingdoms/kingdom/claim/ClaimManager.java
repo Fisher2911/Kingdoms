@@ -11,7 +11,6 @@ import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.world.KChunk;
 import org.bukkit.Chunk;
-import org.bukkit.Location;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,15 +30,14 @@ public class ClaimManager {
         this.playerClaimModes = new HashMap<>();
     }
 
-    public void tryClaim(User user, Location location) {
-        final Chunk chunk = location.getChunk();
+    public void tryClaim(User user, Chunk chunk, boolean searchDatabase) {
         final int x = chunk.getX();
         final int z = chunk.getZ();
-        this.tryClaim(user, location.getWorld().getUID(), x, z);
+        this.tryClaim(user, chunk.getWorld().getUID(), x, z, searchDatabase);
     }
 
-    public void tryClaim(User user, UUID world, int chunkX, int chunkZ) {
-        this.kingdomManager.getKingdom(user.getKingdomId()).
+    public void tryClaim(User user, UUID world, int chunkX, int chunkZ, boolean searchDatabase) {
+        this.kingdomManager.getKingdom(user.getKingdomId(), searchDatabase).
                 ifPresentOrElse(k -> this.tryClaim(user, k, world, chunkX, chunkZ),
                         () -> MessageHandler.sendNotInKingdom(user)
                 );
@@ -49,6 +47,12 @@ public class ClaimManager {
         final ClaimedChunk at = this.worldManager.getAt(world, chunkX, chunkZ);
         this.tryClaim(user, kingdom, at);
 
+    }
+
+    public void tryClaim(User user, Kingdom kingdom, Chunk chunk) {
+        final int x = chunk.getX();
+        final int z = chunk.getZ();
+        this.tryClaim(user, kingdom, chunk.getWorld().getUID(), x, z);
     }
 
     public void tryClaim(User user, Kingdom kingdom, ClaimedChunk chunk) {
@@ -76,15 +80,14 @@ public class ClaimManager {
         MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_CLAIM, chunk.getChunk());
     }
 
-    public void tryUnClaim(User user, Location location) {
-        final Chunk chunk = location.getChunk();
+    public void tryUnClaim(User user, Chunk chunk, boolean searchDatabase) {
         final int x = chunk.getX();
         final int z = chunk.getZ();
-        this.tryUnClaim(user, location.getWorld().getUID(), x, z);
+        this.tryUnClaim(user, chunk.getWorld().getUID(), x, z, searchDatabase);
     }
 
-    public void tryUnClaim(User user, UUID world, int chunkX, int chunkZ) {
-        this.kingdomManager.getKingdom(user.getKingdomId()).
+    public void tryUnClaim(User user, UUID world, int chunkX, int chunkZ, boolean searchDatabase) {
+        this.kingdomManager.getKingdom(user.getKingdomId(), searchDatabase).
                 ifPresentOrElse(k -> this.tryUnClaim(user, k, world, chunkX, chunkZ),
                         () -> MessageHandler.sendNotInKingdom(user)
                 );
@@ -97,6 +100,12 @@ public class ClaimManager {
     public void tryUnClaim(User user, Kingdom kingdom, UUID world, int chunkX, int chunkZ) {
         final ClaimedChunk at = this.worldManager.getAt(world, chunkX, chunkZ);
         this.tryUnClaim(user, kingdom, at);
+    }
+
+    public void tryUnClaim(User user, Kingdom kingdom, Chunk chunk) {
+        final int x = chunk.getX();
+        final int z = chunk.getZ();
+        this.tryUnClaim(user, kingdom, chunk.getWorld().getUID(), x, z);
     }
 
     public void tryUnClaim(User user, Kingdom kingdom, ClaimedChunk at) {

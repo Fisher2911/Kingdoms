@@ -6,6 +6,7 @@ import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 
 import java.util.Map;
@@ -22,14 +23,19 @@ public class InfoCommand extends KCommand {
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
         if (args.length == 0) {
-            this.kingdomManager.sendKingdomInfo(user);
+            TaskChain.create(this.plugin)
+                    .runAsync(() -> this.kingdomManager.sendKingdomInfo(user, true))
+                    .execute();
             return;
         }
         final String kingdomName = args[0];
-        this.kingdomManager.getKingdomByName(kingdomName).ifPresentOrElse(k ->
-                        this.kingdomManager.sendKingdomInfo(user, k),
-                () -> MessageHandler.sendMessage(user, Message.KINGDOM_NOT_FOUND)
-        );
+        TaskChain.create(this.plugin)
+                .runAsync(() -> this.kingdomManager.getKingdomByName(kingdomName, true).ifPresentOrElse(k ->
+                                this.kingdomManager.sendKingdomInfo(user, k),
+                        () -> MessageHandler.sendMessage(user, Message.KINGDOM_NOT_FOUND)
+                ))
+                .execute();
+
     }
 
     @Override

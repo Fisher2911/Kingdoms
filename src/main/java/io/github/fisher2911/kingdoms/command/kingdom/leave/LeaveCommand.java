@@ -5,6 +5,7 @@ import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 
 import java.util.Map;
@@ -20,7 +21,9 @@ public class LeaveCommand extends KCommand {
 
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
-        this.kingdomManager.tryLeave(user);
+        TaskChain.create(this.plugin)
+                .runAsync(() -> this.kingdomManager.tryLeave(user, true))
+                .execute();
     }
 
     @Override

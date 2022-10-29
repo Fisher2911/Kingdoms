@@ -4,6 +4,7 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 
 import java.util.Map;
@@ -19,7 +20,9 @@ public class DisbandCommand extends KCommand {
 
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
-        this.kingdomManager.tryDisband(user);
+        TaskChain.create(this.plugin)
+                .runAsync(() -> this.kingdomManager.tryDisband(user, true))
+                .execute();
     }
 
     @Override

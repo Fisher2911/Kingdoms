@@ -342,7 +342,9 @@ public class ClickActionSerializer {
             if (previousGuis == null || previousGuis.isEmpty()) return;
             final String previousGui = previousGuis.remove(previousGuis.size() - 1);
             if (previousGui == null) return;
-            plugin.getGuiManager().open(previousGui, userManager.wrap(event.getWhoClicked()), Map.of(GuiKeys.PREVIOUS_MENU_ID, previousGuis));
+            final User user = userManager.forceGet(event.getWhoClicked().getUniqueId());
+            if (user == null) return;
+            plugin.getGuiManager().open(previousGui, user, Map.of(GuiKeys.PREVIOUS_MENU_ID, previousGuis));
         };
 
     }

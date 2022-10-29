@@ -34,5 +34,6 @@ public interface User {
     void setChatChannel(ChatChannel chatChannel);
     @Nullable
     WorldPosition getPosition();
+    void onJoin(Player player);
 
 }

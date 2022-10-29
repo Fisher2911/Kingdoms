@@ -8,6 +8,7 @@ import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,34 +33,18 @@ public class EditPermissionsCommand extends KCommand {
 
     @Override
     public void execute(User user, String[] args, String[] previous) {
-        this.kingdomManager.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
-            this.guiManager.open(
-                    GuiManager.PERMISSIONS_GUI,
-                    user,
-                    Map.of(
-                            GuiKeys.USER, user,
-                            GuiKeys.KINGDOM, kingdom,
-                            GuiKeys.ROLE_ID, args[0]
-                    ));
-        }, () -> MessageHandler.sendNotInKingdom(user));
-//        final Role role = this.roleManager.getById(args[0]);
-//        if (role == null) {
-//            MessageHandler.sendMessage(user, Message.NO_ROLE_FOUND);
-//            return;
-//        }
-//        try {
-//            this.kingdomManager.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
-//                PermissionGui.create(
-//                        user,
-//                        this.plugin,
-//                        role,
-//                        kingdom,
-//                        null
-//                ).open(user);
-//            }, () -> MessageHandler.sendMessage(user, "Could not find kingdom"));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        TaskChain.create(this.plugin)
+                .supplyAsync(() -> this.kingdomManager.getKingdom(user.getKingdomId(), true))
+                .consumeSync(opt -> opt.ifPresentOrElse(kingdom ->
+                        this.guiManager.open(
+                        GuiManager.PERMISSIONS_GUI,
+                        user,
+                        Map.of(
+                                GuiKeys.USER, user,
+                                GuiKeys.KINGDOM, kingdom,
+                                GuiKeys.ROLE_ID, args[0]
+                        )), () -> MessageHandler.sendNotInKingdom(user)))
+                .execute();
     }
 
     @Override

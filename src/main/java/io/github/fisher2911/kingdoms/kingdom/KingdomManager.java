@@ -18,8 +18,8 @@ import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
 import io.github.fisher2911.kingdoms.teleport.TeleportInfo;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.world.WorldPosition;
-import org.bukkit.Location;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,11 +29,13 @@ public class KingdomManager {
     private final PriceManager priceManager;
     private final DataManager dataManager;
     private final Map<Integer, Kingdom> kingdoms;
+    private final Map<String, Kingdom> byName;
 
     public KingdomManager(Kingdoms plugin, Map<Integer, Kingdom> kingdoms) {
         this.plugin = plugin;
         this.priceManager = this.plugin.getPriceManager();
         this.dataManager = this.plugin.getDataManager();
+        this.byName = new HashMap<>();
         this.kingdoms = kingdoms;
     }
 
@@ -47,7 +49,7 @@ public class KingdomManager {
             MessageHandler.sendMessage(user, Message.NO_PERMISSION_TO_CREATE_KINGDOM);
             return empty;
         }
-        final Optional<Kingdom> kingdomByName = this.getKingdomByName(name);
+        final Optional<Kingdom> kingdomByName = this.getKingdomByName(name, true);
         if (kingdomByName.isPresent()) {
             MessageHandler.sendMessage(user, Message.KINGDOM_ALREADY_EXISTS, kingdomByName.get());
             return empty;
@@ -63,8 +65,8 @@ public class KingdomManager {
         return Optional.of(kingdom);
     }
 
-    public Optional<Kingdom> join(User user, int kingdomId) {
-        return this.getKingdom(kingdomId).flatMap(kingdom -> this.join(user, kingdom));
+    public Optional<Kingdom> join(User user, int kingdomId, boolean searchDatabase) {
+        return this.getKingdom(kingdomId, searchDatabase).flatMap(kingdom -> this.join(user, kingdom));
     }
 
     public Optional<Kingdom> join(User user, Kingdom kingdom) {
@@ -107,12 +109,26 @@ public class KingdomManager {
         MessageHandler.sendMessage(user, Message.LEVEL_UP_UPGRADE_SUCCESSFUL, new UpgradesWrapper(upgrades, upgradeLevel + 1));
     }
 
-    public Optional<Kingdom> getKingdom(int id) {
-        return Optional.ofNullable(this.kingdoms.get(id));
+    public Optional<Kingdom> getKingdom(int id, boolean searchDatabase) {
+        if (id == Kingdom.WILDERNESS_ID) return Optional.empty();
+        final Kingdom kingdom = this.kingdoms.get(id);
+        if (kingdom != null || !searchDatabase) return Optional.of(kingdom);
+        return this.loadKingdom(id);
     }
 
-    public Optional<Kingdom> getKingdomByName(String name) {
-        return this.kingdoms.values().stream().filter(k -> k.getName().equalsIgnoreCase(name)).findAny();
+    public Optional<Kingdom> loadKingdom(int id) {
+        final Optional<Kingdom> kingdom = this.dataManager.loadKingdom(id);
+        kingdom.ifPresent(k -> {
+            this.kingdoms.put(k.getId(), k);
+            this.byName.put(k.getName(), k);
+        });
+        return kingdom;
+    }
+
+    public Optional<Kingdom> getKingdomByName(String name, boolean searchDatabase) {
+        final Kingdom kingdom = this.byName.get(name);
+        if (kingdom != null || !searchDatabase) return Optional.ofNullable(kingdom);
+        return this.dataManager.loadKingdomByName(name);
     }
 
     public void sendKingdomInfo(User user, Kingdom kingdom) {
@@ -125,8 +141,8 @@ public class KingdomManager {
         MessageHandler.sendMessage(user, Message.KINGDOM_INFO, kingdom);
     }
 
-    public void sendKingdomInfo(User user) {
-        this.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
+    public void sendKingdomInfo(User user, boolean searchDatabase) {
+        this.getKingdom(user.getKingdomId(), searchDatabase).ifPresentOrElse(kingdom -> {
             if ((kingdom.getId() != user.getKingdomId() && !user.hasPermission(CommandPermission.VIEW_OTHER_KINGDOM_INFO)) ||
                     (kingdom.getId() == user.getKingdomId() && !user.hasPermission(CommandPermission.VIEW_SELF_KINGDOM_INFO))
             ) {
@@ -137,8 +153,8 @@ public class KingdomManager {
         }, () -> MessageHandler.sendNotInKingdom(user));
     }
 
-    public void tryKick(User kicker, User toKick) {
-        this.getKingdom(kicker.getKingdomId()).ifPresentOrElse(kingdom -> {
+    public void tryKick(User kicker, User toKick, boolean searchDatabase) {
+        this.getKingdom(kicker.getKingdomId(), searchDatabase).ifPresentOrElse(kingdom -> {
             if (!kingdom.canKick(kicker, toKick)) {
                 MessageHandler.sendMessage(kicker, Message.NO_KINGDOM_PERMISSION);
                 return;
@@ -149,8 +165,8 @@ public class KingdomManager {
         }, () -> MessageHandler.sendMessage(kicker, Message.NOT_IN_KINGDOM));
     }
 
-    public void trySetRole(User user, User toSet, String roleId) {
-        this.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
+    public void trySetRole(User user, User toSet, String roleId, boolean searchDatabase) {
+        this.getKingdom(user.getKingdomId(), searchDatabase).ifPresentOrElse(kingdom -> {
             if (toSet.getKingdomId() != user.getKingdomId()) {
                 MessageHandler.sendMessage(user, Message.NOT_IN_SAME_KINGDOM, toSet);
                 return;
@@ -168,8 +184,8 @@ public class KingdomManager {
         }, () -> MessageHandler.sendNotInKingdom(user));
     }
 
-    public void tryLeave(User user) {
-        this.getKingdom(user.getKingdomId()).
+    public void tryLeave(User user, boolean searchDatabase) {
+        this.getKingdom(user.getKingdomId(), searchDatabase).
                 ifPresentOrElse(kingdom -> {
                     final Role role = kingdom.getRole(user);
                     if (role.equals(this.plugin.getRoleManager().getLeaderRole(kingdom))) {
@@ -182,12 +198,12 @@ public class KingdomManager {
                 }, () -> MessageHandler.sendNotInKingdom(user));
     }
 
-    public void tryDisband(User user) {
-        this.tryDisband(user, false);
+    public void tryDisband(User user, boolean searchDatabase) {
+        this.tryDisband(user, false, searchDatabase);
     }
 
-    public void tryDisband(User user, boolean force) {
-        this.getKingdom(user.getKingdomId()).
+    public void tryDisband(User user, boolean force, boolean searchDatabase) {
+        this.getKingdom(user.getKingdomId(), searchDatabase).
                 ifPresentOrElse(kingdom -> {
                     if (!kingdom.isLeader(user)) {
                         MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
@@ -204,28 +220,26 @@ public class KingdomManager {
                         );
                         return;
                     }
-                    this.disband(user, kingdom);
+                    this.disband(user, kingdom, searchDatabase);
                 }, () -> MessageHandler.sendNotInKingdom(user));
     }
 
-    private void disband(User user, Kingdom kingdom) {
+    private void disband(User user, Kingdom kingdom, boolean searchDatabase) {
         MessageHandler.sendMessage(kingdom, Message.KINGDOM_DISBANDED, kingdom, user);
         kingdom.getKingdomRelations().keySet().forEach(id ->
-                this.getKingdom(id).ifPresent(k -> this.plugin.getRelationManager().removeRelation(k, kingdom))
+                this.getKingdom(id, searchDatabase).ifPresent(k -> this.plugin.getRelationManager().removeRelation(k, kingdom))
         );
         kingdom.getMembers().forEach(member -> member.setKingdomId(Kingdom.WILDERNESS_ID));
         this.kingdoms.remove(kingdom.getId());
     }
 
-    public void trySetHome(User user) {
+    public void trySetHome(User user, WorldPosition worldPosition, boolean searchDatabase) {
         if (!user.isOnline()) return;
-        final Location location = user.getPlayer().getLocation();
-        this.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
+        this.getKingdom(user.getKingdomId(), searchDatabase).ifPresentOrElse(kingdom -> {
             if (!kingdom.hasPermission(user, KPermission.SET_KINGDOM_HOME)) {
                 MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
                 return;
             }
-            final WorldPosition worldPosition = WorldPosition.fromLocation(location);
             kingdom.getLocations().setPosition(KingdomLocations.HOME, worldPosition);
             MessageHandler.sendMessage(user, Message.SET_KINGDOM_HOME, kingdom, worldPosition);
         }, () -> MessageHandler.sendNotInKingdom(user));
@@ -233,7 +247,7 @@ public class KingdomManager {
     }
 
     public void tryTeleportTo(User user, String id, KPermission requiredPerm) {
-        this.getKingdom(user.getKingdomId()).ifPresentOrElse(kingdom -> {
+        this.getKingdom(user.getKingdomId(), false).ifPresentOrElse(kingdom -> {
             final WorldPosition worldPosition = kingdom.getLocations().getPosition(id);
             if (worldPosition == null) {
                 MessageHandler.sendMessage(user, Message.KINGDOM_LOCATION_NOT_SET, id);

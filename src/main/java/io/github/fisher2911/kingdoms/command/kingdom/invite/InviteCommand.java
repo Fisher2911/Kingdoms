@@ -5,8 +5,8 @@ import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.invite.InviteManager;
-import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.jetbrains.annotations.Nullable;
@@ -30,9 +30,15 @@ public class InviteCommand extends KCommand {
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
         final String invitedName = args[0];
-        final User invited = this.userManager.getUserByName(invitedName);
-        this.kingdomManager.getKingdom(user.getKingdomId()).
-                ifPresentOrElse(kingdom -> this.inviteManager.invite(kingdom, user, invited), () -> MessageHandler.sendNotInKingdom(user));
+        this.userManager.getUserByName(invitedName, false)
+                .ifPresent(invited ->
+                        TaskChain.create(this.plugin)
+                                .supplyAsync(() -> this.kingdomManager.getKingdom(user.getKingdomId(), true))
+                                .consumeSync(opt -> opt.ifPresentOrElse(kingdom -> this.inviteManager.invite(kingdom, user, invited),
+                                        () -> MessageHandler.sendNotInKingdom(user)
+                                ))
+                                .execute()
+                );
     }
 
     @Override

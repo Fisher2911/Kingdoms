@@ -6,6 +6,7 @@ import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationManager;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +36,9 @@ public class RelationCommand extends KCommand {
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
         final String kingdomName = args[0];
-        this.relationManager.tryAddRelation(user, kingdomName, this.type);
+        TaskChain.create(this.plugin)
+                .runAsync(() -> this.relationManager.tryAddRelation(user, kingdomName, this.type, true))
+                .execute();
     }
 
     @Override

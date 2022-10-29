@@ -107,7 +107,8 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
                 final Role role = roleManager.getRole(gui.getMetadata(GuiKeys.ROLE_ID, String.class), kingdom);
                 final ClaimedChunk chunk = gui.getMetadata(GuiKeys.CHUNK, ClaimedChunk.class);
                 event.setCancelled(true);
-                final User user = userManager.wrap(event.getWhoClicked());
+                final User user = userManager.forceGet(event.getWhoClicked());
+                if (user == null) return;
                 final Role userRole = kingdom.getRole(user);
                 if (userRole == null || role == null || role.isAtLeastRank(userRole)) {
                     MessageHandler.sendMessage(user, Message.CANNOT_EDIT_KINGDOM_PERMISSION, role);

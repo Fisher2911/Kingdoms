@@ -3,9 +3,11 @@ package io.github.fisher2911.kingdoms.command.kingdom.upgrade;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import io.github.fisher2911.kingdoms.gui.type.UpgradeGui;
+import io.github.fisher2911.kingdoms.gui.GuiKeys;
+import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 
 import java.util.Map;
@@ -21,13 +23,19 @@ public class UpgradeCommand extends KCommand {
 
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
-        this.kingdomManager.getKingdom(user.getKingdomId()).
-                ifPresentOrElse(kingdom -> {
-                    UpgradeGui.create(
-                            this.plugin,
-                            kingdom
-                    ).open(user.getPlayer());
-                }, () -> MessageHandler.sendNotInKingdom(user));
+        TaskChain.create(this.plugin)
+                .supplyAsync(() -> this.kingdomManager.getKingdom(user.getKingdomId(), true))
+                .consumeSync(opt -> opt.ifPresentOrElse(kingdom -> {
+                    this.plugin.getGuiManager().open(
+                            GuiManager.UPGRADES_GUI,
+                            user,
+                            Map.of(
+                                    GuiKeys.USER, user,
+                                    GuiKeys.KINGDOM, kingdom
+                            )
+                    );
+                }, () -> MessageHandler.sendNotInKingdom(user)))
+                .execute();
     }
 
     @Override

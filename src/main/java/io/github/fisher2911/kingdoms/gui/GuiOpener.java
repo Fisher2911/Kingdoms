@@ -2,6 +2,7 @@ package io.github.fisher2911.kingdoms.gui;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.util.function.TriConsumer;
 
@@ -36,12 +37,18 @@ public class GuiOpener {
         final Gui.Builder copy = this.builder.copy().metadata(metadata);
         copy.metadata(GuiKeys.USER, user);
         if (!user.isOnline()) return;
-        PLUGIN.getKingdomManager().getKingdom(user.getKingdomId()).ifPresent(kingdom -> {
-            for (final GuiKeys key : this.requiredMetadata) {
-                METADATA_MAP.get(key).accept(copy, user, kingdom);
-            }
-        });
-        copy.build().open(user.getPlayer());
+        TaskChain.create(PLUGIN)
+                .supplyAsync(() -> PLUGIN.getKingdomManager().getKingdom(user.getKingdomId(), true))
+                .consumeSync(opt -> {
+                    if (!user.isOnline()) return;
+                    opt.ifPresent(kingdom -> {
+                        for (final GuiKeys key : this.requiredMetadata) {
+                            METADATA_MAP.get(key).accept(copy, user, kingdom);
+                        }
+                    });
+                    copy.build().open(user.getPlayer());
+                })
+                .execute();
     }
 
     public void open(User user) {

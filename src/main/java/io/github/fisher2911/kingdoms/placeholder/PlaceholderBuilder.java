@@ -36,7 +36,7 @@ public class PlaceholderBuilder {
         put(User.class, Placeholder.USER_NAME, u -> castAndParseUser(u, User::getName));
         put(User.class, Placeholder.USER_BALANCE, u -> castAndParseUser(u, User::getMoney));
         put(User.class, Placeholder.USER_KINGDOM_NAME, u -> castAndParseUser(u, user -> plugin.getKingdomManager().
-                getKingdom(user.getKingdomId()).
+                getKingdom(user.getKingdomId(), false).
                 map(Kingdom::getName).
                 orElse("Wilderness"))
         );

@@ -7,7 +7,9 @@ import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimMode;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 
 import java.util.Map;
@@ -32,18 +34,25 @@ public class AutoSubCommand extends KCommand {
         final UUID uuid = user.getId();
         final ClaimMode previousClaimMode = this.claimManager.getClaimMode(uuid);
         if (previousClaimMode == claimMode) {
+            final Message message = claimMode == ClaimMode.CLAIM ? Message.DISABLED_AUTO_CLAIM : Message.DISABLED_AUTO_UNCLAIM;
             this.claimManager.removePlayerClaimMode(uuid);
-            MessageHandler.sendMessage(user, "No longer " + claimMode.toString().toLowerCase() + "ing land");
+            MessageHandler.sendMessage(user, message);
             return;
         }
         this.claimManager.setClaimMode(uuid, claimMode);
         final Location location = user.getPlayer().getLocation();
-        if (claimMode == ClaimMode.CLAIM) {
-            this.claimManager.tryClaim(user, location);
-        } else if (claimMode == ClaimMode.UNCLAIM) {
-            this.claimManager.tryUnClaim(user, location);
-        }
-        MessageHandler.sendMessage(user, claimMode.toString().toLowerCase() + "ing land");
+        final Message message = claimMode == ClaimMode.CLAIM ? Message.ENABLED_AUTO_CLAIM : Message.ENABLED_AUTO_UNCLAIM;
+        final Chunk chunk = location.getChunk();
+        TaskChain.create(this.plugin)
+                .runAsync(() -> {
+                    if (claimMode == ClaimMode.CLAIM) {
+                        this.claimManager.tryClaim(user, chunk, true);
+                    } else if (claimMode == ClaimMode.UNCLAIM) {
+                        this.claimManager.tryUnClaim(user, chunk, true);
+                    }
+                    MessageHandler.sendMessage(user, message);
+                })
+                .execute();
     }
 
     @Override

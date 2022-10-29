@@ -6,6 +6,7 @@ import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 
 import java.util.Arrays;
@@ -27,7 +28,9 @@ public class CreateCommand extends KCommand {
             return;
         }
         final String name = args[0];
-        this.kingdomManager.tryCreate(user, name);
+        TaskChain.create(this.plugin)
+                .runAsync(() -> this.kingdomManager.tryCreate(user, name))
+                .execute();
     }
 
     @Override

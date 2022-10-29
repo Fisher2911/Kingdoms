@@ -87,7 +87,9 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        return this.getTabs(this.userManager.wrap(sender), args, new String[0], false);
+        final User user = this.plugin.getUserManager().forceGet(sender);
+        if (user == null) return null;
+        return this.getTabs(user, args, new String[0], false);
     }
 
 }

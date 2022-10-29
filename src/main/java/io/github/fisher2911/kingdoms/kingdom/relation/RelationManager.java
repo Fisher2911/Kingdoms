@@ -35,15 +35,15 @@ public class RelationManager {
         this.invitedRelations = Multimaps.newSetMultimap(new HashMap<>(), HashSet::new);
     }
 
-    public void tryAddRelation(User user, String toRelate, RelationType type) {
-        this.kingdomManager.getKingdomByName(toRelate).ifPresentOrElse(kingdom ->
-                        this.tryAddRelation(user, kingdom, type),
+    public void tryAddRelation(User user, String toRelate, RelationType type, boolean searchDatabase) {
+        this.kingdomManager.getKingdomByName(toRelate, searchDatabase).ifPresentOrElse(kingdom ->
+                        this.tryAddRelation(user, kingdom, type, searchDatabase),
                 () -> MessageHandler.sendMessage(user, Message.KINGDOM_NOT_FOUND)
         );
     }
 
-    public void tryAddRelation(User user, Kingdom toRelate, RelationType type) {
-        this.kingdomManager.getKingdom(user.getKingdomId()).
+    public void tryAddRelation(User user, Kingdom toRelate, RelationType type, boolean searchDatabase) {
+        this.kingdomManager.getKingdom(user.getKingdomId(), searchDatabase).
                 ifPresentOrElse(kingdom -> this.tryAddRelation(kingdom, user, toRelate, type),
                         () -> MessageHandler.sendNotInKingdom(user)
                 );

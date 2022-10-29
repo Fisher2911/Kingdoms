@@ -7,7 +7,9 @@ import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 
 import java.util.HashMap;
@@ -31,11 +33,14 @@ public class ClaimCommand extends KCommand {
             MessageHandler.sendNotInKingdom(user);
             return;
         }
-        this.kingdomManager.getKingdom(user.getKingdomId()).
-                ifPresentOrElse(kingdom -> {
+        TaskChain.create(this.plugin)
+                .supplyAsync(() -> this.kingdomManager.getKingdom(user.getKingdomId(), true))
+                .consumeSync(opt -> opt.ifPresentOrElse(kingdom -> {
                     final Location location = user.getPlayer().getLocation();
-                    this.claimManager.tryClaim(user, location);
-                }, () -> MessageHandler.sendMessage(user, Message.KINGDOM_NOT_FOUND));
+                    final Chunk chunk = location.getChunk();
+                    this.claimManager.tryClaim(user, kingdom, chunk);
+                }, () -> MessageHandler.sendMessage(user, Message.KINGDOM_NOT_FOUND)))
+                .execute();
     }
 
     @Override

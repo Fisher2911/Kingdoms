@@ -5,7 +5,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class TaskChain<T, R> {
 
@@ -25,6 +27,42 @@ public class TaskChain<T, R> {
         return this.syncLater(function, 0);
     }
 
+    public <X> TaskChain<T, X> supplySync(Supplier<X> supplier) {
+        return this.syncLater(a -> supplier.get(), 0);
+    }
+
+    public <X> TaskChain<T, X> consumeSync(Consumer<R> supplier) {
+        return this.syncLater(a -> {
+            supplier.accept(a);
+            return null;
+        }, 0);
+    }
+
+    public <X> TaskChain<T, X> runSync(Runnable runnable) {
+        return this.syncLater(a -> {
+            runnable.run();
+            return null;
+        }, 0);
+    }
+
+    public <X> TaskChain<T, X> supplySyncLater(Supplier<X> supplier, int delay) {
+        return this.syncLater(a -> supplier.get(), delay);
+    }
+
+    public <X> TaskChain<T, X> consumeSyncLater(Consumer<R> supplier, int delay) {
+        return this.syncLater(a -> {
+            supplier.accept(a);
+            return null;
+        }, delay);
+    }
+
+    public <X> TaskChain<T, X> runSyncLater(Runnable runnable, int delay) {
+        return this.syncLater(a -> {
+            runnable.run();
+            return null;
+        }, delay);
+    }
+
     public <X> TaskChain<T, X> syncLater(Function<R, X> function, int delay) {
         this.queue.add(new Task((Function<Object, Object>) function, false, delay));
         return new TaskChain<>(this.plugin, queue);
@@ -32,6 +70,42 @@ public class TaskChain<T, R> {
 
     public <X> TaskChain<T, X> async(Function<R, X> function) {
         return this.asyncLater(function, 0);
+    }
+
+    public <X> TaskChain<T, X> supplyAsync(Supplier<X> supplier) {
+        return this.asyncLater(a -> supplier.get(), 0);
+    }
+
+    public <X> TaskChain<T, X> runAsync(Runnable runnable) {
+        return this.asyncLater(a -> {
+            runnable.run();
+            return null;
+        }, 0);
+    }
+
+    public <X> TaskChain<T, X> consumeAsync(Consumer<R> supplier) {
+        return this.asyncLater(a -> {
+            supplier.accept(a);
+            return null;
+        }, 0);
+    }
+
+    public <X> TaskChain<T, X> consumeAsyncLater(Consumer<R> supplier, int delay) {
+        return this.asyncLater(a -> {
+            supplier.accept(a);
+            return null;
+        }, delay);
+    }
+
+    public <X> TaskChain<T, X> supplyAsyncLater(Supplier<X> supplier, int delay) {
+        return this.asyncLater(a -> supplier.get(), delay);
+    }
+
+    public <X> TaskChain<T, X> runAsyncLater(Runnable runnable, int delay) {
+        return this.asyncLater(a -> {
+            runnable.run();
+            return null;
+        }, delay);
     }
 
     public <X> TaskChain<T, X> asyncLater(Function<R, X> function, int delay) {

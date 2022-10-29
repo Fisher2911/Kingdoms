@@ -4,8 +4,11 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
+import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
+import io.github.fisher2911.kingdoms.world.WorldPosition;
 
 import java.util.Map;
 
@@ -20,7 +23,14 @@ public class SetHomeCommand extends KCommand {
 
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
-        this.kingdomManager.trySetHome(user);
+        final WorldPosition position = user.getPosition();
+        if (position == null) {
+            MessageHandler.sendMessage(user, Message.INVALID_POSITION);
+            return;
+        }
+        TaskChain.create(this.plugin)
+                .runAsync(() -> this.kingdomManager.trySetHome(user, position, true))
+                .execute();
     }
 
     @Override

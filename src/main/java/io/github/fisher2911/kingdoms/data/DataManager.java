@@ -28,7 +28,6 @@ import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
-import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.BukkitUser;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.util.Pair;
@@ -306,7 +305,6 @@ public class DataManager {
 
     public Kingdom newKingdom(User creator, String name) {
         try {
-            System.out.println(this.loadKingdom(-1));
             final int id = this.createKingdom(this.getConnection(), name, this.plugin.getKingdomSettings().getDefaultKingdomDescription());
             final Kingdom kingdom = new KingdomImpl(
                     this.plugin,
@@ -609,6 +607,14 @@ public class DataManager {
         }
     }
 
+    public void saveUser(User user) {
+        try {
+            saveUser(this.getConnection(), user);
+        } catch (final SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void saveUser(Connection connection, User user) {
         final SQLStatement statement = SQLStatement.insert(USER_TABLE_NAME)
                 .add(USER_UUID_COLUMN)
@@ -628,6 +634,24 @@ public class DataManager {
             statement.insert(connection, suppliers, batchSize);
         } catch (final SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public Optional<User> loadUser(UUID uuid) {
+        try {
+            return this.loadUser(this.getConnection(), uuid);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
+    public Optional<User> loadUserByName(String name) {
+        try {
+            return this.loadUserByName(this.getConnection(), name);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
         }
     }
 
@@ -653,6 +677,27 @@ public class DataManager {
         return Optional.empty();
     }
 
+    public Optional<User> loadUserByName(Connection connection, String name) {
+        final SQLQuery<User> statement = SQLQuery.<User>select(USER_TABLE_NAME)
+                .select(USER_UUID_COLUMN, USER_CHAT_CHANNEL_COLUMN, USER_KINGDOM_ID_COLUMN)
+                .where(WhereCondition.of(USER_NAME_COLUMN, SQLObject.of(name)))
+                .build();
+        try {
+            final User user = statement.mapTo(connection, results -> {
+                if (results.next()) {
+                    final UUID uuid = this.bytesToUUID(results.getBytes(USER_UUID_COLUMN.getName()));
+                    final ChatChannel chatChannel = ChatChannel.valueOf(results.getString(USER_CHAT_CHANNEL_COLUMN.getName()));
+                    final int kingdomId = results.getInt(USER_KINGDOM_ID_COLUMN.getName());
+                    return new BukkitUser(this.plugin, uuid, name, null, kingdomId, chatChannel);
+                }
+                return null;
+            });
+            return Optional.ofNullable(user);
+        } catch (final SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
 
 //    public Optional<Kingdom> loadKingdom(int kingdomId) {
 //        final SQLQuery<Kingdom> query = SQLQuery.<Kingdom>select(KINGDOM_TABLE_NAME)
@@ -701,6 +746,11 @@ public class DataManager {
                 .join(KINGDOM_ID_COLUMN, LOCATIONS_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
                 .build();
         System.out.println(query.createStatement());
+        return Optional.empty();
+    }
+
+    // todo
+    public Optional<Kingdom> loadKingdomByName(String name) {
         return Optional.empty();
     }
 //

@@ -5,7 +5,9 @@ import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
+import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.jetbrains.annotations.Nullable;
@@ -30,8 +32,13 @@ public class SetRoleCommand extends KCommand {
 
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
-        final User toSet = this.userManager.getUserByName(args[1]);
-        this.kingdomManager.trySetRole(user, toSet, args[0]);
+        final String roleId = args[0];
+        final String name = args[1];
+        TaskChain.create(this.plugin).
+                supplyAsync(() -> this.userManager.getUserByName(name, true))
+                .consumeAsync(opt -> opt.ifPresentOrElse(toSet -> this.kingdomManager.trySetRole(user, toSet, roleId, true),
+                        () -> MessageHandler.sendMessage(user, Message.NOT_IN_KINGDOM)))
+                .execute();
     }
 
     @Override

@@ -44,7 +44,11 @@ public abstract class KCommand {
     }
 
     public void handleArgs(CommandSender sender, String[] args, String[] previousArgs) {
-        final User user = this.userManager.wrap(sender);
+        final User user = this.userManager.forceGet(sender);
+        if (user == null) {
+            MessageHandler.sendMessage(sender, Message.USER_DATA_LOAD_ERROR);
+            return;
+        }
         if (!this.senderType.canExecute(sender)) {
             MessageHandler.sendMessage(user, Message.INVALID_COMMAND_EXECUTOR);
             return;

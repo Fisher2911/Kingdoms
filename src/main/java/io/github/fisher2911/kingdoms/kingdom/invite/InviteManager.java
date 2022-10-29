@@ -8,6 +8,7 @@ import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import org.bukkit.Bukkit;
 
@@ -56,11 +57,13 @@ public class InviteManager {
     public void tryJoin(KingdomInvite invite) {
         final User invited = invite.invited();
         final User inviter = invite.inviter();
-        this.kingdomManager.join(invited, invite.kingdom().getId()).
-                ifPresent(kingdom -> {
-                    MessageHandler.sendMessage(inviter, Message.NEW_MEMBER_JOINED_KINGDOM, invited);
-                    this.invitedPlayers.remove(invited.getId(), invite);
-                });
+        TaskChain.create(this.plugin)
+                .runAsync(() -> this.kingdomManager.join(invited, invite.kingdom().getId(), true).
+                        ifPresent(kingdom -> {
+                            MessageHandler.sendMessage(inviter, Message.NEW_MEMBER_JOINED_KINGDOM, invited);
+                            this.invitedPlayers.remove(invited.getId(), invite);
+                        }))
+                .execute();
     }
 
     public void tryJoin(User user, String name) {

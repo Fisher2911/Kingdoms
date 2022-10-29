@@ -26,11 +26,16 @@ public class ChatListener extends KListener {
     }
 
     public void onChat(AsyncPlayerChatEvent event) {
-        final User user = this.userManager.wrap(event.getPlayer());
+        final User user = this.userManager.forceGet(event.getPlayer());
+        if (user == null) return;
         final ChatChannel chatChannel = user.getChatChannel();
-        this.kingdomManager.getKingdom(user.getKingdomId()).
+        this.kingdomManager.getKingdom(user.getKingdomId(), false).
                 ifPresent(kingdom -> event.getRecipients().
-                        removeIf(player -> !chatChannel.canSeeChat(kingdom, this.userManager.wrap(player)))
+                        removeIf(player -> {
+                            final User viewer = this.userManager.forceGet(player);
+                            if (viewer == null) return false;
+                            return !chatChannel.canSeeChat(kingdom, viewer);
+                        })
                 );
     }
 }
