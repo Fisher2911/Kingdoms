@@ -18,6 +18,15 @@ public record KChunk(UUID world, int x, int z) {
     }
 
     @Override
+    public String toString() {
+        return "KChunk{" +
+                "world=" + world +
+                ", x=" + x +
+                ", z=" + z +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

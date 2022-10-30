@@ -14,6 +14,10 @@ public class MapOfMaps<K, E, V> implements Map<K, Map<E, V>> {
     private final Map<K, Map<E, V>> map;
     private final Supplier<Map<E, V>> mapFactory;
 
+    public static <K, E, V> MapOfMaps<K, E, V> newHashMap() {
+        return new MapOfMaps<>(new HashMap<>(), HashMap::new);
+    }
+
     public MapOfMaps(Map<K, Map<E, V>> map, Supplier<Map<E, V>> mapFactory) {
         this.map = map;
         this.mapFactory = mapFactory;

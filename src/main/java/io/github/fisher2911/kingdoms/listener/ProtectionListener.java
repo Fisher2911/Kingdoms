@@ -7,6 +7,7 @@ import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -121,8 +122,9 @@ public class ProtectionListener extends KListener {
 
     private boolean isAllowed(User user, Location location, KPermission permission) {
         final ClaimedChunk chunk = this.worldManager.getAt(location);
+        Bukkit.broadcastMessage("Is wilderness? " + chunk.isWilderness());
         if (chunk.isWilderness()) return true;
-        return this.kingdomManager.getKingdom(chunk.getOwnedBy(), false).map(k ->
+        return this.kingdomManager.getKingdom(chunk.getKingdomId(), false).map(k ->
                         k.hasPermission(user, permission, chunk)).
                 orElse(false);
     }

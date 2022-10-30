@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface Claim extends KPermissible {
 
     boolean isWilderness();
-    int getOwnedBy();
+    int getKingdomId();
     @Nullable
     <T> T getData(String key);
     UUID getWorld();

@@ -1,5 +1,6 @@
 package io.github.fisher2911.kingdoms.kingdom.permission;
 
+import io.github.fisher2911.kingdoms.data.Saveable;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.util.MapOfMaps;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -8,10 +9,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PermissionContainer {
+public class PermissionContainer implements Saveable {
 
     // String is role id
     private final MapOfMaps<String, KPermission, Boolean> permissions;
+    private boolean dirty;
 
     public PermissionContainer(MapOfMaps<String, KPermission, Boolean> permissions) {
         this.permissions = permissions;
@@ -24,14 +26,6 @@ public class PermissionContainer {
     public static PermissionContainer empty() {
         return new PermissionContainer(new MapOfMaps<>(Collections.emptyMap(), Collections::emptyMap));
     }
-
-//    public static PermissionContainer createWithLeader(Role leader) {
-//        final MapOfMaps<String, KPermission, Boolean> mapOfMaps = new MapOfMaps<>(new HashMap<>(), HashMap::new);
-//        for (KPermission permission : KPermission.values()) {
-//            mapOfMaps.put(leader.id(), permission, true);
-//        }
-//        return new PermissionContainer(mapOfMaps);
-//    }
 
     public boolean hasPermission(Role role, KPermission permission) {
         return this.permissions.getOrDefault(role.id(), permission, false);
@@ -56,8 +50,14 @@ public class PermissionContainer {
     }
 
     public void setPermission(Role role, KPermission permission, boolean value) {
-        this.permissions.put(role.id(), permission, value);
+        this.setPermission(role.id(), permission, value);
     }
+
+    public void setPermission(String roleId, KPermission permission, boolean value) {
+        this.permissions.put(roleId, permission, value);
+        this.setDirty(true);
+    }
+
 
     public MapOfMaps<String, KPermission, Boolean> getPermissions() {
         return this.permissions;
@@ -72,6 +72,16 @@ public class PermissionContainer {
 
     public PermissionContainer copy() {
         return new PermissionContainer(new MapOfMaps<>(this.permissions));
+    }
+
+    @Override
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    @Override
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
     }
 
     public static PermissionContainer deserialize(ConfigurationNode node, String permissionPath) {

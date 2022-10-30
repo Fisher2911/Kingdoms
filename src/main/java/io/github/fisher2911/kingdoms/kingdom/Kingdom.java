@@ -1,12 +1,13 @@
 package io.github.fisher2911.kingdoms.kingdom;
 
+import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.data.Saveable;
 import io.github.fisher2911.kingdoms.economy.Bank;
 import io.github.fisher2911.kingdoms.kingdom.location.KingdomLocations;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermissible;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermissionHolder;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
-import io.github.fisher2911.kingdoms.kingdom.relation.Relation;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
@@ -19,7 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder {
+public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder, Saveable {
 
     int WILDERNESS_ID = -1;
 
@@ -49,20 +50,21 @@ public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder {
     boolean canKick(User kicker, User toKick);
     void kick(User user);
     Map<Integer, RelationInfo> getKingdomRelations();
-    Map<RelationType, Relation> getRelations();
+//    Map<RelationType, Relation> getRelations();
     Collection<RelationInfo> getRelations(RelationType type);
     @Nullable // if self
     RelationType getKingdomRelation(int kingdomId);
-    @Nullable // if self
-    Relation getRelation(int kingdomId);
+//    @Nullable // if self
+//    Relation getRelation(int kingdomId);
     void setRelation(Integer kingdomId, RelationInfo info);
     void removeRelation(Integer kingdomId);
-    void setRelation(RelationType type, Relation relation);
+//    void setRelation(RelationType type, Relation relation);
     boolean isLeader(User user);
     Bank<Kingdom> getBank();
     double getBankLimit();
     Map<String, Role> getRoles();
     Role getRole(String id);
     KingdomLocations getLocations();
+    boolean canBeUnloaded(Kingdoms plugin);
 
 }

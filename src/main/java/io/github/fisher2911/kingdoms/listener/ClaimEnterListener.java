@@ -12,6 +12,7 @@ import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -49,7 +50,7 @@ public class ClaimEnterListener extends KListener {
         final User user = this.userManager.forceGet(event.getPlayer());
         if (user == null) return;
 
-        if (fromChunk.getOwnedBy() == toChunk.getOwnedBy()) {
+        if (fromChunk.getKingdomId() == toChunk.getKingdomId()) {
             this.enterSameChunkToClaim(user, toChunk);
             return;
         }
@@ -70,15 +71,14 @@ public class ClaimEnterListener extends KListener {
     private void handleEnterKingdomLand(PlayerMoveEvent event, User user, ClaimedChunk chunk) {
         final Player player = event.getPlayer();
         TaskChain.create(this.plugin)
-                .supplyAsync(() -> this.kingdomManager.getKingdom(chunk.getOwnedBy(), true))
-                .consumeSync(opt -> opt.ifPresent(kingdom -> {
+                .supplyAsync(() -> this.kingdomManager.getKingdom(chunk.getKingdomId(), true))
+                .consumeSync(opt -> opt.ifPresentOrElse(kingdom -> {
                             MessageHandler.sendMessage(user, Message.ENTERED_KINGDOM_LAND, kingdom);
                             final ClaimMode claimMode = this.claimManager.getClaimMode(player.getUniqueId());
                             if (claimMode == ClaimMode.UNCLAIM && kingdom.hasPermission(user, KPermission.UNCLAIM_LAND, chunk)) {
                                 this.claimManager.tryUnClaim(user, kingdom, chunk);
                             }
-                        }
-                ))
+                        }, () -> MessageHandler.sendMessage(user, "test")))
                 .execute();
 
     }
@@ -88,7 +88,7 @@ public class ClaimEnterListener extends KListener {
         final ClaimMode claimMode = this.claimManager.getClaimMode(player.getUniqueId());
         if (claimMode == ClaimMode.NONE) {
             TaskChain.create(this.plugin)
-                    .supplyAsync(() -> this.kingdomManager.getKingdom(previous.getOwnedBy(), true))
+                    .supplyAsync(() -> this.kingdomManager.getKingdom(previous.getKingdomId(), true))
                     .consumeSync(opt -> {
                         opt.ifPresent(kingdom -> MessageHandler.sendMessage(user, Message.LEFT_KINGDOM_LAND, kingdom));
                         MessageHandler.sendMessage(user, Message.ENTERED_WILDERNESS_LAND);
@@ -102,8 +102,8 @@ public class ClaimEnterListener extends KListener {
     private void enterSameChunkToClaim(User user, ClaimedChunk chunk) {
         final ClaimMode claimMode = this.claimManager.getClaimMode(user.getId());
         if (claimMode == ClaimMode.NONE) return;
-        if (claimMode == ClaimMode.CLAIM && chunk.getOwnedBy() == user.getKingdomId()) return;
-        if (claimMode == ClaimMode.UNCLAIM && chunk.getOwnedBy() != user.getKingdomId()) return;
+        if (claimMode == ClaimMode.CLAIM && chunk.getKingdomId() == user.getKingdomId()) return;
+        if (claimMode == ClaimMode.UNCLAIM && chunk.getKingdomId() != user.getKingdomId()) return;
         TaskChain.create(this.plugin)
                 .supplyAsync(() -> this.kingdomManager.getKingdom(user.getKingdomId(), true))
                 .consumeSync(opt -> opt.ifPresent(kingdom -> {

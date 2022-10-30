@@ -2,6 +2,7 @@ package io.github.fisher2911.kingdoms.listener;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.data.DataManager;
+import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -32,6 +33,9 @@ public class PlayerJoinListener extends KListener {
     }
 
     public void onQuit(PlayerQuitEvent event) {
+        final User user = this.userManager.removeUser(event.getPlayer().getUniqueId());
+        if (user == null) return;
+        this.dataManager.saveUser(user);
         this.userManager.removeUser(event.getPlayer().getUniqueId());
     }
 

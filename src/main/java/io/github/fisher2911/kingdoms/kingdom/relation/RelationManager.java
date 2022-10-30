@@ -142,11 +142,12 @@ public class RelationManager {
 
     public int getMaxRelations(Kingdom kingdom, RelationType type, int def) {
         final String upgradeId = switch (type) {
-            case ALLY -> UpgradeId.MAX_ALLIES.displayName();
-            case TRUCE -> UpgradeId.MAX_TRUCES.displayName();
-            case ENEMY -> UpgradeId.MAX_ENEMIES.displayName();
+            case ALLY -> UpgradeId.MAX_ALLIES.toString();
+            case TRUCE -> UpgradeId.MAX_TRUCES.toString();
+            case ENEMY -> UpgradeId.MAX_ENEMIES.toString();
             default -> null;
         };
+        System.out.println("Upgrade id: " + upgradeId);
         if (upgradeId == null) return def;
         final Integer value = kingdom.getUpgradesValue(upgradeId, IntUpgrades.class);
         if (value == null) return def;

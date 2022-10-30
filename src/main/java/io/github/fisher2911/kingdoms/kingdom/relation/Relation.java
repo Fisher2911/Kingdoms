@@ -25,7 +25,7 @@ public class Relation implements RolePermissionHolder {
     }
 
     public boolean hasPermission(Role role, KPermission permission, ClaimedChunk chunk) {
-        return chunk.getRelations().get(this.relationType).hasPermission(role, permission);
+        return chunk.getPermissions().hasPermission(role, permission);
     }
 
     @Override

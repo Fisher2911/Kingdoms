@@ -110,4 +110,14 @@ public class ConsoleUser implements User {
     public void onJoin(Player player) {
 
     }
+
+    @Override
+    public boolean isDirty() {
+        return false;
+    }
+
+    @Override
+    public void setDirty(boolean dirty) {
+
+    }
 }

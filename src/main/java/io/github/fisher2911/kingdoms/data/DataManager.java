@@ -4,7 +4,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
-import io.github.fisher2911.kingdoms.data.sql.SQLObject;
 import io.github.fisher2911.kingdoms.data.sql.SQLType;
 import io.github.fisher2911.kingdoms.data.sql.condition.WhereCondition;
 import io.github.fisher2911.kingdoms.data.sql.dialect.SQLDialect;
@@ -14,6 +13,7 @@ import io.github.fisher2911.kingdoms.data.sql.field.SQLField;
 import io.github.fisher2911.kingdoms.data.sql.field.SQLForeignField;
 import io.github.fisher2911.kingdoms.data.sql.field.SQLIdField;
 import io.github.fisher2911.kingdoms.data.sql.field.SQLKeyType;
+import io.github.fisher2911.kingdoms.data.sql.statement.DeleteStatement;
 import io.github.fisher2911.kingdoms.data.sql.statement.SQLJoinType;
 import io.github.fisher2911.kingdoms.data.sql.statement.SQLQuery;
 import io.github.fisher2911.kingdoms.data.sql.statement.SQLStatement;
@@ -26,15 +26,20 @@ import io.github.fisher2911.kingdoms.kingdom.location.KingdomLocations;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
+import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.BukkitUser;
 import io.github.fisher2911.kingdoms.user.User;
+import io.github.fisher2911.kingdoms.util.MapOfMaps;
 import io.github.fisher2911.kingdoms.util.Pair;
+import io.github.fisher2911.kingdoms.world.KChunk;
 import io.github.fisher2911.kingdoms.world.Position;
 import io.github.fisher2911.kingdoms.world.WorldPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -44,10 +49,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -97,15 +105,34 @@ public class DataManager {
             .addFields(PERMISSIONS_ROLE_ID_COLUMN, PERMISSIONS_ID_COLUMN, PERMISSIONS_VALUE_COLUMN, PERMISSIONS_KINGDOM_ID_COLUMN)
             .build();
 
+    // Chunk Table
+    private static final String CHUNK_TABLE_NAME = "kingdom_chunks";
+    private static final SQLField CHUNK_KEY_COLUMN = new SQLField(CHUNK_TABLE_NAME, "key", SQLType.LONG, SQLKeyType.PRIMARY_KEY);
+    private static final SQLField CHUNK_WORLD_UUID_COLUMN = new SQLField(CHUNK_TABLE_NAME, "world_uuid", SQLType.UUID);
+    private static final SQLField CHUNK_X_COLUMN = new SQLField(CHUNK_TABLE_NAME, "x", SQLType.INTEGER);
+    private static final SQLField CHUNK_Z_COLUMN = new SQLField(CHUNK_TABLE_NAME, "z", SQLType.INTEGER);
+    private static final SQLField CHUNK_KINGDOM_ID_COLUMN = new SQLForeignField(
+            CHUNK_TABLE_NAME,
+            "kingdom_id",
+            SQLType.INTEGER,
+            KINGDOM_TABLE_NAME,
+            List.of(KINGDOM_ID_COLUMN),
+            ForeignKeyAction.ON_DELETE_CASCADE
+    );
+    private static final SQLTable CHUNK_TABLE = SQLTable.builder(CHUNK_TABLE_NAME)
+            .addFields(CHUNK_KEY_COLUMN, CHUNK_WORLD_UUID_COLUMN, CHUNK_X_COLUMN, CHUNK_Z_COLUMN, CHUNK_KINGDOM_ID_COLUMN)
+            .build();
+
+
     // --------------- Chunk Permissions Table ---------------
     private static final String CHUNK_PERMISSIONS_TABLE_NAME = "kingdom_chunk_permissions";
-    private static final SQLField CHUNK_PERMISSIONS_ROLE_ID_COLUMN = new SQLField(PERMISSIONS_TABLE_NAME, "role_id", SQLType.varchar());
-    private static final SQLField CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN = new SQLField(PERMISSIONS_TABLE_NAME, "id", SQLType.varchar(), SQLKeyType.UNIQUE);
-    private static final SQLField CHUNK_PERMISSIONS_VALUE_COLUMN = new SQLField(PERMISSIONS_TABLE_NAME, "value", SQLType.BOOLEAN);
-    private static final SQLField CHUNK_PERMISSIONS_ID_COLUMN = new SQLField(PERMISSIONS_TABLE_NAME, "chunk_id", SQLType.LONG);
-    private static final SQLField CHUNK_PERMISSIONS_WORLD_UUID_COLUMN = new SQLField(PERMISSIONS_TABLE_NAME, "world_uuid", SQLType.UUID);
+    private static final SQLField CHUNK_PERMISSIONS_ROLE_ID_COLUMN = new SQLField(CHUNK_PERMISSIONS_TABLE_NAME, "role_id", SQLType.varchar());
+    private static final SQLField CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN = new SQLField(CHUNK_PERMISSIONS_TABLE_NAME, "id", SQLType.varchar(), SQLKeyType.UNIQUE);
+    private static final SQLField CHUNK_PERMISSIONS_VALUE_COLUMN = new SQLField(CHUNK_PERMISSIONS_TABLE_NAME, "value", SQLType.BOOLEAN);
+    private static final SQLField CHUNK_PERMISSIONS_ID_COLUMN = new SQLField(CHUNK_PERMISSIONS_TABLE_NAME, "chunk_id", SQLType.LONG);
+    private static final SQLField CHUNK_PERMISSIONS_WORLD_UUID_COLUMN = new SQLField(CHUNK_PERMISSIONS_TABLE_NAME, "world_uuid", SQLType.UUID);
     private static final SQLField CHUNK_PERMISSIONS_KINGDOM_ID_COLUMN = new SQLForeignField(
-            PERMISSIONS_TABLE_NAME,
+            CHUNK_PERMISSIONS_TABLE_NAME,
             "kingdom_id",
             true,
             SQLType.INTEGER,
@@ -176,7 +203,7 @@ public class DataManager {
 
     // --------------- Roles Table ---------------
     private static final String ROLES_TABLE_NAME = "kingdom_roles";
-    private static final SQLField ROLES_ID_COLUMN = new SQLField(ROLES_TABLE_NAME, "id", SQLType.varchar(32), SQLKeyType.PRIMARY_KEY);
+    private static final SQLField ROLES_ID_COLUMN = new SQLField(ROLES_TABLE_NAME, "id", SQLType.varchar(32), SQLKeyType.UNIQUE);
     private static final SQLField ROLES_NAME_COLUMN = new SQLField(ROLES_TABLE_NAME, "name", SQLType.varchar(32));
     private static final SQLField ROLES_WEIGHT_COLUMN = new SQLField(ROLES_TABLE_NAME, "weight", SQLType.INTEGER);
     private static final SQLField ROLES_KINGDOM_ID_COLUMN = new SQLForeignField(
@@ -212,36 +239,33 @@ public class DataManager {
             ForeignKeyAction.ON_DELETE_CASCADE
     );
     private static final SQLTable LOCATIONS_TABLE = SQLTable.builder(LOCATIONS_TABLE_NAME)
-            .addFields(LOCATIONS_ID_COLUMN, /*LOCATIONS_NAME_COLUMN, */LOCATIONS_WORLD_UUID_COLUMN, LOCATIONS_X_COLUMN, LOCATIONS_Y_COLUMN, LOCATIONS_Z_COLUMN, LOCATIONS_YAW_COLUMN, LOCATIONS_PITCH_COLUMN, LOCATIONS_KINGDOM_ID_COLUMN)
+            .addFields(LOCATIONS_ID_COLUMN, LOCATIONS_WORLD_UUID_COLUMN, LOCATIONS_X_COLUMN, LOCATIONS_Y_COLUMN, LOCATIONS_Z_COLUMN, LOCATIONS_YAW_COLUMN, LOCATIONS_PITCH_COLUMN, LOCATIONS_KINGDOM_ID_COLUMN)
             .build();
 
 
     // --------------- User Table ---------------
-    private static final String USER_TABLE_NAME = "kingdom_user";
+    private static final String USER_TABLE_NAME = "users";
     private static final SQLField USER_UUID_COLUMN = new SQLField(USER_TABLE_NAME, "uuid", SQLType.UUID, SQLKeyType.PRIMARY_KEY);
     private static final SQLField USER_NAME_COLUMN = new SQLField(USER_TABLE_NAME, "name", SQLType.varchar(16));
     private static final SQLField USER_CHAT_CHANNEL_COLUMN = new SQLField(USER_TABLE_NAME, "chat_channel", SQLType.varchar(32));
     private static final SQLField USER_KINGDOM_ID_COLUMN = new SQLForeignField(
             USER_TABLE_NAME,
             "kingdom_id",
-            true,
             SQLType.INTEGER,
             KINGDOM_TABLE_NAME,
             List.of(KINGDOM_ID_COLUMN),
-            ForeignKeyAction.ON_DELETE_CASCADE
+            ForeignKeyAction.ON_DELETE_SET_DEFAULT
     );
     private static final SQLTable USER_TABLE = SQLTable.builder(USER_TABLE_NAME)
             .addFields(USER_UUID_COLUMN, USER_NAME_COLUMN, USER_CHAT_CHANNEL_COLUMN, USER_KINGDOM_ID_COLUMN)
             .build();
 
     private final Kingdoms plugin;
-    private final RoleManager roleManager;
     private final Path databasePath;
     private final Supplier<Connection> dataSource;
 
     public DataManager(Kingdoms plugin) {
         this.plugin = plugin;
-        this.roleManager = this.plugin.getRoleManager();
         this.databasePath = this.plugin.getDataFolder().toPath().resolve("database").resolve("kingdoms.db");
         this.dataSource = this.init();
     }
@@ -291,6 +315,7 @@ public class DataManager {
             KINGDOM_TABLE.create(connection);
             MEMBER_TABLE.create(connection);
             PERMISSIONS_TABLE.create(connection);
+            CHUNK_TABLE.create(connection);
             CHUNK_PERMISSIONS_TABLE.create(connection);
 //            CLAIMS_TABLE.create(connection);
             UPGRADE_LEVELS_TABLE.create(connection);
@@ -298,12 +323,14 @@ public class DataManager {
             BANK_TABLE.create(connection);
             ROLES_TABLE.create(connection);
             LOCATIONS_TABLE.create(connection);
+            USER_TABLE.create(connection);
         } catch (final SQLException e) {
             e.printStackTrace();
         }
     }
 
     public Kingdom newKingdom(User creator, String name) {
+        final RoleManager roleManager = this.plugin.getRoleManager();
         try {
             final int id = this.createKingdom(this.getConnection(), name, this.plugin.getKingdomSettings().getDefaultKingdomDescription());
             final Kingdom kingdom = new KingdomImpl(
@@ -313,23 +340,18 @@ public class DataManager {
                     this.plugin.getKingdomSettings().getDefaultKingdomDescription(),
                     new HashMap<>(),
                     new HashMap<>(),
-                    this.roleManager.getDefaultRolePermissions(),
-                    this.roleManager.getDefaultRolePermissions(),
+                    roleManager.getDefaultRolePermissions(),
                     new HashSet<>(),
                     this.plugin.getUpgradeManager().getUpgradeHolder(),
                     new HashMap<>(),
                     new HashMap<>(),
-                    new HashMap<>(),
                     Bank.createKingdomBank(0),
-                    this.roleManager.createKingdomRoles(),
+                    roleManager.createKingdomRoles(),
                     new KingdomLocations(new HashMap<>())
             );
-            for (var entry : this.plugin.getRelationManager().createRelations(kingdom).entrySet()) {
-                kingdom.setRelation(entry.getKey(), entry.getValue());
-            }
             kingdom.addMember(creator);
-            kingdom.setRole(creator, this.roleManager.getLeaderRole(kingdom));
-            this.save(kingdom);
+            kingdom.setRole(creator, roleManager.getLeaderRole(kingdom));
+            this.saveKingdom(kingdom);
             return kingdom;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -344,7 +366,9 @@ public class DataManager {
                 build();
         final List<Object> values = List.of(name, desc);
         final Integer id = statement.insert(connection, List.of(() -> values), 1, SQLStatement.INTEGER_ID_FINDER);
-        Bukkit.broadcastMessage("Found id: " + id);
+        if (id == null) {
+            throw new IllegalStateException("Could not create kingdom");
+        }
         return id;
     }
 
@@ -360,21 +384,20 @@ public class DataManager {
         return new BukkitUser(this.plugin, player, -1, ChatChannel.GLOBAL);
     }
 
-    public void save(Kingdom kingdom) {
+    public void saveKingdom(Kingdom kingdom) {
         try (final Connection connection = this.getConnection()) {
             connection.setAutoCommit(false);
             this.saveKingdom(connection, kingdom);
             this.saveMembers(connection, kingdom);
             this.savePermissions(connection, kingdom);
-            this.saveChunkPermissions(connection, kingdom);
-//            this.saveClaims(connection, kingdom);
+            this.saveClaimedChunks(connection, kingdom);
             this.saveUpgradeLevels(connection, kingdom);
-            this.saveRelations(connection, kingdom);
             this.saveBank(connection, kingdom);
             this.saveRoles(connection, kingdom);
+            this.saveKingdomRelations(connection, kingdom);
             this.saveLocations(connection, kingdom);
             connection.commit();
-            connection.setAutoCommit(true);
+            kingdom.setDirty(false);
         } catch (final SQLException e) {
             e.printStackTrace();
         }
@@ -409,6 +432,22 @@ public class DataManager {
         statement.insert(connection, suppliers, kingdom.getMembers().size());
     }
 
+    public Map<UUID, String> loadMembers(Connection connection, int kingdomId) throws SQLException {
+        final SQLQuery<Map<UUID, String>> query = SQLQuery.<Map<UUID, String>>select(MEMBER_TABLE_NAME)
+                .select(MEMBER_UUID_COLUMN, MEMBER_ROLE_ID_COLUMN)
+                .where(WhereCondition.of(MEMBER_KINGDOM_ID_COLUMN, () -> kingdomId))
+                .build();
+        return query.mapTo(connection, resultSet -> {
+            final Map<UUID, String> members = new HashMap<>();
+            while (resultSet.next()) {
+                final UUID uuid = this.bytesToUUID(resultSet.getBytes(MEMBER_UUID_COLUMN.getName()));
+                final String roleId = resultSet.getString(MEMBER_ROLE_ID_COLUMN.getName());
+                members.put(uuid, roleId);
+            }
+            return members;
+        });
+    }
+
     private void savePermissions(Connection connection, Kingdom kingdom) {
         final PermissionContainer permissions = kingdom.getPermissions();
         final SQLStatement statement = SQLStatement.insert(PERMISSIONS_TABLE_NAME)
@@ -441,7 +480,62 @@ public class DataManager {
         }
     }
 
-    public void saveChunkPermissions(Connection connection, Kingdom kingdom) {
+    public PermissionContainer loadPermissions(Connection connection, int kingdomId, Map<String, Role> roles) throws SQLException {
+        final SQLQuery<PermissionContainer> query = SQLQuery.<PermissionContainer>select(PERMISSIONS_TABLE_NAME)
+                .select(PERMISSIONS_ROLE_ID_COLUMN, PERMISSIONS_ID_COLUMN, PERMISSIONS_VALUE_COLUMN)
+                .where(WhereCondition.of(PERMISSIONS_KINGDOM_ID_COLUMN, () -> kingdomId))
+                .build();
+        return query.mapTo(connection, resultSet -> {
+            final PermissionContainer container = new PermissionContainer(MapOfMaps.newHashMap());
+            while (resultSet.next()) {
+                final String roleId = resultSet.getString(PERMISSIONS_ROLE_ID_COLUMN.getName());
+                final String permissionId = resultSet.getString(PERMISSIONS_ID_COLUMN.getName());
+                final KPermission permission = KPermission.get(permissionId);
+                final boolean value = resultSet.getBoolean(PERMISSIONS_VALUE_COLUMN.getName());
+                final Role role = roles.get(roleId);
+                if (role == null) continue;
+                container.setPermission(role, permission, value);
+            }
+            return container;
+        });
+    }
+
+    public void saveClaimedChunks(Collection<ClaimedChunk> chunks) {
+        try {
+            for (ClaimedChunk chunk : chunks) {
+                if (!chunk.isDirty()) continue;
+                this.saveClaimedChunk(this.getConnection(), chunk);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveClaimedChunk(ClaimedChunk chunk) {
+        try {
+            this.saveClaimedChunk(this.getConnection(), chunk);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveClaimedChunk(Connection connection, ClaimedChunk chunk) throws SQLException {
+        if (chunk.getKingdomId() == Kingdom.WILDERNESS_ID) return;
+        final SQLStatement statement = SQLStatement.insert(CHUNK_TABLE_NAME)
+                .add(CHUNK_KEY_COLUMN)
+                .add(CHUNK_KINGDOM_ID_COLUMN)
+                .add(CHUNK_WORLD_UUID_COLUMN)
+                .add(CHUNK_X_COLUMN)
+                .add(CHUNK_Z_COLUMN)
+                .build();
+        final KChunk kChunk = chunk.getChunk();
+        final List<Object> values = List.of(chunk.getChunk().getChunkKey(), chunk.getKingdomId(), uuidToBytes(chunk.getWorld()), kChunk.x(), kChunk.z());
+        statement.insert(connection, List.of(() -> values), 1);
+        this.saveChunkPermissions(connection, chunk);
+    }
+
+    private void saveChunkPermissions(Connection connection, ClaimedChunk chunk) {
+        if (chunk.getKingdomId() == Kingdom.WILDERNESS_ID) return;
         final SQLStatement statement = SQLStatement.insert(CHUNK_PERMISSIONS_TABLE_NAME)
                 .add(CHUNK_PERMISSIONS_ROLE_ID_COLUMN)
                 .add(CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN)
@@ -451,35 +545,115 @@ public class DataManager {
                 .add(CHUNK_PERMISSIONS_KINGDOM_ID_COLUMN)
                 .build();
         final List<Supplier<List<Object>>> suppliers = new ArrayList<>();
-        int batchSize = 1;
-        for (ClaimedChunk chunk : kingdom.getClaimedChunks()) {
-            final PermissionContainer permissions = chunk.getPermissions();
-            for (var rolePermissionsEntry : permissions.getPermissions().entrySet()) {
-                final String role = rolePermissionsEntry.getKey();
-                batchSize = rolePermissionsEntry.getValue().size();
-                for (var entry : rolePermissionsEntry.getValue().entrySet()) {
-                    final List<Object> objects = new ArrayList<>();
-                    final KPermission permission = entry.getKey();
-                    final boolean value = entry.getValue();
-                    if (!value) continue;
-                    objects.add(role);
-                    objects.add(permission.getId());
-                    objects.add(value);
-                    objects.add(chunk.getChunk().getChunkKey());
-                    objects.add(uuidToBytes(chunk.getChunk().world()));
-                    objects.add(kingdom.getId());
-                    suppliers.add(() -> objects);
-                }
+        int batchSize;
+        final PermissionContainer permissions = chunk.getPermissions();
+        for (var rolePermissionsEntry : permissions.getPermissions().entrySet()) {
+            final String role = rolePermissionsEntry.getKey();
+            batchSize = rolePermissionsEntry.getValue().size();
+            for (var entry : rolePermissionsEntry.getValue().entrySet()) {
+                final List<Object> objects = new ArrayList<>();
+                final KPermission permission = entry.getKey();
+                final boolean value = entry.getValue();
+                if (!value) continue;
+                objects.add(role);
+                objects.add(permission.getId());
+                objects.add(value);
+                objects.add(chunk.getChunk().getChunkKey());
+                objects.add(uuidToBytes(chunk.getChunk().world()));
+                objects.add(chunk.getKingdomId());
+                suppliers.add(() -> objects);
             }
             try {
                 statement.insert(connection, suppliers, batchSize);
+                chunk.setDirty(false);
             } catch (final SQLException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void saveUpgradeLevels(Connection connection, Kingdom kingdom) {
+    private PermissionContainer loadChunkPermissions(Connection connection, long chunkKey, int kingdomId) throws SQLException {
+        final SQLQuery<PermissionContainer> query = SQLQuery.<PermissionContainer>select(CHUNK_PERMISSIONS_TABLE_NAME)
+                .select(CHUNK_PERMISSIONS_ROLE_ID_COLUMN, CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN, CHUNK_PERMISSIONS_VALUE_COLUMN)
+                .where(new WhereCondition(List.of(
+                        Pair.of(CHUNK_PERMISSIONS_ID_COLUMN, () -> chunkKey),
+                        Pair.of(CHUNK_PERMISSIONS_KINGDOM_ID_COLUMN, () -> kingdomId)
+                )
+                ))
+                .build();
+        return query.mapTo(connection, results -> {
+            final PermissionContainer container = new PermissionContainer(MapOfMaps.newHashMap());
+            while (results.next()) {
+                final String role = results.getString(CHUNK_PERMISSIONS_ROLE_ID_COLUMN.getName());
+                final String permissionId = results.getString(CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN.getName());
+                final boolean value = results.getBoolean(CHUNK_PERMISSIONS_VALUE_COLUMN.getName());
+                final KPermission permission = KPermission.get(permissionId);
+                if (permission == null) continue;
+                container.setPermission(role, permission, value);
+            }
+            return container;
+        });
+    }
+
+    private Set<ClaimedChunk> loadClaimedChunks(Connection connection, int kingdomId) throws SQLException {
+        final SQLQuery<Set<ClaimedChunk>> query = SQLQuery.<Set<ClaimedChunk>>select(CHUNK_TABLE_NAME)
+                .select(CHUNK_KEY_COLUMN, CHUNK_WORLD_UUID_COLUMN, CHUNK_X_COLUMN, CHUNK_Z_COLUMN)
+                .where(new WhereCondition(List.of(
+                        Pair.of(CHUNK_KINGDOM_ID_COLUMN, () -> kingdomId)
+                )))
+                .build();
+
+        return query.mapTo(connection, results -> {
+            final Set<ClaimedChunk> chunks = new HashSet<>();
+            while (results.next()) {
+                final long chunkKey = results.getLong(CHUNK_KEY_COLUMN.getName());
+                final UUID world = bytesToUUID(results.getBytes(CHUNK_WORLD_UUID_COLUMN.getName()));
+                final int x = results.getInt(CHUNK_X_COLUMN.getName());
+                final int z = results.getInt(CHUNK_Z_COLUMN.getName());
+                final KChunk chunk = new KChunk(world, x, z);
+                final PermissionContainer permissions = this.loadChunkPermissions(connection, chunkKey, kingdomId);
+                final ClaimedChunk claimedChunk = new ClaimedChunk(this.plugin, kingdomId, chunk, permissions);
+                chunks.add(claimedChunk);
+            }
+            return chunks;
+        });
+    }
+
+    @Nullable
+    public ClaimedChunk loadClaimedChunk(long chunkKey) {
+        try {
+            return this.loadClaimedChunk(this.getConnection(), chunkKey);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not load chunk with key " + chunkKey, e);
+        }
+    }
+
+    @Nullable
+    public ClaimedChunk loadClaimedChunk(Connection connection, long chunkKey) throws SQLException {
+        final SQLQuery<ClaimedChunk> statement = SQLQuery.<ClaimedChunk>select(CHUNK_TABLE_NAME)
+                .select(CHUNK_WORLD_UUID_COLUMN, CHUNK_X_COLUMN, CHUNK_Z_COLUMN, CHUNK_KINGDOM_ID_COLUMN)
+                .where(WhereCondition.of(CHUNK_KEY_COLUMN, () -> chunkKey))
+                .build();
+        return statement.mapTo(connection, results -> {
+            if (!results.next()) return null;
+            final int kingdomId = results.getInt(CHUNK_KINGDOM_ID_COLUMN.getName());
+            final int x = results.getInt(CHUNK_X_COLUMN.getName());
+            final int z = results.getInt(CHUNK_Z_COLUMN.getName());
+            final UUID world = bytesToUUID(results.getBytes(CHUNK_WORLD_UUID_COLUMN.getName()));
+            final PermissionContainer container = this.loadChunkPermissions(connection, chunkKey, kingdomId);
+            return new ClaimedChunk(this.plugin, kingdomId, KChunk.at(world, x, z), container);
+        });
+    }
+
+    private void saveClaimedChunks(Connection connection, Kingdom kingdom) throws SQLException {
+        for (final ClaimedChunk chunk : kingdom.getClaimedChunks()) {
+            if (chunk.isDirty()) continue;
+            saveClaimedChunk(connection, chunk);
+        }
+    }
+
+    public void saveUpgradeLevels(Connection connection, Kingdom kingdom) throws SQLException {
         final SQLStatement statement = SQLStatement.insert(UPGRADE_LEVELS_TABLE_NAME)
                 .add(UPGRADE_LEVELS_ID_COLUMN)
                 .add(UPGRADE_LEVELS_LEVEL_COLUMN)
@@ -496,36 +670,25 @@ public class DataManager {
             objects.add(kingdom.getId());
             suppliers.add(() -> objects);
         }
-        try {
-            statement.insert(connection, suppliers, batchSize);
-        } catch (final SQLException e) {
-            e.printStackTrace();
-        }
-
+        statement.insert(connection, suppliers, batchSize);
     }
 
-    public void saveRelations(Connection connection, Kingdom kingdom) {
-        final SQLStatement statement = SQLStatement.insert(RELATIONS_TABLE_NAME)
-                .add(RELATIONS_OTHER_KINGDOM_ID_COLUMN)
-                .add(RELATIONS_ID_COLUMN)
-                .add(RELATIONS_KINGDOM_ID_COLUMN)
+    public Map<String, Integer> loadUpgradeLevels(Connection connection, int kingdomId) throws SQLException {
+        final SQLQuery<Map<String, Integer>> query = SQLQuery.<Map<String, Integer>>select(UPGRADE_LEVELS_TABLE_NAME)
+                .select(UPGRADE_LEVELS_ID_COLUMN, UPGRADE_LEVELS_LEVEL_COLUMN)
+                .where(new WhereCondition(List.of(
+                        Pair.of(UPGRADE_LEVELS_KINGDOM_ID_COLUMN, () -> kingdomId)
+                )))
                 .build();
-        final List<Supplier<List<Object>>> suppliers = new ArrayList<>();
-        int batchSize = kingdom.getRelations().size();
-        for (var entry : kingdom.getKingdomRelations().entrySet()) {
-            final List<Object> objects = new ArrayList<>();
-            final int otherKingdomId = entry.getKey();
-            final RelationInfo relation = entry.getValue();
-            objects.add(otherKingdomId);
-            objects.add(relation.relationType().toString());
-            objects.add(kingdom.getId());
-            suppliers.add(() -> objects);
-        }
-        try {
-            statement.insert(connection, suppliers, batchSize);
-        } catch (final SQLException e) {
-            e.printStackTrace();
-        }
+        return query.mapTo(connection, results -> {
+            final Map<String, Integer> levels = new HashMap<>();
+            while (results.next()) {
+                final String id = results.getString(UPGRADE_LEVELS_ID_COLUMN.getName());
+                final int level = results.getInt(UPGRADE_LEVELS_LEVEL_COLUMN.getName());
+                levels.put(id, level);
+            }
+            return levels;
+        });
     }
 
     public void saveBank(Connection connection, Kingdom kingdom) {
@@ -538,11 +701,26 @@ public class DataManager {
         final List<Object> objects = new ArrayList<>();
         objects.add(kingdom.getBank().getBalance());
         objects.add(kingdom.getId());
+        suppliers.add(() -> objects);
         try {
             statement.insert(connection, suppliers, batchSize);
         } catch (final SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public Bank<Kingdom> loadBank(Connection connection, int kingdomId) throws SQLException {
+        final SQLQuery<Bank<Kingdom>> query = SQLQuery.<Bank<Kingdom>>select(BANK_TABLE_NAME)
+                .select(BANK_MONEY_COLUMN)
+                .where(new WhereCondition(List.of(
+                        Pair.of(BANK_KINGDOM_ID_COLUMN, () -> kingdomId)
+                )))
+                .build();
+        return query.mapTo(connection, results -> {
+            if (!results.next()) return null;
+            final double money = results.getDouble(BANK_MONEY_COLUMN.getName());
+            return Bank.createKingdomBank(money);
+        });
     }
 
     public void saveRoles(Connection connection, Kingdom kingdom) {
@@ -569,6 +747,69 @@ public class DataManager {
         } catch (final SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public Map<String, Role> loadRoles(Connection connection, int kingdomId) throws SQLException {
+        final SQLQuery<Map<String, Role>> query = SQLQuery.<Map<String, Role>>select(ROLES_TABLE_NAME)
+                .select(ROLES_ID_COLUMN, ROLES_NAME_COLUMN, ROLES_WEIGHT_COLUMN)
+                .where(WhereCondition.of(ROLES_KINGDOM_ID_COLUMN, () -> kingdomId))
+                .build();
+        return query.mapTo(connection, results -> {
+            final Map<String, Role> roles = new HashMap<>();
+            while (results.next()) {
+                final String id = results.getString(ROLES_ID_COLUMN.getName());
+                final String name = results.getString(ROLES_NAME_COLUMN.getName());
+                final int weight = results.getInt(ROLES_WEIGHT_COLUMN.getName());
+                roles.put(id, new Role(id, name, weight));
+            }
+            return roles;
+        });
+    }
+//        private static final SQLField RELATIONS_OTHER_KINGDOM_ID_COLUMN = new SQLField(RELATIONS_TABLE_NAME, "other_kingdom_id", SQLType.INTEGER, SQLKeyType.PRIMARY_KEY);
+//    private static final SQLField RELATIONS_ID_COLUMN = new SQLField(RELATIONS_TABLE_NAME, "relation_type", SQLType.varchar(32));
+//    private static final SQLField RELATIONS_KINGDOM_ID_COLUMN = new SQLForeignField(
+
+    public void saveKingdomRelations(Connection connection, Kingdom kingdom) {
+        final SQLStatement statement = SQLStatement.insert(RELATIONS_TABLE_NAME)
+                .add(RELATIONS_OTHER_KINGDOM_ID_COLUMN)
+                .add(RELATIONS_ID_COLUMN)
+                .add(RELATIONS_KINGDOM_ID_COLUMN)
+                .build();
+        final List<Supplier<List<Object>>> suppliers = new ArrayList<>();
+        int batchSize = kingdom.getKingdomRelations().size();
+        for (var entry : kingdom.getKingdomRelations().entrySet()) {
+            final List<Object> objects = new ArrayList<>();
+            final int otherKingdom = entry.getKey();
+            final RelationInfo relation = entry.getValue();
+            objects.add(otherKingdom);
+            objects.add(relation.relationType().toString());
+            objects.add(kingdom.getId());
+            suppliers.add(() -> objects);
+        }
+        try {
+            statement.insert(connection, suppliers, batchSize);
+        } catch (final SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Map<Integer, RelationInfo> loadKingdomRelations(Connection connection, int kingomId) throws SQLException {
+        final SQLQuery<Map<Integer, RelationInfo>> query = SQLQuery.<Map<Integer, RelationInfo>>select(RELATIONS_TABLE_NAME)
+                .select(RELATIONS_OTHER_KINGDOM_ID_COLUMN, RELATIONS_ID_COLUMN)
+                .select(KINGDOM_NAME_COLUMN)
+                .where(WhereCondition.of(RELATIONS_KINGDOM_ID_COLUMN, () -> kingomId))
+                .join(RELATIONS_KINGDOM_ID_COLUMN, KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
+                .build();
+        return query.mapTo(connection, results -> {
+            final Map<Integer, RelationInfo> relations = new HashMap<>();
+            while (results.next()) {
+                final int otherKingdom = results.getInt(RELATIONS_OTHER_KINGDOM_ID_COLUMN.getAliasName());
+                final String relationType = results.getString(RELATIONS_ID_COLUMN.getAliasName());
+                final String otherKingdomName = results.getString(KINGDOM_NAME_COLUMN.getAliasName());
+                relations.put(otherKingdom, new RelationInfo(otherKingdom, otherKingdomName, RelationType.valueOf(relationType)));
+            }
+            return relations;
+        });
     }
 
     public void saveLocations(Connection connection, Kingdom kingdom) {
@@ -607,6 +848,27 @@ public class DataManager {
         }
     }
 
+    public KingdomLocations loadKingdomLocations(Connection connection, int kingdomId) throws SQLException {
+        final SQLQuery<KingdomLocations> query = SQLQuery.<KingdomLocations>select(LOCATIONS_TABLE_NAME)
+                .select(LOCATIONS_ID_COLUMN, LOCATIONS_WORLD_UUID_COLUMN, LOCATIONS_X_COLUMN, LOCATIONS_Y_COLUMN, LOCATIONS_Z_COLUMN, LOCATIONS_YAW_COLUMN, LOCATIONS_PITCH_COLUMN)
+                .where(WhereCondition.of(LOCATIONS_KINGDOM_ID_COLUMN, () -> kingdomId))
+                .build();
+        return query.mapTo(connection, results -> {
+            final KingdomLocations locations = new KingdomLocations(new HashMap<>());
+            while (results.next()) {
+                final String id = results.getString(LOCATIONS_ID_COLUMN.getName());
+                final UUID worldUUID = bytesToUUID(results.getBytes(LOCATIONS_WORLD_UUID_COLUMN.getName()));
+                final double x = results.getDouble(LOCATIONS_X_COLUMN.getName());
+                final double y = results.getDouble(LOCATIONS_Y_COLUMN.getName());
+                final double z = results.getDouble(LOCATIONS_Z_COLUMN.getName());
+                final float yaw = results.getFloat(LOCATIONS_YAW_COLUMN.getName());
+                final float pitch = results.getFloat(LOCATIONS_PITCH_COLUMN.getName());
+                locations.setPosition(id, new WorldPosition(worldUUID, new Position(x, y, z, yaw, pitch)));
+            }
+            return locations;
+        });
+    }
+
     public void saveUser(User user) {
         try {
             saveUser(this.getConnection(), user);
@@ -615,7 +877,8 @@ public class DataManager {
         }
     }
 
-    public void saveUser(Connection connection, User user) {
+    public void saveUser(Connection connection, User user) throws SQLException {
+        connection.setAutoCommit(false);
         final SQLStatement statement = SQLStatement.insert(USER_TABLE_NAME)
                 .add(USER_UUID_COLUMN)
                 .add(USER_NAME_COLUMN)
@@ -632,6 +895,8 @@ public class DataManager {
         suppliers.add(() -> objects);
         try {
             statement.insert(connection, suppliers, batchSize);
+            connection.commit();
+            user.setDirty(false);
         } catch (final SQLException e) {
             e.printStackTrace();
         }
@@ -655,32 +920,28 @@ public class DataManager {
         }
     }
 
-    public Optional<User> loadUser(Connection connection, UUID uuid) {
+    public Optional<User> loadUser(Connection connection, UUID uuid) throws SQLException {
         final SQLQuery<User> statement = SQLQuery.<User>select(USER_TABLE_NAME)
-                .select(USER_NAME_COLUMN, USER_CHAT_CHANNEL_COLUMN, USER_KINGDOM_ID_COLUMN)
-                .where(WhereCondition.of(USER_UUID_COLUMN, SQLObject.of(uuidToBytes(uuid))))
+                .select(USER_UUID_COLUMN, USER_NAME_COLUMN, USER_CHAT_CHANNEL_COLUMN, USER_KINGDOM_ID_COLUMN)
+                .where(WhereCondition.of(USER_UUID_COLUMN, () -> uuidToBytes(uuid)))
                 .build();
-        try {
-            final User user = statement.mapTo(connection, results -> {
-                if (results.next()) {
-                    final String name = results.getString(USER_NAME_COLUMN.getName());
-                    final ChatChannel chatChannel = ChatChannel.valueOf(results.getString(USER_CHAT_CHANNEL_COLUMN.getName()));
-                    final int kingdomId = results.getInt(USER_KINGDOM_ID_COLUMN.getName());
-                    return new BukkitUser(this.plugin, uuid, name, null, kingdomId, chatChannel);
-                }
-                return null;
-            });
-            return Optional.ofNullable(user);
-        } catch (final SQLException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
+
+        final User user = statement.mapTo(connection, results -> {
+            if (results.next()) {
+                final String name = results.getString(USER_NAME_COLUMN.getName());
+                final ChatChannel chatChannel = ChatChannel.valueOf(results.getString(USER_CHAT_CHANNEL_COLUMN.getName()));
+                final int kingdomId = results.getInt(USER_KINGDOM_ID_COLUMN.getName());
+                return new BukkitUser(this.plugin, uuid, name, null, kingdomId, chatChannel);
+            }
+            return null;
+        });
+        return Optional.ofNullable(user);
     }
 
     public Optional<User> loadUserByName(Connection connection, String name) {
         final SQLQuery<User> statement = SQLQuery.<User>select(USER_TABLE_NAME)
                 .select(USER_UUID_COLUMN, USER_CHAT_CHANNEL_COLUMN, USER_KINGDOM_ID_COLUMN)
-                .where(WhereCondition.of(USER_NAME_COLUMN, SQLObject.of(name)))
+                .where(WhereCondition.of(USER_NAME_COLUMN, () -> name))
                 .build();
         try {
             final User user = statement.mapTo(connection, results -> {
@@ -699,59 +960,118 @@ public class DataManager {
         return Optional.empty();
     }
 
-//    public Optional<Kingdom> loadKingdom(int kingdomId) {
-//        final SQLQuery<Kingdom> query = SQLQuery.<Kingdom>select(KINGDOM_TABLE_NAME)
-//                .select(KINGDOM_ID_COLUMN, KINGDOM_NAME_COLUMN, KINGDOM_DESCRIPTION_COLUMN)
-//                .select(MEMBER_UUID_COLUMN, MEMBER_ROLE_ID_COLUMN)
-//                .select(PERMISSIONS_ROLE_ID_COLUMN, PERMISSIONS_ID_COLUMN, PERMISSIONS_VALUE_COLUMN)
-//                .select(CHUNK_PERMISSIONS_ROLE_ID_COLUMN, CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN, CHUNK_PERMISSIONS_VALUE_COLUMN, CHUNK_PERMISSIONS_ID_COLUMN, CHUNK_PERMISSIONS_WORLD_UUID_COLUMN)
-//                .select(UPGRADE_LEVELS_ID_COLUMN, UPGRADE_LEVELS_LEVEL_COLUMN)
-//                .select(RELATIONS_ID_COLUMN, RELATIONS_KINGDOM_ID_COLUMN)
-//                .select(BANK_MONEY_COLUMN)
-//                .select(ROLES_ID_COLUMN, ROLES_NAME_COLUMN, ROLES_WEIGHT_COLUMN)
-//                .select(LOCATIONS_ID_COLUMN, LOCATIONS_WORLD_UUID_COLUMN, LOCATIONS_X_COLUMN, LOCATIONS_Y_COLUMN, LOCATIONS_Z_COLUMN, LOCATIONS_YAW_COLUMN, LOCATIONS_PITCH_COLUMN)
-//                .where(new WhereCondition(List.of(Pair.of(KINGDOM_ID_COLUMN, SQLObject.of(kingdomId)))))
-//                .join(KINGDOM_ID_COLUMN, MEMBER_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-//                .join(KINGDOM_ID_COLUMN, PERMISSIONS_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-//                .join(KINGDOM_ID_COLUMN, CHUNK_PERMISSIONS_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-//                .join(KINGDOM_ID_COLUMN, UPGRADE_LEVELS_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-//                .join(KINGDOM_ID_COLUMN, RELATIONS_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-//                .join(KINGDOM_ID_COLUMN, BANK_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-//                .join(KINGDOM_ID_COLUMN, ROLES_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-//                .join(KINGDOM_ID_COLUMN, LOCATIONS_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-//                .build();
-//        System.out.println(query.createStatement());
-//        return Optional.empty();
-//    }
-
     public Optional<Kingdom> loadKingdom(int kingdomId) {
-        final SQLQuery<Kingdom> query = SQLQuery.<Kingdom>select(KINGDOM_TABLE_NAME)
-                .select(KINGDOM_ID_COLUMN, KINGDOM_NAME_COLUMN, KINGDOM_DESCRIPTION_COLUMN)
-                .select(MEMBER_UUID_COLUMN, MEMBER_ROLE_ID_COLUMN)
-                .select(PERMISSIONS_ROLE_ID_COLUMN, PERMISSIONS_ID_COLUMN, PERMISSIONS_VALUE_COLUMN)
-                .select(CHUNK_PERMISSIONS_ROLE_ID_COLUMN, CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN, CHUNK_PERMISSIONS_VALUE_COLUMN, CHUNK_PERMISSIONS_ID_COLUMN, CHUNK_PERMISSIONS_WORLD_UUID_COLUMN)
-                .select(UPGRADE_LEVELS_ID_COLUMN, UPGRADE_LEVELS_LEVEL_COLUMN)
-                .select(RELATIONS_ID_COLUMN, RELATIONS_KINGDOM_ID_COLUMN)
-                .select(BANK_MONEY_COLUMN)
-                .select(ROLES_ID_COLUMN, ROLES_NAME_COLUMN, ROLES_WEIGHT_COLUMN)
-                .select(LOCATIONS_ID_COLUMN, LOCATIONS_WORLD_UUID_COLUMN, LOCATIONS_X_COLUMN, LOCATIONS_Y_COLUMN, LOCATIONS_Z_COLUMN, LOCATIONS_YAW_COLUMN, LOCATIONS_PITCH_COLUMN)
-                .where(new WhereCondition(List.of(Pair.of(KINGDOM_ID_COLUMN, SQLObject.of(kingdomId)))))
-                .join(KINGDOM_ID_COLUMN, MEMBER_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-                .join(KINGDOM_ID_COLUMN, PERMISSIONS_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-                .join(KINGDOM_ID_COLUMN, CHUNK_PERMISSIONS_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-                .join(KINGDOM_ID_COLUMN, UPGRADE_LEVELS_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-                .join(KINGDOM_ID_COLUMN, RELATIONS_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-                .join(KINGDOM_ID_COLUMN, BANK_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-                .join(KINGDOM_ID_COLUMN, ROLES_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-                .join(KINGDOM_ID_COLUMN, LOCATIONS_KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
-                .build();
-        System.out.println(query.createStatement());
-        return Optional.empty();
+        try {
+            return this.loadKingdom(this.getConnection(), kingdomId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
     }
 
-    // todo
+    private Optional<Kingdom> loadKingdom(Connection connection, int kingdomId) throws SQLException {
+        if (kingdomId == Kingdom.WILDERNESS_ID) return Optional.empty();
+        final SQLQuery<Kingdom> query = SQLQuery.<Kingdom>select(KINGDOM_TABLE_NAME)
+                .select(KINGDOM_ID_COLUMN, KINGDOM_NAME_COLUMN, KINGDOM_DESCRIPTION_COLUMN)
+                .where(WhereCondition.of(KINGDOM_ID_COLUMN, () -> kingdomId))
+                .build();
+
+        final Set<ClaimedChunk> chunks = this.loadClaimedChunks(connection, kingdomId);
+        final Map<String, Integer> upgradeLevels = this.loadUpgradeLevels(connection, kingdomId);
+
+        final Map<String, Role> roles = this.loadRoles(connection, kingdomId);
+        final Map<UUID, String> memberRoleIds = this.loadMembers(connection, kingdomId);
+        final Map<UUID, Role> memberRoles = new HashMap<>();
+        for (final Map.Entry<UUID, String> entry : memberRoleIds.entrySet()) {
+            final Role role = roles.get(entry.getValue());
+            if (role == null) {
+                throw new IllegalStateException("Could not find role with id " + entry.getValue());
+            }
+            memberRoles.put(entry.getKey(), role);
+        }
+        final Map<UUID, User> users = new HashMap<>();
+        for (UUID uuid : memberRoles.keySet()) {
+            final User user = this.plugin.getUserManager().forceGet(uuid);
+            if (user != null) {
+                users.put(uuid, user);
+                Bukkit.broadcastMessage("Found previous user: " + user.getName());
+                continue;
+            }
+            final Optional<User> optional = this.loadUser(connection, uuid);
+            if (optional.isEmpty()) continue;
+            final User loadedUser = optional.get();
+            this.plugin.getUserManager().addUser(loadedUser);
+            users.put(uuid, loadedUser);
+        }
+        final PermissionContainer permissions = this.loadPermissions(connection, kingdomId, roles);
+        final Bank<Kingdom> bank = this.loadBank(connection, kingdomId);
+        final Map<Integer, RelationInfo> kingdomRelations = this.loadKingdomRelations(connection, kingdomId);
+        final KingdomLocations locations = this.loadKingdomLocations(connection, kingdomId);
+        return Optional.ofNullable(query.mapTo(connection, results -> {
+            if (!results.next()) return null;
+            final int id = results.getInt(KINGDOM_ID_COLUMN.getName());
+            final String name = results.getString(KINGDOM_NAME_COLUMN.getName());
+            final String description = results.getString(KINGDOM_DESCRIPTION_COLUMN.getName());
+            TaskChain.create(this.plugin)
+                    .runSync(() -> {
+                        for (ClaimedChunk chunk : chunks) {
+                            this.plugin.getWorldManager().setChunk(chunk);
+                        }
+                    })
+                    .execute();
+            return new KingdomImpl(
+                    this.plugin,
+                    id,
+                    name,
+                    description,
+                    users,
+                    memberRoles,
+                    permissions,
+                    chunks,
+                    this.plugin.getUpgradeManager().getUpgradeHolder(),
+                    upgradeLevels,
+                    kingdomRelations,
+                    bank,
+                    roles,
+                    locations
+            );
+        }));
+    }
+
+    public void deleteKingdom(int kingdomId) {
+        try {
+            this.deleteKingdom(this.getConnection(), kingdomId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deleteKingdom(Connection connection, int kingdomId) throws SQLException {
+        DeleteStatement.builder(KINGDOM_TABLE)
+                .where(WhereCondition.of(KINGDOM_ID_COLUMN, () -> kingdomId))
+                .build()
+                .execute(connection);
+    }
+
     public Optional<Kingdom> loadKingdomByName(String name) {
-        return Optional.empty();
+        try {
+            return this.loadKingdomByName(this.getConnection(), name);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
+    private Optional<Kingdom> loadKingdomByName(Connection connection, String name) throws SQLException {
+        final SQLQuery<Optional<Kingdom>> query = SQLQuery.<Optional<Kingdom>>select(KINGDOM_TABLE_NAME)
+                .select(KINGDOM_ID_COLUMN)
+                .where(WhereCondition.of(KINGDOM_NAME_COLUMN, () -> name))
+                .build();
+        return query.mapTo(this.getConnection(), results -> {
+            if (!results.next()) return Optional.empty();
+            final int kingdomId = results.getInt(KINGDOM_ID_COLUMN.getName());
+            return this.loadKingdom(connection, kingdomId);
+        });
     }
 //
 //    private Set<User> getKingdomUsers(int kingdomId) {

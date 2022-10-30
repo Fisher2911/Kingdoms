@@ -72,8 +72,7 @@ public class ClaimManager {
                 this.plugin,
                 kingdom.getId(),
                 chunk.getChunk(),
-                kingdom.getDefaultChunkPermissions(),
-                this.plugin.getRelationManager().createRelations(kingdom)
+                kingdom.getDefaultChunkPermissions()
         );
         this.worldManager.setChunk(claimedChunk);
         kingdom.addClaimedChunk(claimedChunk);
@@ -109,7 +108,7 @@ public class ClaimManager {
     }
 
     public void tryUnClaim(User user, Kingdom kingdom, ClaimedChunk at) {
-        if (at.getOwnedBy() != kingdom.getId()) {
+        if (at.getKingdomId() != kingdom.getId()) {
             MessageHandler.sendMessage(user, Message.NOT_CLAIMED_BY_KINGDOM, at.getChunk());
             return;
         }
@@ -121,8 +120,7 @@ public class ClaimManager {
                 this.plugin,
                 kingdom.getId(),
                 at.getChunk(),
-                kingdom.getDefaultChunkPermissions(),
-                this.plugin.getRelationManager().createRelations(kingdom)
+                kingdom.getDefaultChunkPermissions()
         );
         this.worldManager.setToWilderness(claimedChunk.getChunk());
         kingdom.removeClaimedChunk(claimedChunk);

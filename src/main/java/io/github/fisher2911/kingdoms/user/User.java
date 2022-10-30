@@ -2,6 +2,7 @@ package io.github.fisher2911.kingdoms.user;
 
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.command.CommandPermission;
+import io.github.fisher2911.kingdoms.data.Saveable;
 import io.github.fisher2911.kingdoms.world.WorldPosition;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.UUID;
 
-public interface User {
+public interface User extends Saveable {
 
     User CONSOLE = new ConsoleUser();
 

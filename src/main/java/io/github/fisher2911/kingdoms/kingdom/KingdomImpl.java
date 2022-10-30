@@ -8,7 +8,6 @@ import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.kingdom.location.KingdomLocations;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
-import io.github.fisher2911.kingdoms.kingdom.relation.Relation;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
@@ -40,15 +39,14 @@ public class KingdomImpl implements Kingdom {
     private final Map<UUID, Role> userRoles;
     private final Multimap<Role, UUID> roleUsers;
     private final PermissionContainer permissions;
-    private final PermissionContainer defaultChunkPermissions;
     private final Set<ClaimedChunk> claims;
     private final UpgradeHolder upgradeHolder;
     private final Map<String, Integer> upgradeLevels;
-    private final Map<RelationType, Relation> relations;
     private final Map<Integer, RelationInfo> kingdomRelations;
     private final Bank<Kingdom> bank;
     private final Map<String, Role> roles;
     private final KingdomLocations locations;
+    private boolean dirty;
 
     public KingdomImpl(
             Kingdoms plugin,
@@ -58,11 +56,9 @@ public class KingdomImpl implements Kingdom {
             Map<UUID, User> members,
             Map<UUID, Role> userRoles,
             PermissionContainer permissions,
-            PermissionContainer defaultPermissions,
             Set<ClaimedChunk> claims,
             UpgradeHolder upgradeHolder,
             Map<String, Integer> upgradeLevels,
-            Map<RelationType, Relation> relations,
             Map<Integer, RelationInfo> kingdomRelations,
             Bank<Kingdom> bank,
             Map<String, Role> roles,
@@ -79,11 +75,9 @@ public class KingdomImpl implements Kingdom {
             this.roleUsers.put(entry.getValue(), entry.getKey());
         }
         this.permissions = permissions;
-        this.defaultChunkPermissions = defaultPermissions;
         this.claims = claims;
         this.upgradeHolder = upgradeHolder;
         this.upgradeLevels = upgradeLevels;
-        this.relations = relations;
         this.kingdomRelations = kingdomRelations;
         this.bank = bank;
         this.roles = roles;
@@ -144,27 +138,27 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public PermissionContainer getDefaultChunkPermissions() {
-        return this.defaultChunkPermissions.copy();
+        return this.permissions.copy();
     }
 
     @Override
     public boolean hasPermission(User user, KPermission permission) {
         final Role role = this.getRole(user);
-        final Relation relation = this.getRelation(user.getKingdomId());
-        if (relation != null) return relation.hasPermission(role, permission);
+//        final Relation relation = this.getRelation(user.getKingdomId());
+//        if (relation != null) return relation.hasPermission(role, permission);
         return this.hasPermission(role, permission);
     }
 
     @Override
     public boolean hasPermission(User user, KPermission permission, ClaimedChunk chunk) {
         final Role role = this.getRole(user);
-        final RelationType relationType = this.getKingdomRelation(user.getKingdomId());
-        Relation relation = chunk.getRelations().get(relationType);
-        if (relation != null && relation.hasPermission(role, permission, chunk)) {
-            return true;
-        }
-        relation = this.getRelation(user.getKingdomId());
-        if (relation != null) return relation.hasPermission(role, permission);
+//        final RelationType relationType = this.getKingdomRelation(user.getKingdomId());
+//        Relation relation = chunk.getRelations().get(relationType);
+//        if (relation != null && relation.hasPermission(role, permission, chunk)) {
+//            return true;
+//        }
+//        relation = this.getRelation(user.getKingdomId());
+//        if (relation != null) return relation.hasPermission(role, permission);
         if (chunk.getPermissions().hasPermission(role, permission)) {
             return true;
         }
@@ -178,32 +172,34 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public void setPermission(Role role, KPermission permission, boolean value) {
-        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role.id()));
-        if (relation == null) {
+//        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role.id()));
+//        if (relation == null) {
             this.permissions.setPermission(role, permission, value);
-            return;
-        }
-        relation.setPermission(role, permission, value);
+            this.setDirty(true);
+//            return;
+//        }
+//        relation.setPermission(role, permission, value);
+        this.setDirty(true);
     }
 
 
     @Override
     public boolean hasPermission(Role role, KPermission permission) {
         final RelationType relationType = this.plugin.getRelationManager().fromRole(role.id());
-        final Relation relation = this.relations.get(relationType);
-        if (relation != null) return relation.hasPermission(role, permission);
+//        final Relation relation = this.relations.get(relationType);
+//        if (relation != null) return relation.hasPermission(role, permission);
         return this.permissions.hasPermission(role, permission);
     }
 
     @Override
     public boolean hasPermission(Role role, KPermission permission, ClaimedChunk chunk) {
         final RelationType relationType = this.plugin.getRelationManager().fromRole(role.id());
-        Relation relation = chunk.getRelations().get(relationType);
-        if (relation != null && relation.hasPermission(role, permission, chunk)) {
-            return true;
-        }
-        relation = this.relations.get(relationType);
-        if (relation != null) return relation.hasPermission(role, permission);
+//        Relation relation = chunk.getRelations().get(relationType);
+//        if (relation != null && relation.hasPermission(role, permission, chunk)) {
+//            return true;
+//        }
+//        relation = this.relations.get(relationType);
+//        if (relation != null) return relation.hasPermission(role, permission);
         if (chunk.getPermissions().hasPermission(role, permission)) {
             return true;
         }
@@ -218,11 +214,13 @@ public class KingdomImpl implements Kingdom {
     @Override
     public void addClaimedChunk(ClaimedChunk chunk) {
         this.claims.add(chunk);
+        this.setDirty(true);
     }
 
     @Override
     public void removeClaimedChunk(ClaimedChunk chunk) {
         this.claims.remove(chunk);
+        this.setDirty(true);
     }
 
 
@@ -230,6 +228,7 @@ public class KingdomImpl implements Kingdom {
     public void setRole(User user, Role role) {
         this.roleUsers.put(role, user.getId());
         this.userRoles.put(user.getId(), role);
+        this.setDirty(true);
     }
 
     @Override
@@ -237,6 +236,7 @@ public class KingdomImpl implements Kingdom {
         this.members.put(user.getId(), user);
         user.setKingdomId(this.id);
         this.setRole(user, this.plugin.getRoleManager().getDefaultRole(this));
+        this.setDirty(true);
     }
 
     @Override
@@ -246,6 +246,7 @@ public class KingdomImpl implements Kingdom {
         this.roleUsers.remove(this.getRole(user), uuid);
         this.userRoles.remove(uuid);
         user.setKingdomId(Kingdom.WILDERNESS_ID);
+        this.setDirty(true);
     }
 
     @Override
@@ -285,6 +286,7 @@ public class KingdomImpl implements Kingdom {
     @Override
     public void setUpgradeLevel(String id, int level) {
         final Upgrades<?> upgrades = this.upgradeHolder.getUpgrades(id);
+        System.out.println("Are upgrades null for " + id + " - " + upgrades);
         if (upgrades == null) return;
         if (upgrades.getMaxLevel() < level) return;
         this.upgradeLevels.put(id, level);
@@ -337,22 +339,22 @@ public class KingdomImpl implements Kingdom {
         this.removeMember(user);
     }
 
-    @Override
-    @Nullable
-    public Relation getRelation(int kingdomId) {
-        if (kingdomId == this.id) return null;
-        return this.relations.get(this.getKingdomRelation(kingdomId));
-    }
+//    @Override
+//    @Nullable
+//    public Relation getRelation(int kingdomId) {
+//        if (kingdomId == this.id) return null;
+//        return this.relations.get(this.getKingdomRelation(kingdomId));
+//    }
 
     @Override
     public Map<Integer, RelationInfo> getKingdomRelations() {
         return this.kingdomRelations;
     }
 
-    @Override
-    public Map<RelationType, Relation> getRelations() {
-        return this.relations;
-    }
+//    @Override
+//    public Map<RelationType, Relation> getRelations() {
+//        return this.relations;
+//    }
 
     @Override
     @Nullable
@@ -375,10 +377,10 @@ public class KingdomImpl implements Kingdom {
         this.kingdomRelations.remove(kingdomId);
     }
 
-    @Override
-    public void setRelation(RelationType type, Relation relation) {
-        this.relations.put(type, relation);
-    }
+//    @Override
+//    public void setRelation(RelationType type, Relation relation) {
+//        this.relations.put(type, relation);
+//    }
 
     @Override
     public Collection<RelationInfo> getRelations(RelationType type) {
@@ -419,6 +421,50 @@ public class KingdomImpl implements Kingdom {
     @Override
     public KingdomLocations getLocations() {
         return this.locations;
+    }
+
+    @Override
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    @Override
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
+    @Override
+    public boolean canBeUnloaded(Kingdoms plugin) {
+        final WorldManager worldManager = plugin.getWorldManager();
+        for (User user : this.getMembers()) {
+            if (user.isOnline()) return false;
+        }
+        for (ClaimedChunk chunk : this.claims) {
+            if (worldManager.isChunkLoaded(chunk.getChunk())) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "KingdomImpl{" +
+                "plugin=" + plugin +
+                ", id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", members=" + members +
+                ", userRoles=" + userRoles +
+                ", roleUsers=" + roleUsers +
+                ", permissions=" + permissions +
+                ", claims=" + claims +
+                ", upgradeHolder=" + upgradeHolder +
+                ", upgradeLevels=" + upgradeLevels +
+                ", kingdomRelations=" + kingdomRelations +
+                ", bank=" + bank +
+                ", roles=" + roles +
+                ", locations=" + locations +
+                ", dirty=" + dirty +
+                '}';
     }
 
     @Override

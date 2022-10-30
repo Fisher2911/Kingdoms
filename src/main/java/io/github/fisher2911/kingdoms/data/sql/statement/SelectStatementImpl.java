@@ -74,7 +74,7 @@ public class SelectStatementImpl<T> implements SQLQuery<T> {
             for (var condition : this.conditions) {
                 for (var insertion : condition.getInsertionColumns()) {
                     currentIndex++;
-                    statement.setObject(currentIndex, insertion.second().createStatement());
+                    statement.setObject(currentIndex, insertion.second().get());
                 }
             }
             return mapper.map(statement.executeQuery());

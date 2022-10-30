@@ -16,6 +16,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.WorldLoadEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,6 +83,26 @@ public class GlobalListener implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
+        this.handle(event);
+    }
+
+    @EventHandler
+    public void onChunkLoad(ChunkLoadEvent event) {
+        this.handle(event);
+    }
+
+    @EventHandler
+    public void onChunkUnload(ChunkLoadEvent event) {
+        this.handle(event);
+    }
+
+    @EventHandler
+    public void onWorldLoad(WorldLoadEvent event) {
+        this.handle(event);
+    }
+
+    @EventHandler
+    public void onWorldUnload(WorldLoadEvent event) {
         this.handle(event);
     }
 

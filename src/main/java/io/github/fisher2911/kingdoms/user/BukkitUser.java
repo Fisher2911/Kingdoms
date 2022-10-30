@@ -26,6 +26,7 @@ public class BukkitUser implements User {
     private Player player;
     private int kingdomId;
     private ChatChannel chatChannel;
+    private boolean dirty;
 
     public BukkitUser(Kingdoms plugin, UUID uuid, String name, @Nullable Player player) {
         this.plugin = plugin;
@@ -52,6 +53,7 @@ public class BukkitUser implements User {
     public void onJoin(Player player) {
         this.player = player;
         this.name = this.player.getName();
+        this.dirty = true;
     }
 
     @Override
@@ -104,6 +106,7 @@ public class BukkitUser implements User {
     @Override
     public void setKingdomId(int id) {
         this.kingdomId = id;
+        this.dirty = true;
     }
 
     @Override
@@ -135,6 +138,7 @@ public class BukkitUser implements User {
     @Override
     public void setChatChannel(ChatChannel chatChannel) {
         this.chatChannel = chatChannel;
+        this.dirty = true;
     }
 
     @Override
@@ -142,5 +146,28 @@ public class BukkitUser implements User {
     public WorldPosition getPosition() {
         if (!this.isOnline()) return null;
         return WorldPosition.fromLocation(this.player.getLocation());
+    }
+
+    @Override
+    public boolean isDirty() {
+        return this.dirty;
+    }
+
+    @Override
+    public void setDirty(boolean dirty) {
+        this.dirty = true;
+    }
+
+    @Override
+    public String toString() {
+        return "BukkitUser{" +
+                "plugin=" + plugin +
+                ", uuid=" + uuid +
+                ", name='" + name + '\'' +
+                ", player=" + player +
+                ", kingdomId=" + kingdomId +
+                ", chatChannel=" + chatChannel +
+                ", dirty=" + dirty +
+                '}';
     }
 }

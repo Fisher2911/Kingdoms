@@ -1,7 +1,7 @@
 upgrades:
   1:
     type: int
-    id: max_claims
+    id: max-claims
     display-name: '<blue>Max Claims'
     expression: "10 level * 5"
     money-price-expression: "level * 100"
@@ -22,7 +22,7 @@ upgrades:
         - "<red>Max Level!"
   2:
     type: int
-    id: max_members
+    id: max-members
     display-name: '<blue>Max Members'
     expression: "10 level * 5"
     money-price-expression: "level * 100"
@@ -43,7 +43,7 @@ upgrades:
         - "<red>Max Level!"
   3:
     type: double
-    id: bank_limit
+    id: bank-limit
     display-name: '<blue>Bank Limit'
     expression: "10 level * 5"
     money-price-expression: "level * 100"
@@ -64,7 +64,7 @@ upgrades:
         - "<red>Max Level!"
   4:
     type: int
-    id: max_allies
+    id: max-allies
     display-name: '<blue>Max Allies'
     expression: "10 level * 5"
     money-price-expression: "level * 100"
@@ -85,7 +85,7 @@ upgrades:
         - "<red>Max Level!"
   5:
     type: int
-    id: max_truces
+    id: max-truces
     display-name: '<blue>Max Truces'
     expression: "10 level * 5"
     money-price-expression: "level * 100"
@@ -106,7 +106,7 @@ upgrades:
         - "<red>Max Level!"
   6:
     type: int
-    id: max_enemies
+    id: max-enemies
     display-name: '<blue>Max Enemies'
     expression: "10 level * 5"
     money-price-expression: "level * 100"

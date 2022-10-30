@@ -21,7 +21,7 @@ public class WorldManager {
         this.worldMaps = worldMaps;
     }
 
-    public WorldMap getWorldMap(UUID world) {
+    private WorldMap getWorldMap(UUID world) {
         return this.worldMaps.computeIfAbsent(world, w -> {
             final World bukkitWorld = Bukkit.getWorld(world);
             if (bukkitWorld != null) return new WorldMap(this.plugin, world, new HashMap<>());
@@ -43,6 +43,16 @@ public class WorldManager {
         return worldMap.getAt(chunkX, chunkZ);
     }
 
+    public ClaimedChunk remove(UUID world, int chunkX, int chunkZ) {
+        final WorldMap worldMap = this.getWorldMap(world);
+        if (worldMap == null) return null;
+        return worldMap.remove(chunkX, chunkZ);
+    }
+
+    public ClaimedChunk remove(ClaimedChunk chunk) {
+        return this.remove(chunk.getChunk().world(), chunk.getChunk().x(), chunk.getChunk().z());
+    }
+
     public void setChunk(ClaimedChunk chunk) {
         final WorldMap worldMap = this.getWorldMap(chunk.getWorld());
         if (worldMap == null) return;
@@ -52,18 +62,30 @@ public class WorldManager {
     public void setToWilderness(KChunk at) {
         final WorldMap worldMap = this.getWorldMap(at.world());
         if (worldMap == null) return;
-        worldMap.setChunk(ClaimedChunk.wilderness(this.plugin, at));
+        worldMap.setToWilderness(at);
     }
 
     public void setToWilderness(UUID world, int chunkX, int chunkZ) {
         final WorldMap worldMap = this.getWorldMap(world);
         if (worldMap == null) return;
-        worldMap.setChunk(ClaimedChunk.wilderness(this.plugin, KChunk.at(world, chunkX, chunkZ)));
+        worldMap.setToWilderness(chunkX, chunkZ);
+    }
+
+    public boolean isChunkLoaded(KChunk at) {
+        final WorldMap worldMap = this.getWorldMap(at.world());
+        if (worldMap == null) return false;
+        return worldMap.isChunkLoaded(at);
     }
 
     public void populate() {
         for (World world : Bukkit.getWorlds()) {
-            this.worldMaps.put(world.getUID(), new WorldMap(this.plugin, world.getUID(), new HashMap<>()));
+            this.worldMaps.putIfAbsent(world.getUID(), new WorldMap(this.plugin, world.getUID(), new HashMap<>()));
+        }
+    }
+
+    public void saveDirty() {
+        for (WorldMap worldMap : this.worldMaps.values()) {
+            worldMap.saveDirty();
         }
     }
 }

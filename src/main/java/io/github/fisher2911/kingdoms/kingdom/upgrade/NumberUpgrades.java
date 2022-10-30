@@ -89,6 +89,7 @@ public abstract class NumberUpgrades<T extends Number> implements Upgrades<T> {
     public static NumberUpgrades<?> deserialize(ConfigurationNode node, String type) {
         try {
             final String id = node.node(ID).getString();
+            System.out.println("Loaded upgrade: " + id);
             final String displayName = node.node(DISPLAY_NAME).getString();
             final Expression expression = new ExpressionBuilder(node.node(EXPRESSION).getString("")).variable(CURRENT_LEVEL_VARIABLE).build();
             final Expression moneyPriceExpression = new ExpressionBuilder(node.node(MONEY_PRICE_EXPRESSION).getString("")).variable(CURRENT_LEVEL_VARIABLE).build();

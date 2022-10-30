@@ -43,7 +43,7 @@ public class DeleteStatement implements SQLObject {
             int index = 1;
             for (var condition : this.conditions) {
                 for (var insertion : condition.getInsertionColumns()) {
-                    statement.setObject(index, insertion.second().createStatement());
+                    statement.setObject(index, insertion.second().get());
                     index++;
                 }
             }

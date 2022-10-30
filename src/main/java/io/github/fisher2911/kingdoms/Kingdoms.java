@@ -17,6 +17,7 @@ import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeManager;
 import io.github.fisher2911.kingdoms.listener.ChatListener;
 import io.github.fisher2911.kingdoms.listener.ClaimEnterListener;
+import io.github.fisher2911.kingdoms.listener.ClaimLoadListener;
 import io.github.fisher2911.kingdoms.listener.GlobalListener;
 import io.github.fisher2911.kingdoms.listener.PlayerJoinListener;
 import io.github.fisher2911.kingdoms.listener.ProtectionListener;
@@ -30,6 +31,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +57,7 @@ public final class Kingdoms extends JavaPlugin {
     private EconomyManager economyManager;
     private GuiManager guiManager;
     private Economy economy;
+    private BukkitTask saveTask;
 
     @Override
     public void onEnable() {
@@ -65,13 +68,13 @@ public final class Kingdoms extends JavaPlugin {
 
         // order matters
         this.teleportManager = new TeleportManager(this);
+        this.dataManager = new DataManager(this);
         this.globalListener = new GlobalListener();
         this.upgradeManager = new UpgradeManager(this);
         this.userManager = new UserManager(this, new HashMap<>());
         this.priceManager = new PriceManager();
         this.roleManager = new RoleManager(this, new HashMap<>());
         this.kingdomSettings = new KingdomsSettings(this);
-        this.dataManager = new DataManager(this);
         this.kingdomManager = new KingdomManager(this, new HashMap<>());
         this.worldManager = new WorldManager(this, new HashMap<>());
         this.claimManager = new ClaimManager(this);
@@ -85,6 +88,20 @@ public final class Kingdoms extends JavaPlugin {
         this.registerCommands();
 
         this.load();
+
+        this.saveTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::save, 0L, this.kingdomSettings.getSaveInterval());
+    }
+
+    @Override
+    public void onDisable() {
+        if (this.saveTask != null && !this.saveTask.isCancelled()) this.saveTask.cancel();
+        this.save();
+    }
+
+    public void save() {
+        this.userManager.saveDirty();
+        this.kingdomManager.saveDirty();
+        this.worldManager.saveDirty();
     }
 
     public void registerCommands() {
@@ -102,16 +119,13 @@ public final class Kingdoms extends JavaPlugin {
         Bukkit.getScheduler().runTaskLater(this, this.worldManager::populate, 20);
     }
 
-    @Override
-    public void onDisable() {
-    }
-
     private void registerListeners() {
         new ProtectionListener(this).init();
         new PlayerJoinListener(this).init();
         new ClaimEnterListener(this).init();
         new GuiListener(this.globalListener).init();
         new ChatListener(this).init();
+        new ClaimLoadListener(this).init();
         List.of(this.globalListener).forEach(this::registerListener);
     }
 

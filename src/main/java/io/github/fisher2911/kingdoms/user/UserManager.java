@@ -6,6 +6,7 @@ import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.task.TaskChain;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -51,18 +52,30 @@ public class UserManager {
 
     public void loadUser(Player player) {
         TaskChain.create(this.plugin)
-                .supplyAsync(() -> this.dataManager.loadUser(player.getUniqueId()))
-                .consumeSync(opt -> opt.ifPresentOrElse(this::addUser, () -> this.createUser(player)))
+                .supplyAsync(() -> {
+                    final User current = this.userMap.get(player.getUniqueId());
+                    if (current != null) return current;
+                    final Optional<User> user = this.dataManager.loadUser(player.getUniqueId());
+                    if (user.isPresent()) {
+                        return user.get();
+                    }
+                    final User newUser = this.createUser(player);
+                    this.dataManager.saveUser(newUser);
+                    return newUser;
+                })
+                .sync(user -> {
+                    Bukkit.broadcastMessage("Adding user: " + user);
+                    this.addUser(user);
+                    user.onJoin(player);
+                    return user.getKingdomId();
+                })
+                .consumeAsync(kingdomId -> this.plugin.getKingdomManager().getKingdom(kingdomId, true))
                 .execute();
     }
 
 
-    public User createUser(Player player) {
-        final UUID uuid = player.getUniqueId();
-        final User user = new BukkitUser(this.plugin, player.getUniqueId(), player.getName(), player);
-        this.userMap.put(uuid, user);
-        this.byName.put(player.getName(), user);
-        return user;
+    private User createUser(Player player) {
+        return new BukkitUser(this.plugin, player.getUniqueId(), player.getName(), player);
     }
 
     public void changeChatChannel(User user, ChatChannel channel) {
@@ -100,6 +113,12 @@ public class UserManager {
         if (user == null) return null;
         this.byName.remove(user.getName());
         return user;
+    }
+
+    public void saveDirty() {
+        this.userMap.values().stream()
+                .filter(User::isDirty)
+                .forEach(this.dataManager::saveUser);
     }
 
 }

@@ -82,6 +82,7 @@ public enum Message {
     ENABLED_AUTO_UNCLAIM,
     DISABLED_AUTO_CLAIM,
     DISABLED_AUTO_UNCLAIM,
+    PLAYER_NOT_FOUND,
 
 
     ;

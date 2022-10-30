@@ -15,6 +15,7 @@ import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.teleport.TeleportInfo;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.world.WorldPosition;
@@ -61,7 +62,11 @@ public class KingdomManager {
         final Kingdom kingdom = this.dataManager.newKingdom(user, name);
         MessageHandler.sendMessage(user, Message.CREATED_KINGDOM, kingdom);
         this.kingdoms.put(kingdom.getId(), kingdom);
+        this.byName.put(kingdom.getName(), kingdom);
         user.setKingdomId(kingdom.getId());
+        TaskChain.create(this.plugin)
+                .runAsync(() -> this.dataManager.saveUser(user))
+                .execute();
         return Optional.of(kingdom);
     }
 
@@ -112,7 +117,7 @@ public class KingdomManager {
     public Optional<Kingdom> getKingdom(int id, boolean searchDatabase) {
         if (id == Kingdom.WILDERNESS_ID) return Optional.empty();
         final Kingdom kingdom = this.kingdoms.get(id);
-        if (kingdom != null || !searchDatabase) return Optional.of(kingdom);
+        if (kingdom != null || !searchDatabase) return Optional.ofNullable(kingdom);
         return this.loadKingdom(id);
     }
 
@@ -231,6 +236,12 @@ public class KingdomManager {
         );
         kingdom.getMembers().forEach(member -> member.setKingdomId(Kingdom.WILDERNESS_ID));
         this.kingdoms.remove(kingdom.getId());
+        this.byName.remove(kingdom.getName());
+        this.dataManager.deleteKingdom(kingdom.getId());
+        final WorldManager worldManager = this.plugin.getWorldManager();
+        for (ClaimedChunk chunk : kingdom.getClaimedChunks()) {
+            worldManager.remove(chunk);
+        }
     }
 
     public void trySetHome(User user, WorldPosition worldPosition, boolean searchDatabase) {
@@ -271,10 +282,19 @@ public class KingdomManager {
 
         }, () -> MessageHandler.sendNotInKingdom(user));
     }
-
-    public int countKingdoms() {
-        return this.kingdoms.size();
+    public void saveDirty() {
+        this.kingdoms.values()
+                .stream()
+                .filter(Kingdom::isDirty)
+                .forEach(this.dataManager::saveKingdom);
     }
 
+    public void removeIfCanBeUnloaded(int kingdomId) {
+        this.getKingdom(kingdomId, false).ifPresent(kingdom -> {
+            if (!kingdom.canBeUnloaded(this.plugin)) return;
+            this.dataManager.saveKingdom(kingdom);
+            kingdom.getClaimedChunks().forEach(this.plugin.getWorldManager()::remove);
+        });
+    }
 
 }
