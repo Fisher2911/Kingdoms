@@ -17,8 +17,6 @@ gui-fillers:
         required-metadata:
           - PERMISSION
         conditions:
-          #          has_k_permissions:
-          #            - "mine_block"
           parse_placeholders:
             - "%permission_value%==true"
         conditionals:
