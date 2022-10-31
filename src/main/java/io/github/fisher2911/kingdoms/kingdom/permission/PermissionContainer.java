@@ -2,7 +2,9 @@ package io.github.fisher2911.kingdoms.kingdom.permission;
 
 import io.github.fisher2911.kingdoms.data.Saveable;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
+import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.util.MapOfMaps;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 
 import java.util.Collections;
@@ -27,8 +29,17 @@ public class PermissionContainer implements Saveable {
         return new PermissionContainer(new MapOfMaps<>(Collections.emptyMap(), Collections::emptyMap));
     }
 
-    public boolean hasPermission(Role role, KPermission permission) {
-        return this.permissions.getOrDefault(role.id(), permission, false);
+    public boolean hasPermission(Role role, KPermission permission, @Nullable RoleManager roleManager) {
+        final Boolean hasPermission = this.permissions.get(role.id(), permission);
+        if (hasPermission != null) return hasPermission;
+        if (roleManager == null) return false;
+        final Role pluginRole = roleManager.getPluginDefaultRole(role.id());
+        if (pluginRole != null) {
+            final boolean defaultPerm = roleManager.getDefaultRolePermissions().hasPermission(role, permission, null);
+            this.setPermission(role, permission, defaultPerm);
+            return defaultPerm;
+        }
+        return false;
     }
 
     public boolean containsPermission(Role role, KPermission permission) {
@@ -98,7 +109,7 @@ public class PermissionContainer implements Saveable {
         final Map<KPermission, Boolean> permissions = new HashMap<>();
         for (var entry : node.childrenMap().entrySet()) {
             if (!(entry.getKey() instanceof final String key)) continue;
-            permissions.put(KPermission.get(key), entry.getValue().getBoolean(false));
+            permissions.put(KPermission.getByName(key), entry.getValue().getBoolean(false));
         }
         return permissions;
     }

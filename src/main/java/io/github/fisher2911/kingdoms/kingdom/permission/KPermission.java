@@ -1,8 +1,13 @@
 package io.github.fisher2911.kingdoms.kingdom.permission;
 
+import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -15,7 +20,17 @@ import java.util.Set;
 // not enum for API purposes
 public class KPermission {
 
-    private static final Map<String, KPermission> allPermissions = new HashMap<>();
+    // static initializers
+    public static void load() {}
+
+    private static final Kingdoms PLUGIN = Kingdoms.getPlugin(Kingdoms.class);
+    private static final Path PERMISSION_ID_FILE = PLUGIN.getDataFolder().toPath().resolve("do-not-touch").resolve("permission-ids.yml");
+
+    //    private static final Map<String, KPermission> allPermissions = new HashMap<>();
+    private static final Map<String, Integer> stringToId = new HashMap<>();
+    private static final Map<Integer, KPermission> allPermissions = new HashMap<>();
+
+    private static int maxId = 0;
 
     public static final KPermission MINE_BLOCK = register("mine-block");
     public static final KPermission PLACE_BLOCK = register("place-block");
@@ -55,29 +70,60 @@ public class KPermission {
         return allPermissions.values();
     }
 
-    public static KPermission register(String id, PermissionContext... contexts) {
-        final KPermission permission = new KPermission(id, contexts);
+    public static KPermission register(String name, PermissionContext... contexts) {
+        final int id = getPermissionId(name);
+        final KPermission permission = new KPermission(id, name, contexts);
         allPermissions.put(id, permission);
+        stringToId.put(name, id);
         return permission;
     }
 
-    public static KPermission register(String id) {
-        final KPermission permission = new KPermission(id);
+    public static KPermission register(String name) {
+        final int id = getPermissionId(name);
+        final KPermission permission = new KPermission(id, name);
+
         allPermissions.put(id, permission);
+        stringToId.put(name, id);
         return permission;
     }
 
+    private static int getPermissionId(String name) {
+        final File file = PERMISSION_ID_FILE.toFile();
+        try {
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+            final YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                    .path(PERMISSION_ID_FILE)
+                    .build();
+            final var node = loader.load();
+            if (node.node(name).virtual()) {
+                maxId++;
+                node.node(name).set(maxId);
+                loader.save(node);
+                return maxId;
+            }
+            return node.node(name).getInt();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not find id for permission " + name);
+        }
+    }
 
-    private final String id;
+    private final int id;
+    private final String name;
     private final Set<PermissionContext> permissionContextSet;
 
-    private KPermission(String id) {
+    private KPermission(int id, String name) {
         this.id = id;
+        this.name = name;
         this.permissionContextSet = EnumSet.allOf(PermissionContext.class);
     }
 
-    private KPermission(String id, PermissionContext... contexts) {
+    private KPermission(int id, String name, PermissionContext... contexts) {
         this.id = id;
+        this.name = name;
         this.permissionContextSet = EnumSet.copyOf(Arrays.asList(contexts));
     }
 
@@ -90,7 +136,14 @@ public class KPermission {
     }
 
     @Nullable
-    public static KPermission get(String id) {
+    public static KPermission getByName(String name) {
+        final Integer id = stringToId.get(name);
+        if (id == null) return null;
+        return allPermissions.get(id);
+    }
+
+    @Nullable
+    public static KPermission get(int id) {
         return allPermissions.get(id);
     }
 
@@ -104,11 +157,11 @@ public class KPermission {
 
     @Override
     public String toString() {
-        return this.id;
+        return this.name;
     }
 
-    public String getId() {
-        return id;
+    public int getIntId() {
+        return this.id;
     }
 
     @Override

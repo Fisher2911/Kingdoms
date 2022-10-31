@@ -90,7 +90,7 @@ public class DataManager {
     // --------------- Permissions Table ---------------
     private static final String PERMISSIONS_TABLE_NAME = "kingdom_permissions";
     private static final SQLField PERMISSIONS_ROLE_ID_COLUMN = new SQLField(PERMISSIONS_TABLE_NAME, "role_id", SQLType.varchar(), SQLKeyType.UNIQUE);
-    private static final SQLField PERMISSIONS_ID_COLUMN = new SQLField(PERMISSIONS_TABLE_NAME, "id", SQLType.varchar(), SQLKeyType.UNIQUE);
+    private static final SQLField PERMISSIONS_ID_COLUMN = new SQLField(PERMISSIONS_TABLE_NAME, "id", SQLType.INTEGER, SQLKeyType.UNIQUE);
     private static final SQLField PERMISSIONS_VALUE_COLUMN = new SQLField(PERMISSIONS_TABLE_NAME, "value", SQLType.BOOLEAN);
     private static final SQLField PERMISSIONS_KINGDOM_ID_COLUMN = new SQLForeignField(
             PERMISSIONS_TABLE_NAME,
@@ -127,7 +127,7 @@ public class DataManager {
     // --------------- Chunk Permissions Table ---------------
     private static final String CHUNK_PERMISSIONS_TABLE_NAME = "kingdom_chunk_permissions";
     private static final SQLField CHUNK_PERMISSIONS_ROLE_ID_COLUMN = new SQLField(CHUNK_PERMISSIONS_TABLE_NAME, "role_id", SQLType.varchar());
-    private static final SQLField CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN = new SQLField(CHUNK_PERMISSIONS_TABLE_NAME, "id", SQLType.varchar(), SQLKeyType.UNIQUE);
+    private static final SQLField CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN = new SQLField(CHUNK_PERMISSIONS_TABLE_NAME, "id", SQLType.INTEGER, SQLKeyType.UNIQUE);
     private static final SQLField CHUNK_PERMISSIONS_VALUE_COLUMN = new SQLField(CHUNK_PERMISSIONS_TABLE_NAME, "value", SQLType.BOOLEAN);
     private static final SQLField CHUNK_PERMISSIONS_ID_COLUMN = new SQLField(CHUNK_PERMISSIONS_TABLE_NAME, "chunk_id", SQLType.LONG);
     private static final SQLField CHUNK_PERMISSIONS_WORLD_UUID_COLUMN = new SQLField(CHUNK_PERMISSIONS_TABLE_NAME, "world_uuid", SQLType.UUID);
@@ -465,10 +465,9 @@ public class DataManager {
                 final List<Object> objects = new ArrayList<>();
                 final KPermission permission = entry.getKey();
                 final boolean value = entry.getValue();
-                if (!value) continue;
                 objects.add(kingdom.getId());
                 objects.add(role);
-                objects.add(permission.getId());
+                objects.add(permission.getIntId());
                 objects.add(value);
                 suppliers.add(() -> objects);
             }
@@ -489,7 +488,7 @@ public class DataManager {
             final PermissionContainer container = new PermissionContainer(MapOfMaps.newHashMap());
             while (resultSet.next()) {
                 final String roleId = resultSet.getString(PERMISSIONS_ROLE_ID_COLUMN.getName());
-                final String permissionId = resultSet.getString(PERMISSIONS_ID_COLUMN.getName());
+                final int permissionId = resultSet.getInt(PERMISSIONS_ID_COLUMN.getName());
                 final KPermission permission = KPermission.get(permissionId);
                 final boolean value = resultSet.getBoolean(PERMISSIONS_VALUE_COLUMN.getName());
                 final Role role = roles.get(roleId);
@@ -554,9 +553,8 @@ public class DataManager {
                 final List<Object> objects = new ArrayList<>();
                 final KPermission permission = entry.getKey();
                 final boolean value = entry.getValue();
-                if (!value) continue;
                 objects.add(role);
-                objects.add(permission.getId());
+                objects.add(permission.getIntId());
                 objects.add(value);
                 objects.add(chunk.getChunk().getChunkKey());
                 objects.add(uuidToBytes(chunk.getChunk().world()));
@@ -585,7 +583,7 @@ public class DataManager {
             final PermissionContainer container = new PermissionContainer(MapOfMaps.newHashMap());
             while (results.next()) {
                 final String role = results.getString(CHUNK_PERMISSIONS_ROLE_ID_COLUMN.getName());
-                final String permissionId = results.getString(CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN.getName());
+                final int permissionId = results.getInt(CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN.getName());
                 final boolean value = results.getBoolean(CHUNK_PERMISSIONS_VALUE_COLUMN.getName());
                 final KPermission permission = KPermission.get(permissionId);
                 if (permission == null) continue;
@@ -994,7 +992,6 @@ public class DataManager {
             final User user = this.plugin.getUserManager().forceGet(uuid);
             if (user != null) {
                 users.put(uuid, user);
-                Bukkit.broadcastMessage("Found previous user: " + user.getName());
                 continue;
             }
             final Optional<User> optional = this.loadUser(connection, uuid);

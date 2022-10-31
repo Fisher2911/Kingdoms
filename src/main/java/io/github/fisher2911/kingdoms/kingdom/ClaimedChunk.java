@@ -77,7 +77,7 @@ public class ClaimedChunk implements Claim, RolePermissionHolder, Saveable {
 //        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role.id()));
 //        if (relation == null) return this.permissions.hasPermission(role, permission);
 //        return relation.hasPermission(role, permission);
-        return this.permissions.hasPermission(role, permission);
+        return this.permissions.hasPermission(role, permission, this.plugin.getRoleManager());
     }
 
     @Override

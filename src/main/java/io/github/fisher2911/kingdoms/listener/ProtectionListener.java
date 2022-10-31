@@ -122,7 +122,6 @@ public class ProtectionListener extends KListener {
 
     private boolean isAllowed(User user, Location location, KPermission permission) {
         final ClaimedChunk chunk = this.worldManager.getAt(location);
-        Bukkit.broadcastMessage("Is wilderness? " + chunk.isWilderness());
         if (chunk.isWilderness()) return true;
         return this.kingdomManager.getKingdom(chunk.getKingdomId(), false).map(k ->
                         k.hasPermission(user, permission, chunk)).

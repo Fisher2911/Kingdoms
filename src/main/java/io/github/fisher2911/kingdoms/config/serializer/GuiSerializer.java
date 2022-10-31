@@ -2,10 +2,9 @@ package io.github.fisher2911.kingdoms.config.serializer;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.gui.BaseGui;
-import io.github.fisher2911.kingdoms.gui.BaseGuiItem;
+import io.github.fisher2911.kingdoms.gui.ConditionalItem;
 import io.github.fisher2911.kingdoms.gui.Gui;
 import io.github.fisher2911.kingdoms.gui.GuiFillerType;
-import io.github.fisher2911.kingdoms.gui.GuiItem;
 import io.github.fisher2911.kingdoms.gui.GuiKeys;
 import io.github.fisher2911.kingdoms.gui.GuiOpener;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
@@ -39,7 +38,7 @@ public class GuiSerializer {
 
     private static final String GUI_FILLERS_PATH = "gui-fillers";
 
-    private static final Map<GuiFillerType, Function<ConfigurationNode, Function<BaseGui, List<BaseGuiItem>>>> GUI_FILLER_LOADERS = Map.of(
+    private static final Map<GuiFillerType, Function<ConfigurationNode, Function<BaseGui, List<ConditionalItem>>>> GUI_FILLER_LOADERS = Map.of(
             GuiFillerType.PERMISSIONS, GuiSerializer::loadPermissionsFillers,
             GuiFillerType.UPGRADES, GuiSerializer::loadUpgradesFillers,
             GuiFillerType.ROLES, GuiSerializer::loadRolesFillers
@@ -51,29 +50,29 @@ public class GuiSerializer {
         final int rows = source.node(ROWS_PATH).getInt();
         final boolean cancelClicks = source.node(CANCEL_CLICKS_PATH).getBoolean();
         final var borderNode = source.node(BORDER_ITEMS_PATH);
-        final List<BaseGuiItem> borders = new ArrayList<>();
+        final List<ConditionalItem> borders = new ArrayList<>();
         for (var entry : borderNode.childrenMap().entrySet()) {
-            borders.add(GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, entry.getValue()));
+            borders.add(GuiItemSerializer.INSTANCE.deserialize(ConditionalItem.class, entry.getValue()));
         }
         final Set<Integer> repeatOnAllPagesSlots = new HashSet<>();
         final var itemsNode = source.node(ITEMS_PATH);
-        final Map<Integer, BaseGuiItem> items = new HashMap<>();
+        final Map<Integer, ConditionalItem> items = new HashMap<>();
         for (var entry : itemsNode.childrenMap().entrySet()) {
             if (!(entry.getKey() instanceof final Integer slot)) {
                 continue;
             }
             final boolean repeatOnAllPages = entry.getValue().node(REPEAT_ON_ALL_PAGES_PATH).getBoolean();
             if (repeatOnAllPages) repeatOnAllPagesSlots.add(slot);
-            items.put(slot, GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, entry.getValue()));
+            items.put(slot, GuiItemSerializer.INSTANCE.deserialize(ConditionalItem.class, entry.getValue()));
         }
 
         final var guiFillersNode = source.node(GUI_FILLERS_PATH);
-        final List<Function<BaseGui, List<BaseGuiItem>>> guiFillers = new ArrayList<>();
+        final List<Function<BaseGui, List<ConditionalItem>>> guiFillers = new ArrayList<>();
         for (var entry : guiFillersNode.childrenMap().entrySet()) {
             if (!(entry.getKey() instanceof final String typeStr)) continue;
             final GuiFillerType type = EnumUtil.valueOf(GuiFillerType.class, typeStr.toUpperCase());
             if (type == null) continue;
-            final Function<ConfigurationNode, Function<BaseGui, List<BaseGuiItem>>> loader = GUI_FILLER_LOADERS.get(type);
+            final Function<ConfigurationNode, Function<BaseGui, List<ConditionalItem>>> loader = GUI_FILLER_LOADERS.get(type);
             if (loader == null) continue;
             guiFillers.add(loader.apply(entry.getValue()));
         }
@@ -99,13 +98,13 @@ public class GuiSerializer {
         );
     }
 
-    private static Function<BaseGui, List<BaseGuiItem>> loadPermissionsFillers(final ConfigurationNode source) {
+    private static Function<BaseGui, List<ConditionalItem>> loadPermissionsFillers(final ConfigurationNode source) {
         // stupid checked exceptions
         try {
-            final List<BaseGuiItem> items = new ArrayList<>();
-            final BaseGuiItem filler = GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, source);
+            final List<ConditionalItem> items = new ArrayList<>();
+            final ConditionalItem filler = GuiItemSerializer.INSTANCE.deserialize(ConditionalItem.class, source);
             for (KPermission permission : KPermission.values()) {
-                final GuiItem.Builder builder = GuiItem.builder(filler);
+                final ConditionalItem.Builder builder = ConditionalItem.builder(filler);
                 GuiItemSerializer.applyPermissionItemData(builder, permission);
                 items.add(builder.build());
             }
@@ -115,24 +114,24 @@ public class GuiSerializer {
         }
     }
 
-    private static Function<BaseGui, List<BaseGuiItem>> loadUpgradesFillers(final ConfigurationNode source) {
+    private static Function<BaseGui, List<ConditionalItem>> loadUpgradesFillers(final ConfigurationNode source) {
         // stupid checked exceptions
         try {
-            final BaseGuiItem filler = GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, source);
-            final BaseGuiItem maxLevelItem = GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, source.node(GuiItemSerializer.MAX_LEVEL_ITEM_PATH));
+            final ConditionalItem filler = GuiItemSerializer.INSTANCE.deserialize(ConditionalItem.class, source);
+            final ConditionalItem maxLevelItem = GuiItemSerializer.INSTANCE.deserialize(ConditionalItem.class, source.node(GuiItemSerializer.MAX_LEVEL_ITEM_PATH));
             return gui -> {
                 final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
                 if (kingdom == null) return new ArrayList<>();
-                final List<BaseGuiItem> items = new ArrayList<>();
+                final List<ConditionalItem> items = new ArrayList<>();
                 for (String id : kingdom.getUpgradeHolder().getUpgradeIdOrder()) {
                     final Upgrades<?> upgrades = kingdom.getUpgradeHolder().getUpgrades(id);
                     final Integer level = kingdom.getUpgradeLevel(id);
                     if (level == null || upgrades == null) continue;
-                    final GuiItem.Builder builder;
+                    final ConditionalItem.Builder builder;
                     if (level >= upgrades.getMaxLevel()) {
-                        builder = GuiItem.builder(maxLevelItem);
+                        builder = ConditionalItem.builder(maxLevelItem);
                     } else {
-                        builder = GuiItem.builder(filler);
+                        builder = ConditionalItem.builder(filler);
                     }
                     GuiItemSerializer.applyUpgradesItemData(builder, id, maxLevelItem);
                     items.add(builder.build());
@@ -144,16 +143,16 @@ public class GuiSerializer {
         }
     }
 
-    private static Function<BaseGui, List<BaseGuiItem>> loadRolesFillers(final ConfigurationNode source) {
+    private static Function<BaseGui, List<ConditionalItem>> loadRolesFillers(final ConfigurationNode source) {
         // stupid checked exceptions
         try {
-            final BaseGuiItem filler = GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, source);
+            final ConditionalItem filler = GuiItemSerializer.INSTANCE.deserialize(ConditionalItem.class, source);
             return gui -> {
-                final List<BaseGuiItem> items = new ArrayList<>();
+                final List<ConditionalItem> items = new ArrayList<>();
                 final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
                 if (kingdom == null) return items;
                 for (Role role : PLUGIN.getRoleManager().getRoles(kingdom)) {
-                    final GuiItem.Builder builder = GuiItem.builder(filler);
+                    final ConditionalItem.Builder builder = ConditionalItem.builder(filler);
                     GuiItemSerializer.applyRoleItemData(builder, role.id());
                     items.add(builder.build());
                 }

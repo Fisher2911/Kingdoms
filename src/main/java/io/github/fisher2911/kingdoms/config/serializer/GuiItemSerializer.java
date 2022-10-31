@@ -1,8 +1,11 @@
 package io.github.fisher2911.kingdoms.config.serializer;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.config.condition.ConditionSerializer;
+import io.github.fisher2911.kingdoms.config.condition.ItemConditions;
 import io.github.fisher2911.kingdoms.gui.BaseGui;
 import io.github.fisher2911.kingdoms.gui.BaseGuiItem;
+import io.github.fisher2911.kingdoms.gui.ConditionalItem;
 import io.github.fisher2911.kingdoms.gui.GuiItem;
 import io.github.fisher2911.kingdoms.gui.GuiKeys;
 import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
@@ -21,6 +24,7 @@ import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradeLevelWrapper;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
+import io.github.fisher2911.kingdoms.util.Metadata;
 import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,7 +39,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
+public class GuiItemSerializer implements TypeSerializer<ConditionalItem> {
 
     public static final GuiItemSerializer INSTANCE = new GuiItemSerializer();
 
@@ -45,6 +49,9 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
     private static final String TYPE_PATH = "type";
     private static final String ITEM_PATH = "item";
     private static final String ACTIONS_PATH = "actions";
+    private static final String CONDITIONALS_PATH = "conditionals";
+    private static final String REQUIRED_METADATA_PATH = "required-metadata";
+    private static final String CONDITIONS_PATH = "conditions";
 
 //    private static final Map<String, Supplier<Map<Object, Object>>> metadataSupplier = new HashMap<>();
 
@@ -61,8 +68,27 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
 //        metadataSupplier.put(PERMISSION_TYPE, PermissionItemSerializer::getPermissionItemMetaData);
 //    }
 
+
     @Override
-    public BaseGuiItem deserialize(Type type, ConfigurationNode node) throws SerializationException {
+    public ConditionalItem deserialize(Type type, ConfigurationNode node) throws SerializationException {
+        final var conditionalsNode = node.node(CONDITIONALS_PATH);
+        final ConditionalItem.Builder builder = ConditionalItem.builder();
+        if (conditionalsNode.virtual()) {
+            final BaseGuiItem item = deserializeItem(node);
+            return builder.addConditionalItem(ItemConditions.alwaysTrue(ConditionalItem.of(item))).build();
+        }
+        for (var entry : conditionalsNode.childrenMap().entrySet()) {
+            builder.addConditionalItem(ConditionSerializer.loadConditional(entry.getValue()));
+        }
+        return builder.build();
+//        if (conditionalsNode.virtual()) {
+//            itemItemBuilderFunction = (gui, guiItem) -> itemBuilder;
+//        } else {
+//            itemItemBuilderFunction = ConditionSerializer.loadConditional(conditionalsNode);
+//        }
+    }
+
+    private static BaseGuiItem deserializeItem(ConfigurationNode node) throws SerializationException {
         final String typeString = node.node(TYPE_PATH).getString();
         final ItemBuilder itemBuilder = ItemSerializer.INSTANCE.deserialize(ItemBuilder.class, node.node(ITEM_PATH));
         final GuiItem.Builder builder = GuiItem.builder(itemBuilder);
@@ -72,22 +98,23 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
             wrapper.cancel();
         });
         if (typeString == null) return builder.build();
+        final ConditionalItem.Builder conditionalBuilder = ConditionalItem.builder();
         switch (typeString) {
-            case TYPE_PERMISSION -> GuiItemSerializer.applyPermissionItemData(builder, node.node(PERMISSION_PATH).getString());
+            case TYPE_PERMISSION -> GuiItemSerializer.applyPermissionItemData(conditionalBuilder, node.node(PERMISSION_PATH).getString());
             case TYPE_UPGRADE -> GuiItemSerializer.applyUpgradesItemData(
-                    builder,
+                    conditionalBuilder,
                     node.node(UPGRADE_PATH).getString(),
-                    GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, node.node(MAX_LEVEL_ITEM_PATH))
+                    ConditionalItem.builder(deserializeItem(node.node(MAX_LEVEL_ITEM_PATH))).build()
             );
-            case TYPE_ROLE -> GuiItemSerializer.applyRoleItemData(builder, node.node(ROLE_PATH).getString());
+            case TYPE_ROLE -> GuiItemSerializer.applyRoleItemData(conditionalBuilder, node.node(ROLE_PATH).getString());
             default -> {
             }
         }
-        return builder.build();
+        return conditionalBuilder.build(builder.build()).getItem(Metadata.empty());
     }
 
     @Override
-    public void serialize(Type type, @Nullable BaseGuiItem obj, ConfigurationNode node) throws SerializationException {
+    public void serialize(Type type, @Nullable ConditionalItem obj, ConfigurationNode node) throws SerializationException {
 
     }
 
@@ -99,7 +126,7 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
                 final InventoryClickEvent event = wrapper.event();
                 final BaseGui gui = wrapper.gui();
                 final int slot = event.getSlot();
-                final BaseGuiItem clicked = gui.getItem(slot);
+                final BaseGuiItem clicked = gui.getBaseGuiItem(slot);
                 if (clicked == null) return;
                 final KPermission permission = clicked.getMetadata(GuiKeys.PERMISSION, KPermission.class);
                 if (permission == null) return;
@@ -131,13 +158,13 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
                 gui.refresh(slot);
             };
 
-    public static void applyPermissionItemData(GuiItem.Builder builder, String permissionId) {
-        final KPermission permission = KPermission.get(permissionId);
+    public static void applyPermissionItemData(ConditionalItem.Builder builder, String permissionId) {
+        final KPermission permission = KPermission.getByName(permissionId);
         if (permission == null) return;
         applyPermissionItemData(builder, permission);
     }
 
-    public static void applyPermissionItemData(GuiItem.Builder builder, KPermission permission) {
+    public static void applyPermissionItemData(ConditionalItem.Builder builder, KPermission permission) {
         final RoleManager roleManager = Kingdoms.getPlugin(Kingdoms.class).getRoleManager();
         final Map<Object, Object> metadata = new HashMap<>();
         metadata.put(GuiKeys.SWAP_VALUE_CONSUMER, PERMISSION_SWAP_VALUE_CLICK_ACTION);
@@ -165,7 +192,7 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
                 final BaseGui gui = wrapper.gui();
                 final User user = gui.getMetadata(GuiKeys.USER, User.class);
                 final int slot = event.getSlot();
-                final BaseGuiItem clicked = gui.getItem(slot);
+                final BaseGuiItem clicked = gui.getBaseGuiItem(slot);
                 if (clicked == null) return;
                 final String upgradeId = clicked.getMetadata(GuiKeys.UPGRADE_ID, String.class);
                 final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
@@ -174,23 +201,25 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
                 kingdomManager.tryLevelUpUpgrade(kingdom, user, upgrades);
                 final Integer newLevel = kingdom.getUpgradeLevel(upgrades.getId());
                 if (newLevel != null && newLevel >= upgrades.getMaxLevel()) {
-                    gui.set(slot, getUpgradeItem(upgrades, newLevel, clicked));
+                    ConditionalItem maxLevelItem = clicked.getMetadata(GuiKeys.MAX_LEVEL_ITEM, ConditionalItem.class);
+                    if (maxLevelItem == null) return;
+                    gui.set(slot, maxLevelItem);
                 }
                 gui.refresh(slot);
             };
 
-    private static BaseGuiItem getUpgradeItem(Upgrades<?> upgrades, int upgradeLevel, BaseGuiItem clicked) {
+    @Nullable
+    private static ConditionalItem getUpgradeItem(Upgrades<?> upgrades, int upgradeLevel, BaseGuiItem clicked) {
         if (upgradeLevel >= upgrades.getMaxLevel()) {
-            final BaseGuiItem maxLevelItem = clicked.getMetadata(GuiKeys.MAX_LEVEL_ITEM, BaseGuiItem.class);
-            if (maxLevelItem == null) return clicked;
+            final ConditionalItem maxLevelItem = clicked.getMetadata(GuiKeys.MAX_LEVEL_ITEM, ConditionalItem.class);
             return maxLevelItem;
         }
-        return clicked;
+        return null;
     }
 
     public static final String MAX_LEVEL_ITEM_PATH = "max-level-item";
 
-    public static void applyUpgradesItemData(GuiItem.Builder builder, String upgradeId, BaseGuiItem maxLevelItem) {
+    public static void applyUpgradesItemData(ConditionalItem.Builder builder, String upgradeId, ConditionalItem maxLevelItem) {
         final Map<Object, Object> metadata = new HashMap<>();
         metadata.put(GuiKeys.INCREASE_LEVEL_CONSUMER, UPGRADES_INCREASE_LEVEL_ACTION);
         metadata.put(GuiKeys.UPGRADE_ID, upgradeId);
@@ -213,7 +242,7 @@ public class GuiItemSerializer implements TypeSerializer<BaseGuiItem> {
         });
     }
 
-    public static void applyRoleItemData(GuiItem.Builder builder, String roleId) {
+    public static void applyRoleItemData(ConditionalItem.Builder builder, String roleId) {
         final Map<Object, Object> metadata = new HashMap<>();
         metadata.put(GuiKeys.ROLE_ID, roleId);
         builder.metadata(metadata);

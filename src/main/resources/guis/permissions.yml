@@ -12,15 +12,80 @@ border:
       name: " "
 gui-fillers:
   permissions:
-    item:
-      material: LEVER
-      name: "<blue>%permission_display_name%"
-      lore:
-        - "%permission_display_value%"
-    type: permission
-    actions:
-      swap_value:
-        click-types: [ LEFT, RIGHT ]
+    conditionals:
+      1:
+        required-metadata:
+          - PERMISSION
+        conditions:
+          #          has_k_permissions:
+          #            - "mine_block"
+          parse_placeholders:
+            - "%permission_value%==true"
+        conditionals:
+          1:
+            conditions:
+              has_k_permissions:
+                - "edit-lower-roles-permissions"
+            item:
+              material: GREEN_STAINED_GLASS_PANE
+              name: "<blue>%permission_display_name%"
+              lore:
+                - "%permission_display_value%"
+              glow: true
+            type: permission
+            actions:
+              swap_value:
+                click-types: [ LEFT, RIGHT ]
+          2:
+            conditions:
+              parse_placeholders:
+                - "1==1"
+            item:
+              material: IRON_BARS
+              name: "<blue>%permission_display_name%"
+              lore:
+                - "%permission_display_value%"
+              glow: true
+            type: permission
+            actions:
+              swap_value:
+                click-types: [ LEFT, RIGHT ]
+      2:
+        required-metadata:
+          - PERMISSION
+        conditions:
+          #          has_k_permissions:
+          #            - "mine_block"
+          parse_placeholders:
+            - "%permission_value%==false"
+        conditionals:
+          1:
+            conditions:
+              has_k_permissions:
+                - "edit-lower-roles-permissions"
+            item:
+              material: RED_STAINED_GLASS_PANE
+              name: "<blue>%permission_display_name%"
+              lore:
+                - "%permission_display_value%"
+            type: permission
+            actions:
+              swap_value:
+                click-types: [ LEFT, RIGHT ]
+          2:
+            conditions:
+              parse_placeholders:
+                - "1==1"
+            item:
+              material: IRON_BARS
+              name: "<blue>%permission_display_name%"
+              lore:
+                - ""
+                - "%permission_display_value%"
+            type: permission
+            actions:
+              swap_value:
+                click-types: [ LEFT, RIGHT ]
 items:
   36:
     item:

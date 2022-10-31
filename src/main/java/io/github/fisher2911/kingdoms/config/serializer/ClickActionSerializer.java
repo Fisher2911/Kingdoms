@@ -5,6 +5,7 @@ import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.gui.BaseGui;
 import io.github.fisher2911.kingdoms.gui.BaseGuiItem;
 import io.github.fisher2911.kingdoms.gui.ClickAction;
+import io.github.fisher2911.kingdoms.gui.ConditionalItem;
 import io.github.fisher2911.kingdoms.gui.GuiKeys;
 import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
@@ -145,14 +146,21 @@ public class ClickActionSerializer {
                 previousIds.add(gui.getId());
             }
             metadata.put(GuiKeys.PREVIOUS_MENU_ID, previousIds);
-            final BaseGuiItem item = gui.getItem(event.getSlot());
+            final BaseGuiItem item = gui.getBaseGuiItem(event.getSlot());
             if (item != null) {
                 final List<String> keys = item.getMetadata(GuiKeys.SEND_DATA_KEYS, List.class);
+                final ConditionalItem conditionalItem = gui.getItem(event.getSlot());
                 if (keys != null) {
                     for (String key : keys) {
                         final GuiKeys guiKey = EnumUtil.valueOf(GuiKeys.class, key);
                         if (guiKey == null) continue;
-                        metadata.put(guiKey, item.getMetadata(guiKey));
+                        Object toSend = item.getMetadata(guiKey);
+                        if (toSend == null) {
+                            if (conditionalItem == null) continue;
+                            toSend = conditionalItem.getMetadata(guiKey);
+                            if (toSend == null) continue;
+                        }
+                        metadata.put(guiKey, toSend);
                     }
                 }
             }
@@ -166,7 +174,7 @@ public class ClickActionSerializer {
             event.setCancelled(true);
             if (!clickTypes.contains(event.getClick())) return;
             final int clicked = event.getSlot();
-            final BaseGuiItem item = wrapper.gui().getItem(clicked);
+            final BaseGuiItem item = wrapper.gui().getBaseGuiItem(clicked);
             if (item == null) return;
             final Consumer<InventoryEventWrapper<InventoryClickEvent>> deleter = item.getMetadata(GuiKeys.DELETE_CONSUMER, Consumer.class);
             if (deleter == null) return;
@@ -180,7 +188,7 @@ public class ClickActionSerializer {
             event.setCancelled(true);
             if (!clickTypes.contains(event.getClick())) return;
             final int clicked = event.getSlot();
-            final BaseGuiItem item = wrapper.gui().getItem(clicked);
+            final BaseGuiItem item = wrapper.gui().getBaseGuiItem(clicked);
             if (item == null) return;
             final Consumer<InventoryEventWrapper<InventoryClickEvent>> increaser = item.getMetadata(GuiKeys.INCREASE_LEVEL_CONSUMER, Consumer.class);
             if (increaser == null) return;
@@ -194,7 +202,7 @@ public class ClickActionSerializer {
             event.setCancelled(true);
             if (!clickTypes.contains(event.getClick())) return;
             final int clicked = event.getSlot();
-            final BaseGuiItem item = wrapper.gui().getItem(clicked);
+            final BaseGuiItem item = wrapper.gui().getBaseGuiItem(clicked);
             if (item == null) return;
             final Consumer<InventoryEventWrapper<InventoryClickEvent>> swapper = item.getMetadata(GuiKeys.SWAP_VALUE_CONSUMER, Consumer.class);
             if (swapper == null) return;
@@ -220,11 +228,11 @@ public class ClickActionSerializer {
     ) {
         // stupid checked exceptions not working with lambdas
         try {
-            final Map<Integer, BaseGuiItem> items = new HashMap<>();
+            final Map<Integer, ConditionalItem> items = new HashMap<>();
             final int duration = source.node(RESET_DELAY_PATH).getInt(-1);
             for (var entry : source.node(ITEMS_PATH).childrenMap().entrySet()) {
                 if (!(entry.getKey() instanceof final Integer slot)) continue;
-                final BaseGuiItem item = GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, entry.getValue());
+                final ConditionalItem item = GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, entry.getValue());
                 if (item == null) continue;
                 items.put(slot, item);
             }
@@ -233,11 +241,12 @@ public class ClickActionSerializer {
                 final var event = wrapper.event();
                 event.setCancelled(true);
                 if (!clickTypes.contains(event.getClick())) return;
-                final Map<Integer, BaseGuiItem> original = new HashMap<>();
+                final Map<Integer, ConditionalItem> original = new HashMap<>();
                 for (var entry : items.entrySet()) {
                     final int slot = entry.getKey();
-                    final BaseGuiItem item = wrapper.gui().getItem(slot);
-                    if (duration != -1) original.put(slot, item);
+                    final ConditionalItem conditionalItem = wrapper.gui().getItem(slot);
+                    final BaseGuiItem item = wrapper.gui().getBaseGuiItem(slot);
+                    if (duration != -1) original.put(slot, conditionalItem);
                     wrapper.gui().set(entry.getKey(), entry.getValue());
                 }
                 if (duration == -1) return;
@@ -261,14 +270,14 @@ public class ClickActionSerializer {
         // stupid checked exceptions not working with lambdas
         try {
             final int duration = source.node(RESET_DELAY_PATH).getInt(-1);
-            final BaseGuiItem item = GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, source.node(ITEM_PATH));
+            final ConditionalItem item = GuiItemSerializer.INSTANCE.deserialize(BaseGuiItem.class, source.node(ITEM_PATH));
             if (item == null) throw new SerializationException("Item cannot be null");
             final Kingdoms plugin = Kingdoms.getPlugin(Kingdoms.class);
             return wrapper -> {
                 final var event = wrapper.event();
                 event.setCancelled(true);
                 if (!clickTypes.contains(event.getClick())) return;
-                final BaseGuiItem original = wrapper.gui().getItem(event.getSlot());
+                final ConditionalItem original = wrapper.gui().getItem(event.getSlot());
                 final int clicked = event.getSlot();
                 wrapper.gui().set(clicked, item);
                 if (duration == -1) return;
@@ -293,7 +302,7 @@ public class ClickActionSerializer {
             event.setCancelled(true);
             if (!clickTypes.contains(event.getClick())) return;
             final int clicked = event.getSlot();
-            final BaseGuiItem item = wrapper.gui().getItem(clicked);
+            final BaseGuiItem item = wrapper.gui().getBaseGuiItem(clicked);
             if (item == null) return;
             final BaseGui gui = wrapper.gui();
             final User user = gui.getMetadata(GuiKeys.USER, User.class);
@@ -319,7 +328,7 @@ public class ClickActionSerializer {
                 event.setCancelled(true);
                 if (!clickTypes.contains(event.getClick())) return;
                 final int clicked = event.getSlot();
-                final BaseGuiItem item = wrapper.gui().getItem(clicked);
+                final BaseGuiItem item = wrapper.gui().getBaseGuiItem(clicked);
                 if (item == null) return;
                 item.setMetadata(GuiKeys.SEND_DATA_KEYS, keys);
             };

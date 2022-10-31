@@ -64,7 +64,6 @@ public class UserManager {
                     return newUser;
                 })
                 .sync(user -> {
-                    Bukkit.broadcastMessage("Adding user: " + user);
                     this.addUser(user);
                     user.onJoin(player);
                     return user.getKingdomId();

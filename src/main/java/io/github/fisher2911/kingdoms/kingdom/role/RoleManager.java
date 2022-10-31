@@ -42,6 +42,11 @@ public class RoleManager extends Config {
         return kingdom.getRole(id);
     }
 
+    @Nullable
+    public Role getPluginDefaultRole(String id) {
+        return this.roles.get(id);
+    }
+
     public List<Role> getRoles(Kingdom kingdom) {
         return new SortedList<>(new ArrayList<>(kingdom.getRoles().values()), Comparator.comparingInt(Role::weight));
     }
@@ -78,8 +83,6 @@ public class RoleManager extends Config {
             this.neutralRole = this.loadRole(source, NEUTRAL_ROLE_ID);
             this.truceRole = this.loadRole(source, TRUCE_ROLE_ID);
             this.allyRole = this.loadRole(source, ALLY_ROLE_ID);
-
-
 
             for (var entry : roles.childrenMap().entrySet()) {
                 if (!(entry.getKey() instanceof final String id)) continue;

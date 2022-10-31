@@ -159,7 +159,7 @@ public class KingdomImpl implements Kingdom {
 //        }
 //        relation = this.getRelation(user.getKingdomId());
 //        if (relation != null) return relation.hasPermission(role, permission);
-        if (chunk.getPermissions().hasPermission(role, permission)) {
+        if (chunk.getPermissions().hasPermission(role, permission, this.plugin.getRoleManager())) {
             return true;
         }
         return this.hasPermission(role, permission);
@@ -185,22 +185,22 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public boolean hasPermission(Role role, KPermission permission) {
-        final RelationType relationType = this.plugin.getRelationManager().fromRole(role.id());
+//        final RelationType relationType = this.plugin.getRelationManager().fromRole(role.id());
 //        final Relation relation = this.relations.get(relationType);
 //        if (relation != null) return relation.hasPermission(role, permission);
-        return this.permissions.hasPermission(role, permission);
+        return this.permissions.hasPermission(role, permission, this.plugin.getRoleManager());
     }
 
     @Override
     public boolean hasPermission(Role role, KPermission permission, ClaimedChunk chunk) {
-        final RelationType relationType = this.plugin.getRelationManager().fromRole(role.id());
+//        final RelationType relationType = this.plugin.getRelationManager().fromRole(role.id());
 //        Relation relation = chunk.getRelations().get(relationType);
 //        if (relation != null && relation.hasPermission(role, permission, chunk)) {
 //            return true;
 //        }
 //        relation = this.relations.get(relationType);
 //        if (relation != null) return relation.hasPermission(role, permission);
-        if (chunk.getPermissions().hasPermission(role, permission)) {
+        if (chunk.getPermissions().hasPermission(role, permission, this.plugin.getRoleManager())) {
             return true;
         }
         return this.hasPermission(role, permission);

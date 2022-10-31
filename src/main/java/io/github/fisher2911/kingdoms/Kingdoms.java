@@ -12,6 +12,7 @@ import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
 import io.github.fisher2911.kingdoms.kingdom.invite.InviteManager;
+import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationManager;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeManager;
@@ -109,7 +110,9 @@ public final class Kingdoms extends JavaPlugin {
     }
 
     public void load() {
+        this.saveDefaultConfig();
         MessageHandler.load();
+        KPermission.load();
         this.dataManager.load();
         this.roleManager.load();
         this.kingdomSettings.load();

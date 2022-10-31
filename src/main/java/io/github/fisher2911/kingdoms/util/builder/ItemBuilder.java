@@ -90,8 +90,9 @@ public class ItemBuilder {
     public ItemBuilder glow(boolean glow) {
         if (this.itemMeta == null) return this;
         if (glow) {
+            final boolean empty = this.itemMeta.getEnchants().isEmpty();
             this.enchant(Enchantment.LUCK, 1);
-            if (!this.itemMeta.getEnchants().isEmpty()) return this;
+            if (!empty) return this;
             this.flag(ItemFlag.HIDE_ENCHANTS);
             return this;
         }

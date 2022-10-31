@@ -1,7 +1,9 @@
 package io.github.fisher2911.kingdoms.gui;
 
 import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
+import io.github.fisher2911.kingdoms.util.Metadata;
 import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
+import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -24,7 +26,7 @@ public class GuiItem extends BaseGuiItem {
 
     public GuiItem(
             ItemBuilder itemBuilder,
-            Map<Object, Object> metadata,
+            Metadata metadata,
             @Nullable Consumer<InventoryEventWrapper<InventoryClickEvent>> clickHandler,
             @Nullable Consumer<InventoryEventWrapper<InventoryDragEvent>> dragHandler,
             List<BiFunction<BaseGui, BaseGuiItem, Object>> placeholders
@@ -36,7 +38,7 @@ public class GuiItem extends BaseGuiItem {
 
     @Override
     public BaseGuiItem withItem(ItemBuilder item) {
-        return new GuiItem(item, new HashMap<>(this.metadata), this.clickHandler, this.dragHandler, this.placeholders);
+        return new GuiItem(item, this.metadata.copy(), this.clickHandler, this.dragHandler, this.placeholders);
     }
 
     @Override
@@ -57,7 +59,7 @@ public class GuiItem extends BaseGuiItem {
     }
 
     public static GuiItem nextPage(ItemBuilder itemBuilder, Collection<ClickType> clickTypes) {
-        return new GuiItem(itemBuilder, new HashMap<>(), nextPageWrapper(clickTypes), null, new ArrayList<>());
+        return new GuiItem(itemBuilder, new Metadata(new HashMap<>()), nextPageWrapper(clickTypes), null, new ArrayList<>());
     }
 
     public static GuiItem nextPage(ItemBuilder itemBuilder) {
@@ -72,7 +74,7 @@ public class GuiItem extends BaseGuiItem {
     }
 
     public static GuiItem previousPage(ItemBuilder itemBuilder, Collection<ClickType> clickTypes) {
-        return new GuiItem(itemBuilder, new HashMap<>(), previousPageWrapper(clickTypes), null, new ArrayList<>());
+        return new GuiItem(itemBuilder, new Metadata(new HashMap<>()), previousPageWrapper(clickTypes), null, new ArrayList<>());
     }
 
     public static GuiItem previousPage(ItemBuilder itemBuilder) {
@@ -88,12 +90,21 @@ public class GuiItem extends BaseGuiItem {
 
     @Override
     public BaseGuiItem withPlaceholders(List<BiFunction<BaseGui, BaseGuiItem, Object>> placeholders) {
-        return new GuiItem(this.itemBuilder, new HashMap<>(this.metadata), this.clickHandler, this.dragHandler, placeholders);
+        return new GuiItem(this.itemBuilder, this.metadata.copy(), this.clickHandler, this.dragHandler, placeholders);
+    }
+
+    @Override
+    public BaseGuiItem withMetaData(Metadata metadata) {
+        return new GuiItem(this.itemBuilder, metadata.copyWith(this.metadata), this.clickHandler, this.dragHandler, this.placeholders);
     }
 
     @Override
     public BaseGuiItem copy() {
-        return new GuiItem(this.itemBuilder, new HashMap<>(this.metadata), this.clickHandler, this.dragHandler, this.placeholders);
+        return new GuiItem(this.itemBuilder, this.metadata.copy(), this.clickHandler, this.dragHandler, this.placeholders);
+    }
+
+    public static BaseGuiItem air() {
+        return new GuiItem(ItemBuilder.from(Material.AIR), Metadata.empty(), InventoryEventWrapper::cancel, InventoryEventWrapper::cancel, new ArrayList<>());
     }
 
     public static Builder builder(ItemBuilder itemBuilder) {
@@ -111,7 +122,7 @@ public class GuiItem extends BaseGuiItem {
     public static class Builder {
 
         private final ItemBuilder itemBuilder;
-        private final Map<Object, Object> metadata = new HashMap<>();
+        private final Metadata metadata = new Metadata(new HashMap<>());
         private Consumer<InventoryEventWrapper<InventoryClickEvent>> clickHandler;
         @Nullable
         private Consumer<InventoryEventWrapper<InventoryDragEvent>> dragHandler;
@@ -172,7 +183,7 @@ public class GuiItem extends BaseGuiItem {
         }
 
         public Builder metadata(Object key, Object value) {
-            this.metadata.put(key, value);
+            this.metadata.set(key, value);
             return this;
         }
 

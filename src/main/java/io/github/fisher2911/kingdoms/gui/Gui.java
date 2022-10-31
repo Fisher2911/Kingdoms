@@ -1,6 +1,7 @@
 package io.github.fisher2911.kingdoms.gui;
 
 import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
+import io.github.fisher2911.kingdoms.util.Metadata;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -31,15 +32,15 @@ public class Gui extends BaseGui {
             String id,
             String name,
             int rows,
-            Map<Integer, BaseGuiItem> guiItemsMap,
+            Map<Integer, ConditionalItem> guiItemsMap,
             Set<Integer> repeatPageSlots,
-            Map<Object, Object> metadata,
+            Metadata metadata,
             Consumer<InventoryEventWrapper<InventoryClickEvent>> playerInventoryClickHandler,
             Map<InventoryEventType, Consumer<InventoryEventWrapper<? extends InventoryEvent>>> defaultEventHandlers,
             Consumer<InventoryEventWrapper<InventoryCloseEvent>> closeHandler,
             Consumer<InventoryEventWrapper<InventoryOpenEvent>> openHandler,
-            List<Function<BaseGui, List<BaseGuiItem>>> filler,
-            List<BaseGuiItem> border
+            List<Function<BaseGui, List<ConditionalItem>>> filler,
+            List<ConditionalItem> border
     ) {
         super(id, name, rows, guiItemsMap, repeatPageSlots, metadata, filler, border);
         this.playerInventoryClickHandler = playerInventoryClickHandler;
@@ -62,7 +63,7 @@ public class Gui extends BaseGui {
         if (!event.getView().getTopInventory().equals(clickedInventory)) {
             return;
         }
-        final BaseGuiItem item = this.getItem(this.getItemPageSlot(slot), true);
+        final BaseGuiItem item = this.getBaseGuiItem(this.getItemPageSlot(slot)/*, true*/);
         if (item == null) {
             final var handler = this.defaultEventHandlers.get(InventoryEventType.CLICK);
             if (handler == null) return;
@@ -112,15 +113,15 @@ public class Gui extends BaseGui {
         private final String id;
         private String name = "";
         private int rows = 1;
-        private final Map<Integer, BaseGuiItem> guiItemsMap = new HashMap<>();
+        private final Map<Integer, ConditionalItem> guiItemsMap = new HashMap<>();
         private final Set<Integer> repeatPageSlots = new HashSet<>();
-        private final Map<Object, Object> metadata = new HashMap<>();
+        private final Metadata metadata = new Metadata(new HashMap<>());
         private Consumer<InventoryEventWrapper<InventoryClickEvent>> playerInventoryClickHandler;
         private final Map<InventoryEventType, Consumer<InventoryEventWrapper<? extends InventoryEvent>>> defaultEventHandlers = new HashMap<>();
         private Consumer<InventoryEventWrapper<InventoryCloseEvent>> closeHandler;
         private Consumer<InventoryEventWrapper<InventoryOpenEvent>> openHandler;
-        private final List<Function<BaseGui, List<BaseGuiItem>>> filler = new ArrayList<>();
-        private final List<BaseGuiItem> border = new ArrayList<>();
+        private final List<Function<BaseGui, List<ConditionalItem>>> filler = new ArrayList<>();
+        private final List<ConditionalItem> border = new ArrayList<>();
 
         private Builder(String id) {
             this.id = id;
@@ -140,12 +141,12 @@ public class Gui extends BaseGui {
             return this;
         }
 
-        public Builder item(int slot, BaseGuiItem item) {
+        public Builder item(int slot, ConditionalItem item) {
             this.guiItemsMap.put(slot, item);
             return this;
         }
 
-        public Builder items(Map<Integer, BaseGuiItem> items) {
+        public Builder items(Map<Integer, ConditionalItem> items) {
             this.guiItemsMap.putAll(items);
             return this;
         }
@@ -156,11 +157,16 @@ public class Gui extends BaseGui {
         }
 
         public Builder metadata(Object key, Object value) {
-            this.metadata.put(key, value);
+            this.metadata.set(key, value);
             return this;
         }
 
         public Builder metadata(Map<Object, Object> metadata) {
+            this.metadata.putAll(metadata);
+            return this;
+        }
+
+        public Builder metadata(Metadata metadata) {
             this.metadata.putAll(metadata);
             return this;
         }
@@ -217,22 +223,22 @@ public class Gui extends BaseGui {
             return this;
         }
 
-        public Builder filler(List<Function<BaseGui, List<BaseGuiItem>>> filler) {
+        public Builder filler(List<Function<BaseGui, List<ConditionalItem>>> filler) {
             this.filler.addAll(filler);
             return this;
         }
 
-        public Builder border(List<BaseGuiItem> border) {
+        public Builder border(List<ConditionalItem> border) {
             this.border.addAll(border);
             return this;
         }
 
-        public Builder border(BaseGuiItem... border) {
+        public Builder border(ConditionalItem... border) {
             this.border.addAll(Arrays.asList(border));
             return this;
         }
 
-        public Map<Object, Object> getMetadata() {
+        public Metadata getMetadata() {
             return metadata;
         }
 
