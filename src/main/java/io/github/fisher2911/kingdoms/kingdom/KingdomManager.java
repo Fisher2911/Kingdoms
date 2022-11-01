@@ -11,6 +11,7 @@ import io.github.fisher2911.kingdoms.economy.PriceType;
 import io.github.fisher2911.kingdoms.kingdom.location.KingdomLocations;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
+import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
@@ -160,33 +161,53 @@ public class KingdomManager {
 
     public void tryKick(User kicker, User toKick, boolean searchDatabase) {
         this.getKingdom(kicker.getKingdomId(), searchDatabase).ifPresentOrElse(kingdom -> {
-            if (!kingdom.canKick(kicker, toKick)) {
-                MessageHandler.sendMessage(kicker, Message.NO_KINGDOM_PERMISSION);
-                return;
-            }
-            kingdom.kick(toKick);
-            MessageHandler.sendMessage(kicker, Message.KICKED_OTHER, toKick);
-            MessageHandler.sendMessage(toKick, Message.KICKED_FROM_KINGDOM, kicker, kingdom);
+            this.tryKick(kingdom, kicker, toKick);
         }, () -> MessageHandler.sendMessage(kicker, Message.NOT_IN_KINGDOM));
+    }
+
+    public void tryKick(Kingdom kingdom, User kicker, User toKick) {
+        if (!kingdom.canKick(kicker, toKick) || kicker.getId().equals(toKick.getId())) {
+            MessageHandler.sendMessage(kicker, Message.NO_KINGDOM_PERMISSION);
+            return;
+        }
+        kingdom.kick(toKick);
+        MessageHandler.sendMessage(kicker, Message.KICKED_OTHER, toKick);
+        MessageHandler.sendMessage(toKick, Message.KICKED_FROM_KINGDOM, kicker, kingdom);
     }
 
     public void trySetRole(User user, User toSet, String roleId, boolean searchDatabase) {
         this.getKingdom(user.getKingdomId(), searchDatabase).ifPresentOrElse(kingdom -> {
-            if (toSet.getKingdomId() != user.getKingdomId()) {
-                MessageHandler.sendMessage(user, Message.NOT_IN_SAME_KINGDOM, toSet);
-                return;
-            }
-            final Role role = this.plugin.getRoleManager().getRole(roleId, kingdom);
-            final Role setterRole = kingdom.getRole(user);
-            final Role previousRole = kingdom.getRole(toSet);
-            if (!kingdom.hasPermission(user, KPermission.SET_MEMBER_ROLE) || previousRole.isHigherRankedThan(setterRole)) {
-                MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
-                return;
-            }
-            kingdom.setRole(toSet, role);
-            MessageHandler.sendMessage(user, Message.SET_OTHER_ROLE, toSet, role);
-            MessageHandler.sendMessage(user, Message.OWN_ROLE_SET, user, role);
+            this.trySetRole(kingdom, user, toSet, roleId);
         }, () -> MessageHandler.sendNotInKingdom(user));
+    }
+
+    public void trySetRole(Kingdom kingdom, User user, User toSet, String roleId) {
+        if (toSet.getKingdomId() != user.getKingdomId()) {
+            MessageHandler.sendMessage(user, Message.NOT_IN_SAME_KINGDOM, toSet);
+            return;
+        }
+        final Role role = this.plugin.getRoleManager().getRole(roleId, kingdom);
+        if (role == null) {
+            MessageHandler.sendMessage(user, Message.ROLE_DOES_NOT_EXIST);
+            return;
+        }
+        if (RoleManager.UNSETTABLE_ROLES.contains(roleId)) {
+            MessageHandler.sendMessage(user, Message.CANNOT_SET_PERMISSION_ROLE, role);
+            return;
+        }
+        if (user.getId().equals(toSet.getId())) {
+            MessageHandler.sendMessage(user, Message.CANNOT_SET_SELF_ROLE);
+            return;
+        }
+        final Role setterRole = kingdom.getRole(user);
+        final Role previousRole = kingdom.getRole(toSet);
+        if (!kingdom.hasPermission(user, KPermission.SET_MEMBER_ROLE) || previousRole.isHigherRankedThan(setterRole)) {
+            MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
+            return;
+        }
+        kingdom.setRole(toSet, role);
+        MessageHandler.sendMessage(user, Message.SET_OTHER_ROLE, toSet, role);
+        MessageHandler.sendMessage(toSet, Message.OWN_ROLE_SET, user, role);
     }
 
     public void tryLeave(User user, boolean searchDatabase) {
@@ -282,6 +303,7 @@ public class KingdomManager {
 
         }, () -> MessageHandler.sendNotInKingdom(user));
     }
+
     public void saveDirty() {
         this.kingdoms.values()
                 .stream()
@@ -289,12 +311,18 @@ public class KingdomManager {
                 .forEach(this.dataManager::saveKingdom);
     }
 
-    public void removeIfCanBeUnloaded(int kingdomId) {
-        this.getKingdom(kingdomId, false).ifPresent(kingdom -> {
-            if (!kingdom.canBeUnloaded(this.plugin)) return;
-            this.dataManager.saveKingdom(kingdom);
-            kingdom.getClaimedChunks().forEach(this.plugin.getWorldManager()::remove);
-        });
+    // return true if removed
+    public boolean removeIfCanBeUnloaded(int kingdomId) {
+        return this.getKingdom(kingdomId, false)
+                .map(this::removeIfCanBeUnloaded)
+                .orElse(false);
+    }
+
+    public boolean removeIfCanBeUnloaded(Kingdom kingdom) {
+        if (!kingdom.canBeUnloaded(this.plugin)) return false;
+        this.dataManager.saveKingdom(kingdom);
+        kingdom.getClaimedChunks().forEach(this.plugin.getWorldManager()::remove);
+        return true;
     }
 
 }

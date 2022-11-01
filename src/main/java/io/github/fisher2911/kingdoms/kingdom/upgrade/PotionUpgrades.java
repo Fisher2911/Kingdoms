@@ -4,7 +4,7 @@ import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.util.EnumUtil;
-import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
+import io.github.fisher2911.kingdoms.util.builder.BaseItemBuilder;
 import net.objecthunter.exp4j.Expression;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -27,8 +27,8 @@ public class PotionUpgrades extends IntUpgrades implements EntryUpgrade<Integer>
             Expression expression,
             Expression priceExpression,
             int maxLevel,
-            ItemBuilder displayItem,
-            ItemBuilder maxLevelDisplayItem,
+            BaseItemBuilder displayItem,
+            BaseItemBuilder maxLevelDisplayItem,
             Set<PotionEffectType> potionEffectTypes,
             Set<RelationType> appliesTo,
             boolean appliesToSelf

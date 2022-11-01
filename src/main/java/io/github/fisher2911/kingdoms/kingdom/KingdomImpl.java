@@ -174,8 +174,8 @@ public class KingdomImpl implements Kingdom {
     public void setPermission(Role role, KPermission permission, boolean value) {
 //        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role.id()));
 //        if (relation == null) {
-            this.permissions.setPermission(role, permission, value);
-            this.setDirty(true);
+        this.permissions.setPermission(role, permission, value);
+        this.setDirty(true);
 //            return;
 //        }
 //        relation.setPermission(role, permission, value);
@@ -235,7 +235,7 @@ public class KingdomImpl implements Kingdom {
     public void addMember(User user) {
         this.members.put(user.getId(), user);
         user.setKingdomId(this.id);
-        this.setRole(user, this.plugin.getRoleManager().getDefaultRole(this));
+        this.setRole(user, this.plugin.getRoleManager().getMemberRole(this));
         this.setDirty(true);
     }
 
@@ -425,7 +425,7 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public boolean isDirty() {
-        return dirty;
+        return this.locations.isDirty() || this.permissions.isDirty() || this.dirty;
     }
 
     @Override

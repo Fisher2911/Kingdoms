@@ -41,7 +41,7 @@ kingdom-info: |-
 kicked-other: <red>You kicked %user_name% from your kingdom
 kicked-from-kingdom: <red>You were kicked from %kingdom_name% by %user_name%
 not-in-same-kingdom: <red>You are not in the same kingdom as %user_name%
-set-other-role: <green>You set %user_name%\'s role to %role_display_name%
+set-other-role: <green>You set %user_name%'s role to %role_display_name%
 own-role-set: <green>Your role was set to %role_display_name% by %user_name%
 other-kingdom-full: <red>%kingdom_name% is full
 sent-relation-request-expired: <red>Your %relation_display_name% request to %kingdom_name%
@@ -81,4 +81,22 @@ not-enough-funds: <red>Your kingdom only has %kingdom_bank_balance%
 kingdom-bank-not-large-enough: <red>Your kingdom's bank is not large enough!
 user-not-enough-money: <red>You do not have enough money to do this
 kingdom-balance: <green>Your kingdom's bank balance is %kingdom_bank_balance%
-max-relations-reached: MAX_RELATIONS_REACHED
+max-relations-reached: <red>You have reached the max amount of %relation_display_name%
+  relations
+cannot-edit-kingdom-permission: <red>You are not allowed to edit that kingdom permission
+set-kingdom-home: <green>You set your kingdom's home to your current location
+teleport-success: <green>Teleport successful!
+teleport-cancelled-movement: <red>Teleport cancelled due to movement
+teleport-cancelled: <red>Teleport cancelled
+teleport-countdown: <green>Teleporting in %teleport_info_seconds_left% seconds
+kingdom-location-not-set: <red>Your kingdom's home has not been set
+user-data-load-error: <red>There was an error loading your data
+invalid-position: <red>That is not a valid position
+enabled-auto-claim: <green>You enabled auto claim
+enabled-auto-unclaim: <green>You enabled auto unclaim
+disabled-auto-claim: <green>You disabled auto claim
+disabled-auto-unclaim: <green>You disabled auto unclaim
+player-not-found: <red>That player could not be found
+cannot-set-permission-role: <red>You cannot set permissions for that role
+role-does-not-exist: <red>That role does not exist
+cannot-set-self-role: <red>You cannot set your own role

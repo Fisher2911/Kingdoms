@@ -1,7 +1,7 @@
 package io.github.fisher2911.kingdoms.kingdom.upgrade;
 
 import io.github.fisher2911.kingdoms.economy.Price;
-import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
+import io.github.fisher2911.kingdoms.util.builder.BaseItemBuilder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -12,10 +12,10 @@ public class MappedUpgrades<T> implements Upgrades<T>{
     private final String displayName;
     private final Map<Integer, UpgradeData<T>> levelUpgrades;
     private final int maxLevel;
-    private final ItemBuilder displayItem;
-    private final ItemBuilder maxLevelDisplayItem;
+    private final BaseItemBuilder displayItem;
+    private final BaseItemBuilder maxLevelDisplayItem;
 
-    public MappedUpgrades(String id, String displayName, Map<Integer, UpgradeData<T>> levelUpgrades, int maxLevel, ItemBuilder displayItem, ItemBuilder maxLevelDisplayItem) {
+    public MappedUpgrades(String id, String displayName, Map<Integer, UpgradeData<T>> levelUpgrades, int maxLevel, BaseItemBuilder displayItem, BaseItemBuilder maxLevelDisplayItem) {
         this.id = id;
         this.displayName = displayName;
         this.levelUpgrades = levelUpgrades;
@@ -67,12 +67,12 @@ public class MappedUpgrades<T> implements Upgrades<T>{
     }
 
     @Override
-    public ItemBuilder getGuiItem() {
+    public BaseItemBuilder getGuiItem() {
         return this.displayItem;
     }
 
     @Override
-    public ItemBuilder getMaxLevelGuiItem() {
+    public BaseItemBuilder getMaxLevelGuiItem() {
         return this.maxLevelDisplayItem;
     }
 }

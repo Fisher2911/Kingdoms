@@ -1,8 +1,9 @@
 package io.github.fisher2911.kingdoms.gui;
 
 import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
+import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.util.Metadata;
-import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
+import io.github.fisher2911.kingdoms.util.builder.BaseItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -25,7 +26,7 @@ public class GuiItem extends BaseGuiItem {
     private final Consumer<InventoryEventWrapper<InventoryDragEvent>> dragHandler;
 
     public GuiItem(
-            ItemBuilder itemBuilder,
+            BaseItemBuilder itemBuilder,
             Metadata metadata,
             @Nullable Consumer<InventoryEventWrapper<InventoryClickEvent>> clickHandler,
             @Nullable Consumer<InventoryEventWrapper<InventoryDragEvent>> dragHandler,
@@ -37,13 +38,13 @@ public class GuiItem extends BaseGuiItem {
     }
 
     @Override
-    public BaseGuiItem withItem(ItemBuilder item) {
+    public BaseGuiItem withItem(BaseItemBuilder item) {
         return new GuiItem(item, this.metadata.copy(), this.clickHandler, this.dragHandler, this.placeholders);
     }
 
     @Override
     public BaseGuiItem withItem(ItemStack item) {
-        return this.withItem(ItemBuilder.from(item));
+        return this.withItem(BaseItemBuilder.from(item));
     }
 
     @Override
@@ -58,11 +59,11 @@ public class GuiItem extends BaseGuiItem {
         this.dragHandler.accept(event);
     }
 
-    public static GuiItem nextPage(ItemBuilder itemBuilder, Collection<ClickType> clickTypes) {
+    public static GuiItem nextPage(BaseItemBuilder itemBuilder, Collection<ClickType> clickTypes) {
         return new GuiItem(itemBuilder, new Metadata(new HashMap<>()), nextPageWrapper(clickTypes), null, new ArrayList<>());
     }
 
-    public static GuiItem nextPage(ItemBuilder itemBuilder) {
+    public static GuiItem nextPage(BaseItemBuilder itemBuilder) {
         return nextPage(itemBuilder, List.of(ClickType.values()));
     }
 
@@ -73,11 +74,11 @@ public class GuiItem extends BaseGuiItem {
         };
     }
 
-    public static GuiItem previousPage(ItemBuilder itemBuilder, Collection<ClickType> clickTypes) {
+    public static GuiItem previousPage(BaseItemBuilder itemBuilder, Collection<ClickType> clickTypes) {
         return new GuiItem(itemBuilder, new Metadata(new HashMap<>()), previousPageWrapper(clickTypes), null, new ArrayList<>());
     }
 
-    public static GuiItem previousPage(ItemBuilder itemBuilder) {
+    public static GuiItem previousPage(BaseItemBuilder itemBuilder) {
         return previousPage(itemBuilder, List.of(ClickType.values()));
     }
 
@@ -94,8 +95,9 @@ public class GuiItem extends BaseGuiItem {
     }
 
     @Override
-    public BaseGuiItem withMetaData(Metadata metadata) {
-        return new GuiItem(this.itemBuilder, metadata.copyWith(this.metadata), this.clickHandler, this.dragHandler, this.placeholders);
+    public BaseGuiItem withMetaData(Metadata metadata, boolean overwrite) {
+        final User user = metadata.get(GuiKeys.KINGDOM_MEMBER, User.class);
+        return new GuiItem(this.itemBuilder, this.metadata.copyWith(metadata, overwrite), this.clickHandler, this.dragHandler, this.placeholders);
     }
 
     @Override
@@ -104,10 +106,10 @@ public class GuiItem extends BaseGuiItem {
     }
 
     public static BaseGuiItem air() {
-        return new GuiItem(ItemBuilder.from(Material.AIR), Metadata.empty(), InventoryEventWrapper::cancel, InventoryEventWrapper::cancel, new ArrayList<>());
+        return new GuiItem(BaseItemBuilder.from(Material.AIR), Metadata.empty(), InventoryEventWrapper::cancel, InventoryEventWrapper::cancel, new ArrayList<>());
     }
 
-    public static Builder builder(ItemBuilder itemBuilder) {
+    public static Builder builder(BaseItemBuilder itemBuilder) {
         return Builder.of(itemBuilder);
     }
 
@@ -121,20 +123,20 @@ public class GuiItem extends BaseGuiItem {
 
     public static class Builder {
 
-        private final ItemBuilder itemBuilder;
+        private final BaseItemBuilder itemBuilder;
         private final Metadata metadata = new Metadata(new HashMap<>());
         private Consumer<InventoryEventWrapper<InventoryClickEvent>> clickHandler;
         @Nullable
         private Consumer<InventoryEventWrapper<InventoryDragEvent>> dragHandler;
         private final List<BiFunction<BaseGui, BaseGuiItem, Object>> placeholders = new ArrayList<>();
 
-        private Builder(ItemBuilder itemBuilder) {
+        private Builder(BaseItemBuilder itemBuilder) {
             this.itemBuilder = itemBuilder;
         }
 
         private Builder(GuiItem guiItem) {
             this.itemBuilder = guiItem.itemBuilder;
-            this.metadata.putAll(guiItem.metadata);
+            this.metadata.putAll(guiItem.metadata, true);
             this.clickHandler = guiItem.clickHandler;
             this.dragHandler = guiItem.dragHandler;
             this.placeholders.addAll(guiItem.placeholders);
@@ -142,7 +144,7 @@ public class GuiItem extends BaseGuiItem {
 
         private Builder(BaseGuiItem guiItem) {
             this.itemBuilder = guiItem.itemBuilder;
-            this.metadata.putAll(guiItem.metadata);
+            this.metadata.putAll(guiItem.metadata, true);
             this.placeholders.addAll(guiItem.placeholders);
             if (guiItem instanceof GuiItem item) {
                 this.clickHandler = item.clickHandler;
@@ -150,7 +152,7 @@ public class GuiItem extends BaseGuiItem {
             }
         }
 
-        private static Builder of(ItemBuilder itemBuilder) {
+        private static Builder of(BaseItemBuilder itemBuilder) {
             return new Builder(itemBuilder);
         }
 
@@ -187,8 +189,8 @@ public class GuiItem extends BaseGuiItem {
             return this;
         }
 
-        public Builder metadata(Map<Object, Object> metadata) {
-            this.metadata.putAll(metadata);
+        public Builder metadata(Map<Object, Object> metadata, boolean overwrite) {
+            this.metadata.putAll(metadata, overwrite);
             return this;
         }
 

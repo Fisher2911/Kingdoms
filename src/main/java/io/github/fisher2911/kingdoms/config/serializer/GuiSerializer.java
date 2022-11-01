@@ -11,6 +11,7 @@ import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
+import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.util.EnumUtil;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -41,7 +42,8 @@ public class GuiSerializer {
     private static final Map<GuiFillerType, Function<ConfigurationNode, Function<BaseGui, List<ConditionalItem>>>> GUI_FILLER_LOADERS = Map.of(
             GuiFillerType.PERMISSIONS, GuiSerializer::loadPermissionsFillers,
             GuiFillerType.UPGRADES, GuiSerializer::loadUpgradesFillers,
-            GuiFillerType.ROLES, GuiSerializer::loadRolesFillers
+            GuiFillerType.ROLES, GuiSerializer::loadRolesFillers,
+            GuiFillerType.KINGDOM_MEMBERS, GuiSerializer::loadMemberFillers
     );
 
     public static GuiOpener deserialize(ConfigurationNode source) throws SerializationException {
@@ -154,6 +156,26 @@ public class GuiSerializer {
                 for (Role role : PLUGIN.getRoleManager().getRoles(kingdom)) {
                     final ConditionalItem.Builder builder = ConditionalItem.builder(filler);
                     GuiItemSerializer.applyRoleItemData(builder, role.id());
+                    items.add(builder.build());
+                }
+                return items;
+            };
+        } catch (SerializationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Function<BaseGui, List<ConditionalItem>> loadMemberFillers(final ConfigurationNode source) {
+        // stupid checked exceptions
+        try {
+            final ConditionalItem filler = GuiItemSerializer.INSTANCE.deserialize(ConditionalItem.class, source);
+            return gui -> {
+                final List<ConditionalItem> items = new ArrayList<>();
+                final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
+                if (kingdom == null) return items;
+                for (User member : kingdom.getMembers()) {
+                    final ConditionalItem.Builder builder = ConditionalItem.builder(filler);
+                    GuiItemSerializer.applyMemberItemData(builder, member);
                     items.add(builder.build());
                 }
                 return items;

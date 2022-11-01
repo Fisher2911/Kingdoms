@@ -13,93 +13,91 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ItemBuilder {
+@SuppressWarnings("unchecked")
+public class BaseItemBuilder {
 
-    private Material material;
-    private int amount;
-    private ItemMeta itemMeta;
+    protected Material material;
+    protected int amount;
+    protected ItemMeta itemMeta;
 
-    private ItemBuilder(Material material) {
+    protected BaseItemBuilder(Material material) {
         this.material = material;
         this.itemMeta = Bukkit.getItemFactory().getItemMeta(material);
         this.amount = 1;
     }
 
-    private ItemBuilder(ItemStack itemStack) {
+    protected BaseItemBuilder(ItemStack itemStack) {
         this.material = itemStack.getType();
         this.itemMeta = itemStack.getItemMeta();
         this.amount = itemStack.getAmount();
     }
 
-    public static ItemBuilder from(Material material) {
-        return new ItemBuilder(material);
+    public static <T extends BaseItemBuilder> T from(Material material) {
+        if (material == Material.PLAYER_HEAD) return (T) new SkullBuilder(material);
+        return (T) new BaseItemBuilder(material);
     }
 
-    public static ItemBuilder from(ItemStack itemStack) {
-        return new ItemBuilder(itemStack);
+    public static <T extends BaseItemBuilder> T from(ItemStack itemStack) {
+        if (itemStack.getType() == Material.PLAYER_HEAD) return (T) new SkullBuilder(itemStack);
+        return (T) new BaseItemBuilder(itemStack);
     }
 
-    public ItemBuilder amount(int amount) {
+    public <T extends BaseItemBuilder> T amount(int amount) {
         this.amount = amount;
-        return this;
+        return (T) this;
     }
 
-    public ItemBuilder name(String name) {
-        if (this.itemMeta == null) return this;
+    public <T extends BaseItemBuilder> T name(String name) {
+        if (this.itemMeta == null) return (T) this;
         this.itemMeta.setDisplayName(name);
-//        this.itemMeta.setDisplayName(MessageHandler.serialize(name));
-        return this;
+        return (T) this;
     }
 
-    public ItemBuilder lore(List<String> lore) {
-        if (this.itemMeta == null) return this;
-//        final List<String> newLore = new ArrayList<>();
-//        for (String s : lore) {
-//            newLore.add(MessageHandler.serialize(s));
-//        }
+    public <T extends BaseItemBuilder> T lore(List<String> lore) {
+        if (this.itemMeta == null) return (T) this;
         this.itemMeta.setLore(lore);
-        return this;
+        return (T) this;
     }
 
-    public ItemBuilder unbreakable() {
-        if (this.itemMeta == null) return this;
+    public <T extends BaseItemBuilder> T unbreakable() {
+        if (this.itemMeta == null) return (T) this;
         this.itemMeta.setUnbreakable(true);
-        return this;
+        return (T) this;
     }
 
-    public ItemBuilder enchant(Enchantment enchantment, int level) {
-        if (this.itemMeta == null) return this;
+    public <T extends BaseItemBuilder> T enchant(Enchantment enchantment, int level) {
+        if (this.itemMeta == null) return (T) this;
         this.itemMeta.addEnchant(enchantment, level, true);
-        return this;
+        return (T) this;
     }
 
-    public ItemBuilder flag(ItemFlag... flags) {
-        if (this.itemMeta == null) return this;
+    public <T extends BaseItemBuilder> T flag(ItemFlag... flags) {
+        if (this.itemMeta == null) return (T) this;
         this.itemMeta.addItemFlags(flags);
-        return this;
+        return (T) this;
     }
 
-    public ItemBuilder enchantments(Map<Enchantment, Integer> enchants) {
-        if (this.itemMeta == null) return this;
+    public <T extends BaseItemBuilder> T enchantments(Map<Enchantment, Integer> enchants) {
+        if (this.itemMeta == null) return (T) this;
         for (final Map.Entry<Enchantment, Integer> entry : enchants.entrySet()) {
             this.enchant(entry.getKey(), entry.getValue());
         }
-        return this;
+        return (T) this;
     }
 
-    public ItemBuilder glow(boolean glow) {
-        if (this.itemMeta == null) return this;
+    public <T extends BaseItemBuilder> T glow(boolean glow) {
+        if (this.itemMeta == null) return (T) this;
         if (glow) {
             final boolean empty = this.itemMeta.getEnchants().isEmpty();
             this.enchant(Enchantment.LUCK, 1);
-            if (!empty) return this;
+            if (!empty) return (T) this;
             this.flag(ItemFlag.HIDE_ENCHANTS);
-            return this;
+            return (T) this;
         }
         this.itemMeta.removeEnchant(Enchantment.LUCK);
-        if (!this.itemMeta.getEnchants().isEmpty()) return this;
+        if (!this.itemMeta.getEnchants().isEmpty()) return (T) this;
         this.itemMeta.removeItemFlags(ItemFlag.HIDE_ENCHANTS);
-        return this;
+        return (T) this;
     }
 
     public ItemStack build(Object... placeholders) {
@@ -108,10 +106,25 @@ public class ItemBuilder {
         if (this.itemMeta == null) return itemStack;
         final ItemMeta itemMeta = this.itemMeta.clone();
         final String name = itemMeta.getDisplayName();
-        if (name != null) itemMeta.setDisplayName(MessageHandler.serialize(PlaceholderBuilder.apply(name, placeholders)));
+        itemMeta.setDisplayName(MessageHandler.serialize(PlaceholderBuilder.apply(name, placeholders)));
         final List<String> lore = itemMeta.getLore();
         if (lore != null) {
             itemMeta.setLore(this.buildLore(lore, placeholders));
+        }
+        itemStack.setItemMeta(itemMeta);
+        return itemStack;
+    }
+
+    public ItemStack build() {
+        final ItemStack itemStack = new ItemStack(this.material);
+        itemStack.setAmount(Math.max(1, this.amount));
+        if (this.itemMeta == null) return itemStack;
+        final ItemMeta itemMeta = this.itemMeta.clone();
+        final String name = itemMeta.getDisplayName();
+        itemMeta.setDisplayName(MessageHandler.serialize(name));
+        final List<String> lore = itemMeta.getLore();
+        if (lore != null) {
+            itemMeta.setLore(this.buildLore(lore));
         }
         itemStack.setItemMeta(itemMeta);
         return itemStack;
@@ -123,26 +136,11 @@ public class ItemBuilder {
                 collect(Collectors.toList());
     }
 
-    public ItemStack build() {
-        final ItemStack itemStack = new ItemStack(this.material);
-        itemStack.setAmount(Math.max(1, this.amount));
-        if (this.itemMeta == null) return itemStack;
-        final ItemMeta itemMeta = this.itemMeta.clone();
-        final String name = itemMeta.getDisplayName();
-        if (name != null) itemMeta.setDisplayName(MessageHandler.serialize(name));
-        final List<String> lore = itemMeta.getLore();
-        if (lore != null) {
-            itemMeta.setLore(this.buildLore(lore));
-        }
-        itemStack.setItemMeta(itemMeta);
-        return itemStack;
-    }
-
-    public ItemBuilder copy() {
-        final ItemBuilder builder = new ItemBuilder(this.material).amount(this.amount);
-        if (this.itemMeta == null) return builder;
+    public <T extends BaseItemBuilder> T copy() {
+        final BaseItemBuilder builder = new BaseItemBuilder(this.material).amount(this.amount);
+        if (this.itemMeta == null) return (T) builder;
         builder.itemMeta = this.itemMeta.clone();
-        return builder;
+        return (T) builder;
     }
 
     @Override
@@ -153,4 +151,5 @@ public class ItemBuilder {
                 ", itemMeta=" + itemMeta +
                 '}';
     }
+
 }

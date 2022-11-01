@@ -4,7 +4,7 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.gui.BaseGui;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
-import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
+import io.github.fisher2911.kingdoms.util.builder.BaseItemBuilder;
 import org.bukkit.entity.HumanEntity;
 
 public class UpgradeGui {
@@ -47,7 +47,7 @@ public class UpgradeGui {
 //            final Upgrades<?> upgrades = entry.getValue();
 //            final Integer upgradeLevel = kingdom.getUpgradeLevel(id);
 //            if (upgradeLevel == null) continue;
-//            final ItemBuilder builder = getUpgradeItem(
+//            final BaseItemBuilder builder = getUpgradeItem(
 //                    upgrades,
 //                    upgradeLevel
 //            );
@@ -76,8 +76,8 @@ public class UpgradeGui {
 //        );
     }
 
-    private static ItemBuilder getUpgradeItem(Upgrades<?> upgrades, int upgradeLevel) {
-        final ItemBuilder builder;
+    private static BaseItemBuilder getUpgradeItem(Upgrades<?> upgrades, int upgradeLevel) {
+        final BaseItemBuilder builder;
         if (upgradeLevel >= upgrades.getMaxLevel()) {
             builder = upgrades.getMaxLevelGuiItem();
         } else {

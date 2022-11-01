@@ -1,0 +1,167 @@
+title: <blue>Members
+id: members
+rows: 5
+required-metadata:
+  - KINGDOM
+  - ROLE
+  - USER
+border:
+  1:
+    item:
+      material: BLACK_STAINED_GLASS_PANE
+      name: " "
+gui-fillers:
+  kingdom_members:
+    conditionals:
+      1:
+        conditions:
+          has_k_permissions:
+            - "set-member-role"
+          parse_placeholders:
+            - "%kingdom_member_role_weight%>%gui_user_role_weight%"
+        conditionals:
+          1:
+            conditions:
+              has_k_permissions:
+                - "kick-member"
+            item:
+              material: PLAYER_HEAD
+              name: "<blue>%kingdom_member_name%"
+              lore:
+                - "<blue>Role: %kingdom_member_role_display_name%"
+                - "<blue>Weight: %kingdom_member_role_weight%"
+                - "<red>Left click to kick"
+                - "<red>Right click to set role"
+              skull-owner: "%kingdom_member_uuid%"
+            actions:
+              set_item:
+                click-types: [ LEFT ]
+                duration: 40
+                item:
+                  material: RED_STAINED_GLASS_PANE
+                  name: "<red>Are you sure?"
+                  lore:
+                    - "<red>Left click to confirm"
+                actions:
+                  kick_member:
+                    click-types: [ LEFT ]
+                  close_menu:
+                    click-types: [ LEFT ]
+              send_data:
+                click-types: [ RIGHT ]
+                data:
+                  - "kingdom_member"
+              open_menu:
+                menu: set-member-role
+                click-types: [ RIGHT ]
+          2:
+            item:
+              material: PLAYER_HEAD
+              name: "<blue>%kingdom_member_name%"
+              lore:
+                - "<blue>Role: %kingdom_member_role_display_name%"
+                - "<blue>Weight: %kingdom_member_role_weight%"
+                - "<red>Right click to set role"
+              skull-owner: "%kingdom_member_uuid%"
+            actions:
+              send_data:
+                click-types: [ RIGHT ]
+                data:
+                  - "kingdom_member"
+              open_menu:
+                menu: set-member-role
+                click-types: [ RIGHT ]
+      2:
+        conditions:
+          has_k_permissions:
+            - "kick-member"
+          parse_placeholders:
+            - "%kingdom_member_role_weight%>%gui_role_weight%"
+        conditionals:
+          1:
+            conditions:
+              has_k_permissions:
+                - "set-member-role"
+            item:
+              material: PLAYER_HEAD
+              name: "<blue>%kingdom_member_name%"
+              lore:
+                - "<blue>Role: %kingdom_member_role_display_name%"
+                - "<blue>Weight: %kingdom_member_role_weight%"
+                - "<red>Left click to kick"
+                - "<red>Right click to set role"
+              skull-owner: "%kingdom_member_uuid%"
+            actions:
+              set_item:
+                click-types: [ LEFT ]
+                duration: 40
+                item:
+                  material: RED_STAINED_GLASS_PANE
+                  name: "<red>Are you sure?"
+                  lore:
+                    - "<red>Left click to confirm"
+                actions:
+                  kick_member:
+                    click-types: [ LEFT ]
+                  close_menu:
+                    click-types: [ LEFT ]
+              send_data:
+                click-types: [ RIGHT ]
+                data:
+                  - "kingdom_member"
+              open_menu:
+                menu: set-member-role
+                click-types: [ RIGHT ]
+          2:
+            item:
+              material: PLAYER_HEAD
+              name: "<blue>%kingdom_member_name%"
+              lore:
+                - "<blue>Role: %kingdom_member_role_display_name%"
+                - "<blue>Weight: %kingdom_member_role_weight%"
+                - "<red>Left click to kick"
+              skull-owner: "%kingdom_member_uuid%"
+            actions:
+              set_item:
+                click-types: [ LEFT ]
+                duration: 40
+                item:
+                  material: RED_STAINED_GLASS_PANE
+                  name: "<red>Are you sure?"
+                  lore:
+                    - "<red>Left click to confirm"
+                actions:
+                  kick_member:
+                    click-types: [ LEFT ]
+                  close_menu:
+                    click-types: [ LEFT ]
+      3:
+        item:
+          material: PLAYER_HEAD
+          name: "<blue>%kingdom_member_name%"
+          lore:
+            - "<blue>Role: %kingdom_member_role_display_name%"
+            - "<blue>Weight: %kingdom_member_role_weight%"
+          skull-owner: "%kingdom_member_uuid%"
+items:
+  36:
+    item:
+      material: ARROW
+      name: "<blue>Next Page"
+    actions:
+      previous_page:
+        click-types: [ LEFT, RIGHT ]
+  40:
+    item:
+      material: GOLD_INGOT
+      name: "<blue>Go back"
+    actions:
+      previous_gui:
+        click-types: [ LEFT, RIGHT ]
+  44:
+    item:
+      material: ARROW
+      name: "<blue>Next Page"
+    actions:
+      next_page:
+        click-types: [ LEFT, RIGHT ]

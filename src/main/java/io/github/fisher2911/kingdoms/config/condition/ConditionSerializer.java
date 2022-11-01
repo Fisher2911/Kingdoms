@@ -36,7 +36,7 @@ public class ConditionSerializer {
     );
 
     public static ItemConditions loadConditional(ConfigurationNode source) throws SerializationException {
-//        final ItemBuilder item = ItemSerializer.INSTANCE.deserialize(ItemBuilder.class, source.node(ITEM_PATH));
+//        final BaseItemBuilder item = ItemSerializer.INSTANCE.deserialize(BaseItemBuilder.class, source.node(ITEM_PATH));
         final ConditionalItem item = GuiItemSerializer.INSTANCE.deserialize(ConditionalItem.class, source);
         final List<MetadataPredicate> conditionalList = new ArrayList<>();
         for (var entry : source.node(CONDITIONS_PATH).childrenMap().entrySet()) {
@@ -57,9 +57,9 @@ public class ConditionSerializer {
 
     private static final Map<GuiKeys, Function<Metadata, List<Object>>> PLACEHOLDER_CONDITIONS_PLACEHOLDER_FUNCTIONS = Map.of(
             GuiKeys.PERMISSION, metadata -> {
-                final KPermission permission = metadata.getMetadata(GuiKeys.PERMISSION, KPermission.class);
-                final Kingdom kingdom = metadata.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
-                final String roleId = metadata.getMetadata(GuiKeys.ROLE_ID, String.class);
+                final KPermission permission = metadata.get(GuiKeys.PERMISSION, KPermission.class);
+                final Kingdom kingdom = metadata.get(GuiKeys.KINGDOM, Kingdom.class);
+                final String roleId = metadata.get(GuiKeys.ROLE_ID, String.class);
                 if (permission == null || kingdom == null || roleId == null) {
                     return Collections.emptyList();
                 }

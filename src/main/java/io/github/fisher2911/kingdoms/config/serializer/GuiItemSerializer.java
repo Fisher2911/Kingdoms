@@ -20,12 +20,10 @@ import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.PermissionWrapper;
-import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradeLevelWrapper;
-import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import io.github.fisher2911.kingdoms.util.Metadata;
-import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
+import io.github.fisher2911.kingdoms.util.builder.BaseItemBuilder;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -90,7 +88,7 @@ public class GuiItemSerializer implements TypeSerializer<ConditionalItem> {
 
     private static BaseGuiItem deserializeItem(ConfigurationNode node) throws SerializationException {
         final String typeString = node.node(TYPE_PATH).getString();
-        final ItemBuilder itemBuilder = ItemSerializer.INSTANCE.deserialize(ItemBuilder.class, node.node(ITEM_PATH));
+        final BaseItemBuilder itemBuilder = ItemSerializer.INSTANCE.deserialize(BaseItemBuilder.class, node.node(ITEM_PATH));
         final GuiItem.Builder builder = GuiItem.builder(itemBuilder);
         final List<Consumer<InventoryEventWrapper<InventoryClickEvent>>> clickHandlers = ClickActionSerializer.deserializeAll(node.node(ACTIONS_PATH));
         builder.clickHandler(wrapper -> {
@@ -141,7 +139,7 @@ public class GuiItemSerializer implements TypeSerializer<ConditionalItem> {
                     MessageHandler.sendMessage(user, Message.CANNOT_EDIT_KINGDOM_PERMISSION, role);
                     return;
                 }
-                if ((chunk != null && !kingdom.hasPermission(user, KPermission.EDIT_LOWER_ROLES_PERMISSIONS, chunk)) &&
+                if ((chunk != null && !kingdom.hasPermission(user, KPermission.EDIT_LOWER_ROLES_PERMISSIONS, chunk)) ||
                         (!kingdom.hasPermission(user, KPermission.EDIT_LOWER_ROLES_PERMISSIONS))) {
                     MessageHandler.sendMessage(user, Message.CANNOT_EDIT_KINGDOM_PERMISSION);
                     return;
@@ -168,9 +166,9 @@ public class GuiItemSerializer implements TypeSerializer<ConditionalItem> {
         final RoleManager roleManager = Kingdoms.getPlugin(Kingdoms.class).getRoleManager();
         final Map<Object, Object> metadata = new HashMap<>();
         metadata.put(GuiKeys.SWAP_VALUE_CONSUMER, PERMISSION_SWAP_VALUE_CLICK_ACTION);
-        builder.metadata(metadata);
+        builder.metadata(metadata, true);
         metadata.put(GuiKeys.PERMISSION, permission);
-        builder.metadata(metadata);
+        builder.metadata(metadata, true);
         builder.placeholder((gui, item) -> {
             final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
             if (kingdom == null) return false;
@@ -224,33 +222,34 @@ public class GuiItemSerializer implements TypeSerializer<ConditionalItem> {
         metadata.put(GuiKeys.INCREASE_LEVEL_CONSUMER, UPGRADES_INCREASE_LEVEL_ACTION);
         metadata.put(GuiKeys.UPGRADE_ID, upgradeId);
         metadata.put(GuiKeys.MAX_LEVEL_ITEM, maxLevelItem);
-        builder.metadata(metadata);
-        builder.placeholder((gui, item) -> {
-            final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
-            if (kingdom == null) return false;
-            final Integer upgradeLevel = kingdom.getUpgradeLevel(upgradeId);
-            if (upgradeLevel == null) return false;
-            final Upgrades<?> upgrades = kingdom.getUpgradeHolder().getUpgrades(upgradeId);
-            return new UpgradesWrapper(upgrades, upgradeLevel);
-        });
-        builder.placeholder((gui, item) -> {
-            final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
-            if (kingdom == null) return false;
-            final Integer upgradeLevel = kingdom.getUpgradeLevel(upgradeId);
-            if (upgradeLevel == null) return false;
-            return new UpgradeLevelWrapper(kingdom, upgradeId);
-        });
+        builder.metadata(metadata, true);
+//        builder.placeholder((gui, item) -> {
+//            final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
+//            if (kingdom == null) return false;
+//            final Integer upgradeLevel = kingdom.getUpgradeLevel(upgradeId);
+//            if (upgradeLevel == null) return false;
+//            final Upgrades<?> upgrades = kingdom.getUpgradeHolder().getUpgrades(upgradeId);
+//            return new UpgradesWrapper(upgrades, upgradeLevel);
+//        });
+//        builder.placeholder((gui, item) -> {
+//            final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
+//            if (kingdom == null) return false;
+//            final Integer upgradeLevel = kingdom.getUpgradeLevel(upgradeId);
+//            if (upgradeLevel == null) return false;
+//            return new UpgradeLevelWrapper(kingdom, upgradeId);
+//        });
     }
 
     public static void applyRoleItemData(ConditionalItem.Builder builder, String roleId) {
         final Map<Object, Object> metadata = new HashMap<>();
         metadata.put(GuiKeys.ROLE_ID, roleId);
-        builder.metadata(metadata);
-        builder.placeholder((gui, item) -> {
-            final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
-            if (kingdom == null) return false;
-            return kingdom.getRole(roleId);
-        });
+        builder.metadata(metadata, true);
+    }
+
+    public static void applyMemberItemData(ConditionalItem.Builder builder, User user) {
+        final Map<Object, Object> metadata = new HashMap<>();
+        metadata.put(GuiKeys.KINGDOM_MEMBER, user);
+        builder.metadata(metadata, true);
     }
 
 }

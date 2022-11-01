@@ -1,0 +1,97 @@
+title: <blue>Set %kingdom_member_name%'s role
+id: set-member-role
+rows: 5
+required-metadata:
+  - KINGDOM
+  - ROLE
+  - USER
+border:
+  1:
+    item:
+      material: BLACK_STAINED_GLASS_PANE
+      name: " "
+gui-fillers:
+  roles:
+    conditionals:
+      1:
+        conditions:
+          parse_placeholders:
+            - "%kingdom_member_role_id%==%role_id%"
+        conditionals:
+          1:
+            conditions:
+              parse_placeholders:
+                - "%role_weight%>%gui_user_role_weight%"
+              has_k_permissions:
+                - "set-member-role"
+            item:
+              material: PLAYER_HEAD
+              name: "<blue>%role_display_name%"
+              lore:
+                - ""
+                - "<blue>Weight: %role_weight%"
+                - "<blue>Left click to set"
+              glow: true
+              skull-owner: "%kingdom_member_uuid%"
+            actions:
+              set_member_role:
+                click-types: [ LEFT, RIGHT ]
+          2:
+            item:
+              material: PLAYER_HEAD
+              name: "<blue>%role_display_name%"
+              lore:
+                - ""
+                - "<blue>Weight: %role_weight%"
+                - "<red>You are not allowed to set this role"
+              glow: true
+              skull-owner: "%kingdom_member_uuid%"
+      2:
+        conditionals:
+          1:
+            conditions:
+              parse_placeholders:
+                - "%role_weight%>%gui_user_role_weight%"
+              has_k_permissions:
+                - "set-member-role"
+            item:
+              material: GOLDEN_HELMET
+              name: "<blue>%role_display_name%"
+              lore:
+                - ""
+                - "<blue>Weight: %role_weight%"
+                - "<blue>Left click to set"
+              skull-owner: "%kingdom_member_uuid%"
+            actions:
+              set_member_role:
+                click-types: [ LEFT, RIGHT ]
+          2:
+            item:
+              material: GOLDEN_HELMET
+              name: "<blue>%role_display_name%"
+              lore:
+                - ""
+                - "<blue>Weight: %role_weight%"
+                - "<red>You are not allowed to set this role"
+items:
+  36:
+    item:
+      material: ARROW
+      name: "<blue>Next Page"
+    actions:
+      previous_page:
+        click-types: [ LEFT, RIGHT ]
+  40:
+    item:
+      material: GOLD_INGOT
+      name: "<blue>Go back"
+    actions:
+      previous_gui:
+        click-types: [ LEFT, RIGHT ]
+  44:
+    item:
+      material: ARROW
+      name: "<blue>Next Page"
+    actions:
+      next_page:
+        click-types: [ LEFT, RIGHT ]

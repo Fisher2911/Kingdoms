@@ -4,6 +4,7 @@ public enum GuiFillerType {
 
     UPGRADES,
     PERMISSIONS,
-    ROLES
+    ROLES,
+    KINGDOM_MEMBERS,
 
 }

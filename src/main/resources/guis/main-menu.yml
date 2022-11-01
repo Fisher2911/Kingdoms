@@ -6,15 +6,10 @@ border:
     item:
       material: BLACK_STAINED_GLASS_PANE
       name: " "
+required-metadata:
+  - KINGDOM
+  - USER
 items:
-  #  10:
-  #    item:
-  #      material: EMERALD
-  #      name: "<blue>View Upgrades"
-  #    actions:
-  #      open_menu:
-  #        menu: upgrades
-  #        click-types: [ LEFT, RIGHT ]
   10:
     item:
       material: DIAMOND
@@ -33,25 +28,83 @@ items:
         click-types: [ LEFT, RIGHT ]
   12:
     item:
-      material: RED_WOOL
-      name: "<red>Delete Kingdom"
+      material: PLAYER_HEAD
+      name: "<blue>Members"
     actions:
-      set_items:
-        duration: 40
-        items:
-          12:
-            item:
-              material: BARRIER
-              name: "<red>Confirm"
+      open_menu:
+        menu: members
+        click-types: [ LEFT, RIGHT ]
+  13:
+    conditionals:
+      1:
+        conditions:
+          has_k_permissions:
+            - "teleport-to-kingdom-home"
+        item:
+          material: ENDER_PEARL
+          name: "<blue>Teleport Home"
+        actions:
+          close_menu:
             click-types: [ LEFT, RIGHT ]
+          player_command:
+            command: kingdom home
+            click-types: [ LEFT, RIGHT ]
+      2:
+        item:
+          material: IRON_BARS
+          name: "<red>No Permission!"
+          lore:
+            - ""
+            - "You do not have permission to teleport to your kingdom's home."
+  14:
+    conditionals:
+      1:
+        conditions:
+          has_k_permissions:
+            - "set-kingdom-home"
+        item:
+          material: END_PORTAL_FRAME
+          name: "<blue>Set Kingdom Home"
+        actions:
+          close_menu:
+            click-types: [ LEFT, RIGHT ]
+          player_command:
+            command: kingdom sethome
+            click-types: [ LEFT, RIGHT ]
+      2:
+        item:
+          material: IRON_BARS
+          name: "<red>No Permission!"
+          lore:
+            - ""
+            - "<red>You do not have permission"
+            - "<red>to set your kingdom's home."
+  15:
+    conditionals:
+      1:
+        conditions:
+          parse_placeholders:
+            - "%kingdom_member_role_id%==leader"
+        item:
+          material: RED_WOOL
+          name: "<blue>Disband Kingdom"
+        actions:
+          set_item:
+            click-types: [ LEFT, RIGHT ]
+            duration: 40
+            item:
+              material: RED_WOOL
+              name: "<red>Confirm Disband"
             actions:
               delete_kingdom:
                 click-types: [ LEFT, RIGHT ]
-          13:
-            item:
-              material: BARRIER
-              name: "<red>Some other item"
-            click-types: [ LEFT, RIGHT ]
-            actions:
-              delete_kingdom:
+              close_menu:
                 click-types: [ LEFT, RIGHT ]
+      2:
+        item:
+          material: IRON_BARS
+          name: "<red>No Permission!"
+          lore:
+            - ""
+            - "<red>You do not have permission"
+            - "<red>to disband your kingdom."

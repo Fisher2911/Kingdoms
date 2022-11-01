@@ -33,6 +33,7 @@ public enum Placeholder {
 
     ROLE_DISPLAY_NAME,
     ROLE_WEIGHT,
+    ROLE_ID,
 
     RELATION_DISPLAY_NAME,
 
@@ -43,6 +44,22 @@ public enum Placeholder {
     POSITION_X,
     POSITION_Y,
     POSITION_Z,
+
+    // kingdom + user placeholders
+    KINGDOM_MEMBER_ROLE_DISPLAY_NAME,
+    KINGDOM_MEMBER_ROLE_ID,
+    KINGDOM_MEMBER_ROLE_WEIGHT,
+    KINGDOM_MEMBER_UUID,
+    KINGDOM_MEMBER_NAME,
+
+    TELEPORT_INFO_SECONDS_LEFT,
+
+    GUI_USER_ROLE_ID,
+    GUI_USER_ROLE_WEIGHT,
+    GUI_USER_UUID,
+    GUI_KINGDOM_ID,
+    GUI_KINGDOM_NAME,
+
 
     ;
 

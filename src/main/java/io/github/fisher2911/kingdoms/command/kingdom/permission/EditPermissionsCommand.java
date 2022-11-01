@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class EditPermissionsCommand extends KCommand {
 
@@ -37,13 +38,15 @@ public class EditPermissionsCommand extends KCommand {
                 .supplyAsync(() -> this.kingdomManager.getKingdom(user.getKingdomId(), true))
                 .consumeSync(opt -> opt.ifPresentOrElse(kingdom ->
                         this.guiManager.open(
-                        GuiManager.PERMISSIONS_GUI,
-                        user,
-                        Map.of(
-                                GuiKeys.USER, user,
-                                GuiKeys.KINGDOM, kingdom,
-                                GuiKeys.ROLE_ID, args[0]
-                        )), () -> MessageHandler.sendNotInKingdom(user)))
+                                GuiManager.PERMISSIONS_GUI,
+                                user,
+                                Map.of(
+                                        GuiKeys.USER, user,
+                                        GuiKeys.KINGDOM, kingdom,
+                                        GuiKeys.ROLE_ID, args[0]
+                                ),
+                                Set.of()
+                        ), () -> MessageHandler.sendNotInKingdom(user)))
                 .execute();
     }
 

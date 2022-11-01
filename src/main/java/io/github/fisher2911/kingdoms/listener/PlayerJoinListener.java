@@ -2,6 +2,8 @@ package io.github.fisher2911.kingdoms.listener;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.data.DataManager;
+import io.github.fisher2911.kingdoms.kingdom.Kingdom;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.bukkit.entity.Player;
@@ -35,8 +37,21 @@ public class PlayerJoinListener extends KListener {
     public void onQuit(PlayerQuitEvent event) {
         final User user = this.userManager.removeUser(event.getPlayer().getUniqueId());
         if (user == null) return;
-        this.dataManager.saveUser(user);
-        this.userManager.removeUser(event.getPlayer().getUniqueId());
+        user.onQuit();
+        TaskChain.create(this.plugin)
+                .supplyAsync(() -> {
+                    this.dataManager.saveUser(user);
+                    if (
+                            user.getKingdomId() != Kingdom.WILDERNESS_ID &&
+                                    !this.plugin.getKingdomManager().removeIfCanBeUnloaded(user.getKingdomId())
+                    ) return null;
+                    return user;
+                })
+                .consumeSync(u -> {
+                    if (u == null) return;
+                    this.userManager.removeUser(u.getId());
+                })
+                .execute();
     }
 
 }

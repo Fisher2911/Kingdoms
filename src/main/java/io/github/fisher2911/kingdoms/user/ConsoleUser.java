@@ -112,6 +112,11 @@ public class ConsoleUser implements User {
     }
 
     @Override
+    public void onQuit() {
+
+    }
+
+    @Override
     public boolean isDirty() {
         return false;
     }

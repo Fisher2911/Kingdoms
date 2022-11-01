@@ -16,6 +16,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RoleManager extends Config {
 
@@ -56,11 +58,19 @@ public class RoleManager extends Config {
     private static final String WEIGHT_PATH = "weight";
     
     private static final String LEADER_ROLE_ID = "leader";
-    private static final String DEFAULT_ROLE_ID = "member";
+    private static final String MEMBER_ROLE_ID = "member";
     private static final String ENEMY_ROLE_ID = "enemy";
     private static final String NEUTRAL_ROLE_ID = "neutral";
     private static final String TRUCE_ROLE_ID = "truce";
     private static final String ALLY_ROLE_ID = "ally";
+
+    public static final Set<String> UNSETTABLE_ROLES = Set.of(
+            LEADER_ROLE_ID,
+            ENEMY_ROLE_ID,
+            NEUTRAL_ROLE_ID,
+            TRUCE_ROLE_ID,
+            ALLY_ROLE_ID
+    );
 
     public static final String PERMISSIONS = "permissions";
 
@@ -78,7 +88,7 @@ public class RoleManager extends Config {
             
             final var roles = source.node(ROLES_PATH);
             this.leaderRole = this.loadRole(source, LEADER_ROLE_ID);
-            this.defaultRole = this.loadRole(source, DEFAULT_ROLE_ID);
+            this.defaultRole = this.loadRole(source, MEMBER_ROLE_ID);
             this.enemyRole = this.loadRole(source, ENEMY_ROLE_ID);
             this.neutralRole = this.loadRole(source, NEUTRAL_ROLE_ID);
             this.truceRole = this.loadRole(source, TRUCE_ROLE_ID);
@@ -109,7 +119,7 @@ public class RoleManager extends Config {
         return kingdom.getRole(this.leaderRole.id());
     }
 
-    public Role getDefaultRole(Kingdom kingdom) {
+    public Role getMemberRole(Kingdom kingdom) {
         return kingdom.getRole(this.defaultRole.id());
     }
 
@@ -133,7 +143,7 @@ public class RoleManager extends Config {
         return this.leaderRole.id();
     }
 
-    public String getDefaultRoleId() {
+    public String getMemberRoleId() {
         return this.defaultRole.id();
     }
 
@@ -168,6 +178,12 @@ public class RoleManager extends Config {
 
     public Collection<String> getAllRoleIds() {
         return this.roles.keySet();
+    }
+
+    public Collection<String> getSettableRoles(Kingdom kingdom) {
+        return kingdom.getRoles().keySet().stream()
+                .filter(id -> !UNSETTABLE_ROLES.contains(id))
+                .collect(Collectors.toSet());
     }
 
     public PermissionContainer getDefaultRolePermissions() {

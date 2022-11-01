@@ -4,6 +4,8 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.economy.TransactionResult;
+import io.github.fisher2911.kingdoms.gui.BaseGui;
+import io.github.fisher2911.kingdoms.gui.GuiKeys;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
@@ -13,6 +15,8 @@ import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.PermissionWrapper;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradeLevelWrapper;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
+import io.github.fisher2911.kingdoms.placeholder.wrapper.UserKingdomWrapper;
+import io.github.fisher2911.kingdoms.teleport.TeleportInfo;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.util.MapOfMaps;
 import io.github.fisher2911.kingdoms.world.KChunk;
@@ -134,6 +138,11 @@ public class PlaceholderBuilder {
                 r -> castAndParseKRole(r, Role::weight)
         );
 
+        put(Role.class,
+                Placeholder.ROLE_ID,
+                r -> castAndParseKRole(r, Role::id)
+        );
+
         put(RelationType.class,
                 Placeholder.RELATION_DISPLAY_NAME,
                 r -> castAndParseRelationType(r, RelationType::displayName)
@@ -160,6 +169,75 @@ public class PlaceholderBuilder {
         put(WorldPosition.class,
                 Placeholder.POSITION_Z,
                 w -> castAndParse(WorldPosition.class, w, p -> POSITION_FORMAT.format(p.position().z()))
+        );
+
+        put(UserKingdomWrapper.class,
+                Placeholder.KINGDOM_MEMBER_ROLE_DISPLAY_NAME,
+                w -> castAndParse(UserKingdomWrapper.class, w, u -> u.kingdom().getRole(u.user()).displayName())
+        );
+        put(UserKingdomWrapper.class,
+                Placeholder.KINGDOM_MEMBER_ROLE_ID,
+                w -> castAndParse(UserKingdomWrapper.class, w, u -> u.kingdom().getRole(u.user()).id())
+        );
+        put(UserKingdomWrapper.class,
+                Placeholder.KINGDOM_MEMBER_ROLE_WEIGHT,
+                w -> castAndParse(UserKingdomWrapper.class, w, u -> u.kingdom().getRole(u.user()).weight())
+        );
+        put(UserKingdomWrapper.class,
+                Placeholder.KINGDOM_MEMBER_UUID,
+                w -> castAndParse(UserKingdomWrapper.class, w, u -> u.user().getId())
+        );
+        put(UserKingdomWrapper.class,
+                Placeholder.KINGDOM_MEMBER_NAME,
+                w -> castAndParse(UserKingdomWrapper.class, w, u -> u.user().getName())
+        );
+
+        put(TeleportInfo.class,
+                Placeholder.TELEPORT_INFO_SECONDS_LEFT,
+                t -> castAndParse(TeleportInfo.class, t, TeleportInfo::getSecondsLeft)
+        );
+
+        put(BaseGui.class,
+                Placeholder.GUI_USER_ROLE_ID,
+                g -> castAndParse(BaseGui.class, g, b -> {
+                    final Kingdom kingdom = b.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
+                    final User user = b.getMetadata(GuiKeys.USER, User.class);
+                    if (kingdom == null || user == null) return null;
+                    return kingdom.getRole(user).id();
+                })
+        );
+        put(BaseGui.class,
+                Placeholder.GUI_USER_ROLE_WEIGHT,
+                g -> castAndParse(BaseGui.class, g, b -> {
+                    final Kingdom kingdom = b.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
+                    final User user = b.getMetadata(GuiKeys.USER, User.class);
+                    if (kingdom == null || user == null) return null;
+                    return kingdom.getRole(user).weight();
+                })
+        );
+        put(BaseGui.class,
+                Placeholder.GUI_USER_UUID,
+                g -> castAndParse(BaseGui.class, g, b -> {
+                    final User user = b.getMetadata(GuiKeys.USER, User.class);
+                    if (user == null) return null;
+                    return user.getId();
+                })
+        );
+        put(BaseGui.class,
+                Placeholder.GUI_KINGDOM_ID,
+                g -> castAndParse(BaseGui.class, g, b -> {
+                    final Kingdom kingdom = b.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
+                    if (kingdom == null) return null;
+                    return kingdom.getId();
+                })
+        );
+        put(BaseGui.class,
+                Placeholder.GUI_KINGDOM_NAME,
+                g -> castAndParse(BaseGui.class, g, b -> {
+                    final Kingdom kingdom = b.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
+                    if (kingdom == null) return null;
+                    return kingdom.getName();
+                })
         );
     }
 
@@ -205,6 +283,10 @@ public class PlaceholderBuilder {
         return castAndParse(RelationType.class, o, parse);
     }
 
+    private static Object castAndParseUserKingdomWrapper(Object o, Function<UserKingdomWrapper, Object> parse) {
+        return castAndParse(UserKingdomWrapper.class, o, parse);
+    }
+
     private static <T> Object castAndParse(Class<T> clazz, Object o, Function<T, Object> parse) {
         return parse.apply(clazz.cast(o));
     }
@@ -247,10 +329,12 @@ public class PlaceholderBuilder {
     private static String replaceSuperClasses(String s, Object o) {
         var superClass = o.getClass();
         Map<Placeholder, Function<Object, Object>> map = null;
-        while (superClass != null && map == null) {
+        while (superClass != null && (map == null || map.isEmpty())) {
             s = replaceInterfaces(s, o, superClass);
             map = placeholders.get(superClass);
+            if (map != null && !map.isEmpty()) break;
             superClass = superClass.getSuperclass();
+            map = placeholders.get(superClass);
         }
         if (map == null) return s;
         for (var entry : map.entrySet()) {
@@ -267,49 +351,5 @@ public class PlaceholderBuilder {
         }
         return original.replace(key, String.valueOf(value));
     }
-//
-//    public static Component apply(Component component, Object... objects) {
-//        for (Object o : objects) {
-//            component = replaceSuperClasses(component, o);
-//        }
-//        return component;
-//    }
-//
-//    private static Component replaceInterfaces(Component component, Class<?> clazz, Object o) {
-//        for (Class<?> i : clazz.getInterfaces()) {
-//            final var map = placeholders.get(i);
-//            if (map == null) continue;
-//            for (var entry : map.entrySet()) {
-//                final String key = entry.getKey().toString();
-//                final Object value = entry.getValue().apply(o);
-//                component = replace(component, key, value);
-//            }
-//        }
-//        return component;
-//    }
-//
-//    private static Component replaceSuperClasses(Component component, Object o) {
-//        var superClass = o.getClass();
-//        Map<Placeholder, Function<Object, Object>> map = null;
-//        while (superClass != null && map == null) {
-//            map = placeholders.get(superClass);
-//            component = replaceInterfaces(component, superClass, o);
-//            superClass = superClass.getSuperclass();
-//        }
-//        if (map == null) return component;
-//        for (var entry : map.entrySet()) {
-//            final String key = entry.getKey().toString();
-//            final Object value = entry.getValue().apply(o);
-//            component = replace(component, key, value);
-//        }
-//        return component;
-//    }
-//
-//    private static Component replace(Component original, String key, Object value) {
-//        if (value instanceof Component component) {
-//            return original.replaceText(builder -> builder.matchLiteral(key).replacement(component));
-//        }
-//        return original.replaceText(builder -> builder.matchLiteral(key).replacement(String.valueOf(value)));
-//    }
 
 }

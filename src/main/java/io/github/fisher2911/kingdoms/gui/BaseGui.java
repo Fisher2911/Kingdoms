@@ -59,12 +59,13 @@ public abstract class BaseGui implements InventoryHolder {
             List<ConditionalItem> border
     ) {
         this.metadata = metadata;
+        this.metadata.set(GuiKeys.GUI, this);
         this.id = id;
         this.name = name;
         this.rows = rows;
         this.guiItemsMap = guiItemsMap;
-        this.repeatPageSlots = repeatPageSlots;
-        final List<Object> placeholders = this.metadata.getMetadata().keySet()
+        final List<Object> placeholders = GuiKeys.toPlaceholders(this.metadata);
+        /*this.metadata.get().keySet()
                 .stream()
                 .map(o -> {
                     final var function = PLACEHOLDER_MAPPERS.get(o);
@@ -73,7 +74,9 @@ public abstract class BaseGui implements InventoryHolder {
                 })
                 .filter(o -> o != null)
                 .collect(Collectors.toList());
-        placeholders.add(this);
+        placeholders.add(this);*/
+
+        this.repeatPageSlots = repeatPageSlots;
         this.inventory = Bukkit.createInventory(
                 this,
                 this.rows * 9,
@@ -310,7 +313,7 @@ public abstract class BaseGui implements InventoryHolder {
 
     @Nullable
     public <T> T getMetadata(Object key, Class<T> clazz) {
-        return this.metadata.getMetadata(key, clazz);
+        return this.metadata.get(key, clazz);
     }
 
     @Nullable

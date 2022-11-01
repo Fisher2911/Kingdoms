@@ -2,10 +2,11 @@ package io.github.fisher2911.kingdoms.config.condition.impl;
 
 import io.github.fisher2911.kingdoms.config.condition.ConditionOperation;
 import io.github.fisher2911.kingdoms.config.condition.MetadataPredicate;
+import io.github.fisher2911.kingdoms.gui.GuiKeys;
+import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.placeholder.PlaceholderBuilder;
 import io.github.fisher2911.kingdoms.util.Metadata;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -25,15 +26,20 @@ public class PlaceholderConditionals implements MetadataPredicate {
     }
 
     public boolean test(Metadata possible) {
-        final List<Object> placeholders = new ArrayList<>();
-        for (var function : this.placeholderFunctions) {
-            placeholders.addAll(function.apply(possible));
-        }
+//        final List<Object> placeholders = new ArrayList<>();
+//        for (var function : this.placeholderFunctions) {
+//            placeholders.addAll(function.apply(possible));
+//        }
+        final Object[] placeholders = GuiKeys.toPlaceholders(possible).toArray();
         final String parsed = PlaceholderBuilder.apply(
                 this.toParse,
-                placeholders.toArray()
+                placeholders
         );
-        return this.operation.test(parsed, this.value);
+        final String parsedValue = PlaceholderBuilder.apply(
+                this.value,
+                placeholders
+        );
+        return this.operation.test(parsed, parsedValue);
     }
 
     public String getToParse() {

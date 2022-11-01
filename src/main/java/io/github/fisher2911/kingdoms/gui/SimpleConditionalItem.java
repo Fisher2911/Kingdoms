@@ -25,7 +25,7 @@ public class SimpleConditionalItem extends ConditionalItem {
 
     @Override
     public BaseGuiItem getItem(Metadata metadata) {
-        return this.item.withPlaceholders(this.placeholders);
+        return this.item.withMetaData(metadata, false).withPlaceholders(this.placeholders);
     }
 
     public static class Builder extends ConditionalItem.Builder {

@@ -29,7 +29,7 @@ public class ConditionalItem {
 
     @Nullable
     public <T> T getMetadata(Object key, Class<T> clazz) {
-        return this.metadata.getMetadata(key, clazz);
+        return this.metadata.get(key, clazz);
     }
 
     @Nullable
@@ -46,10 +46,10 @@ public class ConditionalItem {
     }
 
     public BaseGuiItem getItem(Metadata metadata) {
-        final Metadata full = metadata.copyWith(this.metadata);
+        final Metadata full = this.metadata.copyWith(metadata, false);
         for (final ItemConditional conditions : this.conditionalItems) {
             if (conditions.test(full)) {
-                return conditions.getItem().getItem(full).withPlaceholders(this.placeholders).withMetaData(full);
+                return conditions.getItem().getItem(full).withPlaceholders(this.placeholders).withMetaData(full, false);
             }
         }
         return GuiItem.air();
@@ -92,8 +92,8 @@ public class ConditionalItem {
             this.placeholders = new ArrayList<>(item.placeholders);
         }
 
-        public Builder metadata(Map<Object, Object> metadata) {
-            this.metadata.putAll(metadata);
+        public Builder metadata(Map<Object, Object> metadata, boolean overwrite) {
+            this.metadata.putAll(metadata, overwrite);
             return this;
         }
 

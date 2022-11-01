@@ -57,6 +57,11 @@ public class BukkitUser implements User {
     }
 
     @Override
+    public void onQuit() {
+        this.player = null;
+    }
+
+    @Override
     public UUID getId() {
         return this.uuid;
     }

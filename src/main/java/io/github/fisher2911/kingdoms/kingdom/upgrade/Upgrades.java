@@ -1,7 +1,7 @@
 package io.github.fisher2911.kingdoms.kingdom.upgrade;
 
 import io.github.fisher2911.kingdoms.economy.Price;
-import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
+import io.github.fisher2911.kingdoms.util.builder.BaseItemBuilder;
 import org.jetbrains.annotations.Nullable;
 
 public interface Upgrades<T> {
@@ -14,7 +14,7 @@ public interface Upgrades<T> {
     Price getPriceAtLevel(int level);
     String getDisplayName();
     int getMaxLevel();
-    ItemBuilder getGuiItem();
-    ItemBuilder getMaxLevelGuiItem();
+    BaseItemBuilder getGuiItem();
+    BaseItemBuilder getMaxLevelGuiItem();
 
 }

@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GuiManager {
 
@@ -18,12 +19,15 @@ public class GuiManager {
     public static final String PERMISSIONS_GUI = "permissions";
     public static final String ROLES_GUI = "roles";
     public static final String UPGRADES_GUI = "upgrades";
+    public static final String MEMBERS_GUI = "members";
 
     private static final List<String> DEFAULT_FILES = List.of(
             "permissions.yml",
             "main-menu.yml",
             "roles-menu.yml",
-            "upgrades.yml"
+            "upgrades.yml",
+            "members.yml",
+            "set-member-role.yml"
     );
 
     private final Path guiFolder;
@@ -43,10 +47,10 @@ public class GuiManager {
         opener.open(user);
     }
 
-    public void open(String gui, User user, Map<Object, Object> metadata) {
+    public void open(String gui, User user, Map<Object, Object> metadata, Set<Object> keysToOverwrite) {
         final GuiOpener opener = this.guiMap.get(gui);
         if (opener == null) return;
-        opener.open(user, metadata);
+        opener.open(user, metadata, keysToOverwrite);
     }
 
     public void load() {

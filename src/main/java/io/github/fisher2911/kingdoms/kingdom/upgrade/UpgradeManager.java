@@ -78,7 +78,7 @@ public class UpgradeManager extends Config {
 //                valueExpression,
 //                priceExpression,
 //                10,
-//                ItemBuilder.from(Material.GRASS_BLOCK).
+//                BaseItemBuilder.from(Material.GRASS_BLOCK).
 //                        name("<blue>" + Placeholder.UPGRADE_DISPLAY_NAME).
 //                        lore(List.of(
 //                                "",
@@ -86,7 +86,7 @@ public class UpgradeManager extends Config {
 //                                "<red>$" + Placeholder.UPGRADE_DISPLAY_PRICE,
 //                                "<gray>Max Claims: " + Placeholder.UPGRADE_DISPLAY_VALUE
 //                        )),
-//                ItemBuilder.from(Material.BARRIER).
+//                BaseItemBuilder.from(Material.BARRIER).
 //                        name("<blue>" + Placeholder.UPGRADE_DISPLAY_NAME).
 //                        lore(List.of(
 //                                "",
@@ -101,7 +101,7 @@ public class UpgradeManager extends Config {
 //                valueExpression,
 //                priceExpression,
 //                2,
-//                ItemBuilder.from(Material.IRON_BARS).
+//                BaseItemBuilder.from(Material.IRON_BARS).
 //                        name("<blue>" + Placeholder.UPGRADE_DISPLAY_NAME).
 //                        lore(List.of(
 //                                "",
@@ -109,7 +109,7 @@ public class UpgradeManager extends Config {
 //                                "<red>$" + Placeholder.UPGRADE_DISPLAY_PRICE,
 //                                "<gray>Members: " + Placeholder.UPGRADE_DISPLAY_VALUE
 //                        )),
-//                ItemBuilder.from(Material.BARRIER).
+//                BaseItemBuilder.from(Material.BARRIER).
 //                        name("<blue>" + Placeholder.UPGRADE_DISPLAY_NAME).
 //                        lore(List.of(
 //                                "",
@@ -127,7 +127,7 @@ public class UpgradeManager extends Config {
 //                bankValueExpression,
 //                bankPriceExpression,
 //                6,
-//                ItemBuilder.from(Material.EMERALD_BLOCK).
+//                BaseItemBuilder.from(Material.EMERALD_BLOCK).
 //                        name("<blue>" + Placeholder.UPGRADE_DISPLAY_NAME).
 //                        lore(List.of(
 //                                "",
@@ -135,7 +135,7 @@ public class UpgradeManager extends Config {
 //                                "<red> $" + Placeholder.UPGRADE_DISPLAY_PRICE,
 //                                "<gray>Bank Limit: " + Placeholder.UPGRADE_DISPLAY_VALUE
 //                        )),
-//                ItemBuilder.from(Material.BARRIER).
+//                BaseItemBuilder.from(Material.BARRIER).
 //                        name("<blue>" + Placeholder.UPGRADE_DISPLAY_NAME).
 //                        lore(List.of(
 //                                "",

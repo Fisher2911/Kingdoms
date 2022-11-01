@@ -13,7 +13,7 @@ public class Metadata {
         this.metadata = metadata;
     }
 
-    public Map<Object, Object> getMetadata() {
+    public Map<Object, Object> get() {
         return metadata;
     }
 
@@ -29,14 +29,23 @@ public class Metadata {
         return new Metadata(new HashMap<>(this.metadata));
     }
 
-    public Metadata copyWith(Metadata metadata) {
+    public Metadata copyWith(Metadata metadata, boolean overwrite) {
         final Map<Object, Object> newMap = new HashMap<>(this.metadata);
-        newMap.putAll(metadata.getMetadata());
+        if (overwrite) {
+            newMap.putAll(metadata.get());
+        } else {
+            metadata.get().forEach((key, value) -> {
+                if (!newMap.containsKey(key)) {
+                    newMap.put(key, value);
+                }
+            });
+        }
+        newMap.putAll(metadata.get());
         return new Metadata(newMap);
     }
 
     @Nullable
-    public <T> T getMetadata(Object key, Class<T> clazz) {
+    public <T> T get(Object key, Class<T> clazz) {
         final Object o = this.metadata.get(key);
         if (o == null) return null;
         if (!clazz.isInstance(o)) return null;
@@ -52,17 +61,33 @@ public class Metadata {
         this.metadata.put(key, value);
     }
 
+    public void set(Object key, Object value, boolean overwrite) {
+        if (overwrite) {
+            this.metadata.put(key, value);
+            return;
+        }
+        this.metadata.putIfAbsent(key, value);
+    }
+
     public void set(Map<Object, Object> metadata) {
         this.metadata.clear();
         this.metadata.putAll(metadata);
     }
 
-    public void putAll(Map<Object, Object> metadata) {
-        this.metadata.putAll(metadata);
+    public void putAll(Map<Object, Object> metadata, boolean overwrite) {
+        if (overwrite) {
+            this.metadata.putAll(metadata);
+        } else {
+            metadata.forEach((key, value) -> {
+                if (!this.metadata.containsKey(key)) {
+                    this.metadata.put(key, value);
+                }
+            });
+        }
     }
 
-    public void putAll(Metadata metadata) {
-        this.metadata.putAll(metadata.getMetadata());
+    public void putAll(Metadata metadata, boolean overwrite) {
+        this.putAll(metadata.get(), overwrite);
     }
 
     @Override

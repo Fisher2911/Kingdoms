@@ -16,6 +16,8 @@ public enum ClickAction {
     DELETE_KINGDOM,
     SEND_DATA,
     PREVIOUS_GUI,
+    SET_MEMBER_ROLE,
+    KICK_MEMBER,
     NONE
 
 }

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SetRoleCommand extends KCommand {
 
@@ -51,9 +52,17 @@ public class SetRoleCommand extends KCommand {
         if (args.length != 1) return Collections.emptyList();
         final String arg = args[0];
         final List<String> tabs = new ArrayList<>();
-        for (String role : this.roleManager.getAllRoleIds()) {
-            if (role.startsWith(arg)) tabs.add(role);
-        }
-        return tabs;
+        return this.kingdomManager.getKingdom(user.getKingdomId(), false)
+                .map(kingdom -> kingdom.getRoles().keySet()
+                        .stream()
+                        .filter(RoleManager.UNSETTABLE_ROLES::contains)
+                        .filter(roleId -> roleId.startsWith(arg))
+                        .collect(Collectors.toList())).
+                orElse(tabs);
+//        if (optKingdom.isEmpty()) return Collections.emptyList();
+//        for (String role : this.roleManager.getSettableRoles(op)) {
+//            if (role.startsWith(arg)) tabs.add(role);
+//        }
+//        return tabs;
     }
 }

@@ -36,5 +36,6 @@ public interface User extends Saveable {
     @Nullable
     WorldPosition getPosition();
     void onJoin(Player player);
+    void onQuit();
 
 }

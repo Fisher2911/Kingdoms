@@ -12,19 +12,30 @@ border:
       name: " "
 gui-fillers:
   roles:
-    item:
-      material: PAPER
-      name: "<blue>%role_display_name%"
-      lore:
-        - "<blue>Weight: %role_weight%"
-    actions:
-      send_data:
-        click-types: [ LEFT, RIGHT ]
-        data:
-          - "role_id"
-      open_menu:
-        menu: permissions
-        click-types: [ LEFT, RIGHT ]
+    conditionals:
+      1:
+        conditions:
+          parse_placeholders:
+            - "%role_weight%>=%kingdom_member_role_weight%"
+        item:
+          material: PAPER
+          name: "<blue>%role_display_name%"
+          lore:
+            - "<blue>Weight: %role_weight%"
+        actions:
+          send_data:
+            click-types: [ LEFT, RIGHT ]
+            data:
+              - "role_id"
+          open_menu:
+            menu: permissions
+            click-types: [ LEFT, RIGHT ]
+      2:
+        item:
+          material: BARRIER
+          name: "<blue>%role_display_name%"
+          lore:
+            - "<blue>Weight: %role_weight%"
 items:
   36:
     item:

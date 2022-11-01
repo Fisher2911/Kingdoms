@@ -8,6 +8,7 @@ import io.github.fisher2911.kingdoms.util.function.TriConsumer;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GuiOpener {
 
@@ -30,11 +31,17 @@ public class GuiOpener {
                 if (!user.isOnline()) return;
                 builder.metadata(GuiKeys.CHUNK, PLUGIN.getWorldManager().getAt(user.getPlayer().getLocation()));
             },
-            GuiKeys.ROLE_ID, (builder, user, kingdom) -> builder.metadata(GuiKeys.ROLE_ID, kingdom.getRole(user).id())
+            GuiKeys.ROLE_ID, (builder, user, kingdom) -> builder.metadata(GuiKeys.ROLE_ID, kingdom.getRole(user).id())/*,
+            GuiKeys.USER_KINGDOM_WRAPPER, (builder, user, kingdom) -> builder.metadata(GuiKeys.USER_KINGDOM_WRAPPER, new UserKingdomWrapper(user, kingdom), false)*/
     );
 
-    public void open(User user, Map<Object, Object> metadata) {
-        final Gui.Builder copy = this.builder.copy().metadata(metadata);
+    public void open(User user, Map<Object, Object> metadata, Set<Object> keysToOverwrite) {
+        final Gui.Builder copy = this.builder.copy().metadata(metadata, true);
+        for (Object key : keysToOverwrite) {
+            final Object o = metadata.get(key);
+            if (o == null) continue;
+            copy.metadata(key, o);
+        }
         copy.metadata(GuiKeys.USER, user);
         if (!user.isOnline()) return;
         TaskChain.create(PLUGIN)
@@ -52,7 +59,7 @@ public class GuiOpener {
     }
 
     public void open(User user) {
-        this.open(user, Map.of());
+        this.open(user, Map.of(), Set.of());
     }
 
     public String getId() {

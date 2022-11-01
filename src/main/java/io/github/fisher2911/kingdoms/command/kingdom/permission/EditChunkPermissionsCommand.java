@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class EditChunkPermissionsCommand extends KCommand {
 
@@ -54,7 +55,9 @@ public class EditChunkPermissionsCommand extends KCommand {
                                         GuiKeys.USER, user,
                                         GuiKeys.ROLE_ID, args[0],
                                         GuiKeys.CHUNK, chunk
-                                )), () -> MessageHandler.sendNotInKingdom(user)))
+                                ),
+                                Set.of()
+                        ), () -> MessageHandler.sendNotInKingdom(user)))
                 .execute();
     }
 

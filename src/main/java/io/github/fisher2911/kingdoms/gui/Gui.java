@@ -161,13 +161,18 @@ public class Gui extends BaseGui {
             return this;
         }
 
-        public Builder metadata(Map<Object, Object> metadata) {
-            this.metadata.putAll(metadata);
+        public Builder metadata(Object key, Object value, boolean overwrite) {
+            this.metadata.set(key, value, overwrite);
             return this;
         }
 
-        public Builder metadata(Metadata metadata) {
-            this.metadata.putAll(metadata);
+        public Builder metadata(Map<Object, Object> metadata, boolean overwrite) {
+            this.metadata.putAll(metadata, overwrite);
+            return this;
+        }
+
+        public Builder metadata(Metadata metadata, boolean overwrite) {
+            this.metadata.putAll(metadata, overwrite);
             return this;
         }
 
@@ -265,7 +270,7 @@ public class Gui extends BaseGui {
                     .rows(this.rows)
                     .items(this.guiItemsMap)
                     .repeatPageSlots(this.repeatPageSlots)
-                    .metadata(this.metadata)
+                    .metadata(this.metadata, true)
                     .playerInventoryClickHandler(this.playerInventoryClickHandler)
                     .defaultEventHandlers(this.defaultEventHandlers)
                     .closeHandler(this.closeHandler)

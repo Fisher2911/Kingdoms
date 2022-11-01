@@ -2,7 +2,7 @@ package io.github.fisher2911.kingdoms.kingdom.upgrade;
 
 import io.github.fisher2911.kingdoms.config.serializer.ItemSerializer;
 import io.github.fisher2911.kingdoms.economy.Price;
-import io.github.fisher2911.kingdoms.util.builder.ItemBuilder;
+import io.github.fisher2911.kingdoms.util.builder.BaseItemBuilder;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.jetbrains.annotations.Nullable;
@@ -20,10 +20,10 @@ public abstract class NumberUpgrades<T extends Number> implements Upgrades<T> {
     protected final Expression expression;
     protected final Expression moneyPriceExpression;
     protected final int maxLevel;
-    protected final ItemBuilder displayItem;
-    protected final ItemBuilder maxLevelDisplayItem;
+    protected final BaseItemBuilder displayItem;
+    protected final BaseItemBuilder maxLevelDisplayItem;
 
-    public NumberUpgrades(String id, String displayName, Expression valueExpression, Expression moneyPriceExpression, int maxLevel, ItemBuilder displayItem, ItemBuilder maxLevelDisplayItem) {
+    public NumberUpgrades(String id, String displayName, Expression valueExpression, Expression moneyPriceExpression, int maxLevel, BaseItemBuilder displayItem, BaseItemBuilder maxLevelDisplayItem) {
         this.id = id;
         this.displayName = displayName;
         this.expression = valueExpression;
@@ -55,12 +55,12 @@ public abstract class NumberUpgrades<T extends Number> implements Upgrades<T> {
     }
 
     @Override
-    public ItemBuilder getGuiItem() {
+    public BaseItemBuilder getGuiItem() {
         return this.displayItem;
     }
 
     @Override
-    public ItemBuilder getMaxLevelGuiItem() {
+    public BaseItemBuilder getMaxLevelGuiItem() {
         return this.maxLevelDisplayItem;
     }
 
@@ -94,8 +94,8 @@ public abstract class NumberUpgrades<T extends Number> implements Upgrades<T> {
             final Expression expression = new ExpressionBuilder(node.node(EXPRESSION).getString("")).variable(CURRENT_LEVEL_VARIABLE).build();
             final Expression moneyPriceExpression = new ExpressionBuilder(node.node(MONEY_PRICE_EXPRESSION).getString("")).variable(CURRENT_LEVEL_VARIABLE).build();
             final int maxLevel = node.node(MAX_LEVEL).getInt();
-            final ItemBuilder displayItem = ItemSerializer.INSTANCE.deserialize(ItemBuilder.class, node.node(DISPLAY_ITEM));
-            final ItemBuilder maxLevelDisplayItem = ItemSerializer.INSTANCE.deserialize(ItemBuilder.class, node.node(MAX_LEVEL_DISPLAY_ITEM));
+            final BaseItemBuilder displayItem = ItemSerializer.INSTANCE.deserialize(BaseItemBuilder.class, node.node(DISPLAY_ITEM));
+            final BaseItemBuilder maxLevelDisplayItem = ItemSerializer.INSTANCE.deserialize(BaseItemBuilder.class, node.node(MAX_LEVEL_DISPLAY_ITEM));
             return switch (type.toLowerCase()) {
                 case DOUBLE_UPGRADE_TYPE -> new DoubleUpgrades(id, displayName, expression, moneyPriceExpression, maxLevel, displayItem, maxLevelDisplayItem);
                 case INT_UPGRADE_TYPE -> new IntUpgrades(id, displayName, expression, moneyPriceExpression, maxLevel, displayItem, maxLevelDisplayItem);

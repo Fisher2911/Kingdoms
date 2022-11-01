@@ -11,6 +11,7 @@ import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 
 import java.util.Map;
+import java.util.Set;
 
 public class UpgradeCommand extends KCommand {
 
@@ -32,7 +33,8 @@ public class UpgradeCommand extends KCommand {
                             Map.of(
                                     GuiKeys.USER, user,
                                     GuiKeys.KINGDOM, kingdom
-                            )
+                            ),
+                            Set.of()
                     );
                 }, () -> MessageHandler.sendNotInKingdom(user)))
                 .execute();
