@@ -56,7 +56,7 @@ public class ClaimManager {
     }
 
     public void tryClaim(User user, Kingdom kingdom, ClaimedChunk chunk) {
-        if (!kingdom.hasPermission(user, KPermission.CLAIM_LAND, chunk)) {
+        if (!kingdom.hasPermission(user, KPermission.CLAIM_LAND)) {
             MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
             return;
         }
@@ -76,7 +76,7 @@ public class ClaimManager {
         );
         this.worldManager.setChunk(claimedChunk);
         kingdom.addClaimedChunk(claimedChunk);
-        MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_CLAIM, chunk.getChunk());
+        MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_CLAIM, claimedChunk.getChunk());
     }
 
     public void tryUnClaim(User user, Chunk chunk, boolean searchDatabase) {

@@ -65,6 +65,8 @@ public class KPermission {
     public static final KPermission VIEW_BANK_BALANCE = register("view-bank-balance", PermissionContext.KINGDOM);
     public static final KPermission SET_KINGDOM_HOME = register("set-kingdom-home", PermissionContext.KINGDOM);
     public static final KPermission TELEPORT_TO_KINGDOM_HOME = register("teleport-to-kingdom-home", PermissionContext.KINGDOM);
+    public static final KPermission SET_KINGDOM_NAME = register("set-kingdom-name", PermissionContext.KINGDOM);
+    public static final KPermission SET_KINGDOM_DESCRIPTION = register("set-kingdom-description", PermissionContext.KINGDOM);
 
     public static Collection<KPermission> values() {
         return allPermissions.values();

@@ -108,6 +108,10 @@ public class MessageHandler extends Config {
         audience.sendMessage(component);
     }
 
+    public static Component deserialize(String s, Object... placeholders) {
+        return MINI_MESSAGE.deserialize(PlaceholderBuilder.apply(s, placeholders));
+    }
+
     public static void sendNotInKingdom(User user) {
         sendMessage(user, Message.NOT_IN_KINGDOM);
     }

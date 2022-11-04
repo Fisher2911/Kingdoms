@@ -3,6 +3,7 @@ package io.github.fisher2911.kingdoms.command.kingdom.upgrade;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
+import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.gui.GuiKeys;
 import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
@@ -17,8 +18,8 @@ public class UpgradeCommand extends KCommand {
 
     private final KingdomManager kingdomManager;
 
-    public UpgradeCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
-        super(plugin, "upgrades", null, CommandSenderType.PLAYER, 0, 1, subCommands);
+    public UpgradeCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
+        super(plugin, parent, "upgrades", null, CommandSenderType.PLAYER, 0, 1, subCommands);
         this.kingdomManager = this.plugin.getKingdomManager();
     }
 
@@ -40,8 +41,8 @@ public class UpgradeCommand extends KCommand {
                 .execute();
     }
 
-    @Override
-    public void sendHelp(User user, String[] args, String[] previousArgs) {
-        MessageHandler.sendMessage(user, "/k upgrades");
-    }
+//    @Override
+//    public void sendHelp(User user, String[] args, String[] previousArgs) {
+//        MessageHandler.sendMessage(user, "/k upgrades");
+//    }
 }

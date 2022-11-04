@@ -37,7 +37,6 @@ import io.github.fisher2911.kingdoms.util.Pair;
 import io.github.fisher2911.kingdoms.world.KChunk;
 import io.github.fisher2911.kingdoms.world.Position;
 import io.github.fisher2911.kingdoms.world.WorldPosition;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,8 +63,8 @@ public class DataManager {
     // --------------- Kingdom Table ---------------
     private static final String KINGDOM_TABLE_NAME = "kingdoms";
     private static final SQLField KINGDOM_ID_COLUMN = new SQLIdField(KINGDOM_TABLE_NAME, "id", SQLType.INTEGER, SQLKeyType.PRIMARY_KEY, true);
-    private static final SQLField KINGDOM_NAME_COLUMN = new SQLField(KINGDOM_TABLE_NAME, "name", SQLType.varchar(30));
-    private static final SQLField KINGDOM_DESCRIPTION_COLUMN = new SQLField(KINGDOM_TABLE_NAME, "description", SQLType.varchar(255));
+    private static final SQLField KINGDOM_NAME_COLUMN = new SQLField(KINGDOM_TABLE_NAME, "name", SQLType.varchar());
+    private static final SQLField KINGDOM_DESCRIPTION_COLUMN = new SQLField(KINGDOM_TABLE_NAME, "description", SQLType.varchar());
     private static final SQLTable KINGDOM_TABLE = SQLTable.builder(KINGDOM_TABLE_NAME)
             .addFields(KINGDOM_ID_COLUMN, KINGDOM_NAME_COLUMN, KINGDOM_DESCRIPTION_COLUMN)
             .build();

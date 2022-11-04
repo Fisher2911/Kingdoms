@@ -3,6 +3,7 @@ package io.github.fisher2911.kingdoms.command.kingdom.claim;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
+import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimMode;
 import io.github.fisher2911.kingdoms.message.Message;
@@ -19,8 +20,8 @@ public class AutoSubCommand extends KCommand {
 
     private final ClaimManager claimManager;
 
-    public AutoSubCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
-        super(plugin, "auto", null, CommandSenderType.PLAYER, 0, 1, subCommands);
+    public AutoSubCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
+        super(plugin, parent, "auto", null, CommandSenderType.PLAYER, 0, 1, subCommands);
         this.claimManager = this.plugin.getClaimManager();
     }
 
@@ -54,10 +55,10 @@ public class AutoSubCommand extends KCommand {
                 })
                 .execute();
     }
-
-    @Override
-    public void sendHelp(User user, String[] args, String[] previous) {
-        MessageHandler.sendMessage(user, "/k claim [auto]");
-    }
+//
+//    @Override
+//    public void sendHelp(User user, String[] args, String[] previous) {
+//        MessageHandler.sendMessage(user, "/k claim [auto]");
+//    }
 
 }

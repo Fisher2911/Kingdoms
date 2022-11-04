@@ -7,7 +7,6 @@ import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -96,6 +95,24 @@ public class ProtectionListener extends KListener {
         }
         if (Tag.BUTTONS.isTagged(material)) {
             if (!this.isAllowed(event.getPlayer(), block.getLocation(), KPermission.USE_BUTTON)) {
+                event.setCancelled(true);
+            }
+            return;
+        }
+        if (Tag.FENCE_GATES.isTagged(material)) {
+            if (!this.isAllowed(event.getPlayer(), block.getLocation(), KPermission.USE_FENCE_GATE)) {
+                event.setCancelled(true);
+            }
+            return;
+        }
+        if (Tag.DOORS.isTagged(material)) {
+            if (!this.isAllowed(event.getPlayer(), block.getLocation(), KPermission.USE_DOOR)) {
+                event.setCancelled(true);
+            }
+            return;
+        }
+        if (Tag.TRAPDOORS.isTagged(material)) {
+            if (!this.isAllowed(event.getPlayer(), block.getLocation(), KPermission.USE_TRAPDOOR)) {
                 event.setCancelled(true);
             }
             return;

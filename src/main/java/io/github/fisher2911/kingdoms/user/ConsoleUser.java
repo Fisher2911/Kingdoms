@@ -125,4 +125,9 @@ public class ConsoleUser implements User {
     public void setDirty(boolean dirty) {
 
     }
+
+    @Override
+    public boolean hasPermission(String permission) {
+        return true;
+    }
 }

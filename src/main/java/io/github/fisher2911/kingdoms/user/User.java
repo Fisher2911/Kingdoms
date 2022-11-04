@@ -29,6 +29,7 @@ public interface User extends Saveable {
     int getKingdomId();
     void setKingdomId(int id);
     boolean hasPermission(CommandPermission permission);
+    boolean hasPermission(String permission);
     Map<Integer, ItemStack> getInventory();
     boolean hasKingdom();
     ChatChannel getChatChannel();

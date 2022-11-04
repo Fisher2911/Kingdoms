@@ -3,6 +3,7 @@ package io.github.fisher2911.kingdoms.command.kingdom.teleport;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
+import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
@@ -16,8 +17,8 @@ public class SetHomeCommand extends KCommand {
 
     private final KingdomManager kingdomManager;
 
-    public SetHomeCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
-        super(plugin, "sethome", null, CommandSenderType.PLAYER, 0, 0, subCommands);
+    public SetHomeCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
+        super(plugin, parent, "sethome", null, CommandSenderType.PLAYER, 0, 0, subCommands);
         this.kingdomManager = this.plugin.getKingdomManager();
     }
 
@@ -33,9 +34,9 @@ public class SetHomeCommand extends KCommand {
                 .execute();
     }
 
-    @Override
-    public void sendHelp(User user, String[] args, String[] previousArgs) {
-        MessageHandler.sendMessage(user, "/k sethome");
-    }
+//    @Override
+//    public void sendHelp(User user, String[] args, String[] previousArgs) {
+//        MessageHandler.sendMessage(user, "/k sethome");
+//    }
 
 }

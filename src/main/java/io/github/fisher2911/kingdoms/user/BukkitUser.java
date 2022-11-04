@@ -120,6 +120,11 @@ public class BukkitUser implements User {
     }
 
     @Override
+    public boolean hasPermission(String permission) {
+        return player != null && player.isOnline() && player.hasPermission(permission);
+    }
+
+    @Override
     public Map<Integer, ItemStack> getInventory() {
         if (this.player == null || !this.player.isOnline()) return Collections.emptyMap();
         final Map<Integer, ItemStack> inventoryMap = new HashMap<>();

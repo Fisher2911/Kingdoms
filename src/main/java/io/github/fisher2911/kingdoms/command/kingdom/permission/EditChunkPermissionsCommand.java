@@ -3,6 +3,7 @@ package io.github.fisher2911.kingdoms.command.kingdom.permission;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
+import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.gui.GuiKeys;
 import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
@@ -28,8 +29,8 @@ public class EditChunkPermissionsCommand extends KCommand {
     private final GuiManager guiManager;
     private final WorldManager worldManager;
 
-    public EditChunkPermissionsCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
-        super(plugin, "chunk", null, CommandSenderType.PLAYER, 1, -1, subCommands);
+    public EditChunkPermissionsCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
+        super(plugin, parent, "chunk", null, CommandSenderType.PLAYER, 1, -1, subCommands);
         this.roleManager = this.plugin.getRoleManager();
         this.kingdomManager = this.plugin.getKingdomManager();
         this.worldManager = this.plugin.getWorldManager();
@@ -61,10 +62,10 @@ public class EditChunkPermissionsCommand extends KCommand {
                 .execute();
     }
 
-    @Override
-    public void sendHelp(User user, String[] args, String[] previous) {
-        MessageHandler.sendMessage(user, "/k permission edit chunk [role]");
-    }
+//    @Override
+//    public void sendHelp(User user, String[] args, String[] previous) {
+//        MessageHandler.sendMessage(user, "/k permission edit chunk [role]");
+//    }
 
     @Override
     public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {

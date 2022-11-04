@@ -2,6 +2,8 @@ package io.github.fisher2911.kingdoms.placeholder;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
+import io.github.fisher2911.kingdoms.command.help.CommandHelp;
+import io.github.fisher2911.kingdoms.command.help.CommandInfo;
 import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.economy.TransactionResult;
 import io.github.fisher2911.kingdoms.gui.BaseGui;
@@ -238,6 +240,28 @@ public class PlaceholderBuilder {
                     if (kingdom == null) return null;
                     return kingdom.getName();
                 })
+        );
+
+        put(CommandHelp.class,
+                Placeholder.COMMAND_HELP_NAME,
+                p -> castAndParse(CommandHelp.class, p, CommandHelp::getCommand)
+        );
+        put(CommandHelp.class,
+                Placeholder.COMMAND_HELP_USAGE,
+                p -> castAndParse(CommandHelp.class, p, CommandHelp::getUsage)
+        );
+        put(CommandHelp.class,
+                Placeholder.COMMAND_HELP_PERMISSION,
+                p -> castAndParse(CommandHelp.class, p, CommandHelp::getPermission)
+        );
+
+        put(CommandInfo.class,
+                Placeholder.COMMAND_INFO_NEXT_PAGE_NUMBER,
+                p -> castAndParse(CommandInfo.class, p, CommandInfo::nextPage)
+        );
+        put(CommandInfo.class,
+                Placeholder.COMMAND_INFO_PREVIOUS_PAGE_NUMBER,
+                p -> castAndParse(CommandInfo.class, p, CommandInfo::previousPage)
         );
     }
 

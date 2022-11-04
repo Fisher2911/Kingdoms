@@ -100,3 +100,17 @@ player-not-found: <red>That player could not be found
 cannot-set-permission-role: <red>You cannot set permissions for that role
 role-does-not-exist: <red>That role does not exist
 cannot-set-self-role: <red>You cannot set your own role
+kingdom-description: "<green>Your kingdom's description is: %kingdom_description%"
+invalid-kingdom-name-length: "<red>Your kingdom name must be between 3 and 20 characters long"
+invalid-kingdom-description-length: "<red>Your kingdom description must be between 3 and 255 characters long"
+changed-kingdom-description: "<green>You changed your kingdom's description to: %kingdom_description%"
+changed-kingdom-name: "<green>You changed your kingdom's name to: %kingdom_name%"
+kingdom-name-info: "<green>Your kingdom's name is: %kingdom_name%"
+command-help-format: "<green>%command_name% - %command_usage%"
+command-help-header: "<gradient:#42d7f5:#08a4ff>--------Kingdoms Help--------"
+command-help-footer: "<gradient:#42d7f5:#08a4ff>--------Kingdoms Help--------"
+admin-command-help-format: "<green>%command_name% - %command_usage%"
+admin-command-help-header: "<gradient:#42d7f5:#08a4ff>--------Kingdoms Help--------"
+admin-command-help-footer: "<gradient:#42d7f5:#08a4ff>--------Kingdoms Help--------"
+#admin-command-help-footer: <gold><click:run_command:/k help %command_info_previous_page_number%><gold>«</click>Help
+#    Footer<click:run_command:/k help %command_info_next_page_number%><gold>˃»</click>

@@ -3,8 +3,8 @@ package io.github.fisher2911.kingdoms.command.kingdom.leave;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
+import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 
@@ -14,8 +14,8 @@ public class LeaveCommand extends KCommand {
 
     private final KingdomManager kingdomManager;
 
-    public LeaveCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
-        super(plugin, "leave", null, CommandSenderType.PLAYER, 0, 0, subCommands);
+    public LeaveCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
+        super(plugin, parent, "leave", null, CommandSenderType.PLAYER, 0, 0, subCommands);
         this.kingdomManager = this.plugin.getKingdomManager();
     }
 
@@ -26,8 +26,8 @@ public class LeaveCommand extends KCommand {
                 .execute();
     }
 
-    @Override
-    public void sendHelp(User user, String[] args, String[] previousArgs) {
-        MessageHandler.sendMessage(user, "/k leave");
-    }
+//    @Override
+//    public void sendHelp(User user, String[] args, String[] previousArgs) {
+//        MessageHandler.sendMessage(user, "/k leave");
+//    }
 }

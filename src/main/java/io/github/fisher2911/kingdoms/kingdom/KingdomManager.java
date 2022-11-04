@@ -2,6 +2,7 @@ package io.github.fisher2911.kingdoms.kingdom;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandPermission;
+import io.github.fisher2911.kingdoms.config.KingdomsSettings;
 import io.github.fisher2911.kingdoms.confirm.Confirmation;
 import io.github.fisher2911.kingdoms.confirm.ConfirmationManager;
 import io.github.fisher2911.kingdoms.data.DataManager;
@@ -28,6 +29,7 @@ import java.util.Optional;
 public class KingdomManager {
 
     private final Kingdoms plugin;
+    private final KingdomsSettings settings;
     private final PriceManager priceManager;
     private final DataManager dataManager;
     private final Map<Integer, Kingdom> kingdoms;
@@ -35,6 +37,7 @@ public class KingdomManager {
 
     public KingdomManager(Kingdoms plugin, Map<Integer, Kingdom> kingdoms) {
         this.plugin = plugin;
+        this.settings = this.plugin.getKingdomSettings();
         this.priceManager = this.plugin.getPriceManager();
         this.dataManager = this.plugin.getDataManager();
         this.byName = new HashMap<>();
@@ -49,6 +52,10 @@ public class KingdomManager {
         }
         if (!user.hasPermission(CommandPermission.CREATE_KINGDOM)) {
             MessageHandler.sendMessage(user, Message.NO_PERMISSION_TO_CREATE_KINGDOM);
+            return empty;
+        }
+        if (!this.settings.isProperNameLength(name)) {
+            MessageHandler.sendMessage(user, Message.INVALID_KINGDOM_NAME_LENGTH);
             return empty;
         }
         final Optional<Kingdom> kingdomByName = this.getKingdomByName(name, true);
@@ -157,6 +164,68 @@ public class KingdomManager {
             }
             MessageHandler.sendMessage(user, Message.KINGDOM_INFO, kingdom);
         }, () -> MessageHandler.sendNotInKingdom(user));
+    }
+
+    public void sendKingdomDescription(User user, Kingdom kingdom) {
+        if ((kingdom.getId() != user.getKingdomId() && !user.hasPermission(CommandPermission.VIEW_OTHER_KINGDOM_DESCRIPTION)) ||
+                (kingdom.getId() == user.getKingdomId() && !user.hasPermission(CommandPermission.VIEW_SELF_KINGDOM_DESCRIPTION))
+        ) {
+            MessageHandler.sendMessage(user, Message.NO_COMMAND_PERMISSION);
+            return;
+        }
+        MessageHandler.sendMessage(user, Message.KINGDOM_DESCRIPTION, kingdom);
+    }
+
+    public void sendKingdomDescription(User user, boolean searchDatabase) {
+        this.getKingdom(user.getKingdomId(), searchDatabase).ifPresentOrElse(kingdom -> {
+            this.sendKingdomDescription(user, kingdom);
+        }, () -> MessageHandler.sendNotInKingdom(user));
+    }
+
+    public void trySetDescription(User user, String description, boolean searchDatabase) {
+        if (!this.settings.isProperDescriptionLength(description)) {
+            MessageHandler.sendMessage(user, Message.INVALID_KINGDOM_DESCRIPTION_LENGTH);
+            return;
+        }
+        this.getKingdom(user.getKingdomId(), searchDatabase).ifPresentOrElse(kingdom -> {
+            this.trySetDescription(user, description, kingdom);
+        }, () -> MessageHandler.sendNotInKingdom(user));
+    }
+
+    public void trySetDescription(User user, String description, Kingdom kingdom) {
+        if (!this.settings.isProperDescriptionLength(description)) {
+            MessageHandler.sendMessage(user, Message.INVALID_KINGDOM_DESCRIPTION_LENGTH);
+            return;
+        }
+        if (!kingdom.hasPermission(user, KPermission.SET_KINGDOM_DESCRIPTION)) {
+            MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
+            return;
+        }
+        kingdom.setDescription(description);
+        MessageHandler.sendMessage(user, Message.CHANGED_KINGDOM_DESCRIPTION, kingdom);
+    }
+
+    public void trySetName(User user, String name) {
+        if (!this.settings.isProperNameLength(name)) {
+            MessageHandler.sendMessage(user, Message.INVALID_KINGDOM_NAME_LENGTH);
+            return;
+        }
+        this.getKingdom(user.getKingdomId(), true).ifPresentOrElse(kingdom -> {
+            this.trySetName(user, name, kingdom);
+        }, () -> MessageHandler.sendNotInKingdom(user));
+    }
+
+    public void trySetName(User user, String name, Kingdom kingdom) {
+        if (!this.settings.isProperNameLength(name)) {
+            MessageHandler.sendMessage(user, Message.INVALID_KINGDOM_NAME_LENGTH);
+            return;
+        }
+        if (!kingdom.hasPermission(user, KPermission.SET_KINGDOM_NAME)) {
+            MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
+            return;
+        }
+        kingdom.setName(name);
+        MessageHandler.sendMessage(user, Message.CHANGED_KINGDOM_NAME, kingdom);
     }
 
     public void tryKick(User kicker, User toKick, boolean searchDatabase) {

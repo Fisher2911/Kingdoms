@@ -1,0 +1,19 @@
+default-kingdom-description: "A new kingdom"
+teleport-delay: 3
+# in ticks
+# 1200 = 1 minute
+save-interval: 1200
+kingdom-name-min-length: 3
+# must be less than or equal to 255
+kingdom-name-max-length: 20
+kingdom-description-min-length: 3
+# must be less than or equal to 255
+kingdom-description-max-length: 100
+kingdom-map:
+  width: 10
+  height: 10
+  wilderness-symbol: "<hover:show_text:'Wilderness'><green>■"
+  kingdom-symbol: "<hover:show_text:'<red>Owned by %kingdom_name%'><red>■"
+  self-claimed-land-symbol: "<hover:show_text:'<red>Owned by %kingdom_name%'><yellow>■"
+commands:
+  commands-per-help-page: 10

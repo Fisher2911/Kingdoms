@@ -3,6 +3,7 @@ package io.github.fisher2911.kingdoms.command.kingdom.permission;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
+import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.gui.GuiKeys;
 import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
@@ -24,12 +25,12 @@ public class EditPermissionsCommand extends KCommand {
     private final KingdomManager kingdomManager;
     private final GuiManager guiManager;
 
-    public EditPermissionsCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
-        super(plugin, "edit", null, CommandSenderType.PLAYER, 1, -1, subCommands);
+    public EditPermissionsCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
+        super(plugin, parent, "edit", null, CommandSenderType.PLAYER, 1, -1, subCommands);
         this.roleManager = this.plugin.getRoleManager();
         this.kingdomManager = this.plugin.getKingdomManager();
         this.guiManager = this.plugin.getGuiManager();
-        this.addSubCommand(new EditChunkPermissionsCommand(this.plugin, new HashMap<>()));
+        this.addSubCommand(new EditChunkPermissionsCommand(this.plugin, this, new HashMap<>()));
     }
 
     @Override
@@ -50,10 +51,10 @@ public class EditPermissionsCommand extends KCommand {
                 .execute();
     }
 
-    @Override
-    public void sendHelp(User user, String[] args, String[] previous) {
-        MessageHandler.sendMessage(user, "/k permission edit [role]");
-    }
+//    @Override
+//    public void sendHelp(User user, String[] args, String[] previous) {
+//        MessageHandler.sendMessage(user, "/k permission edit [role]");
+//    }
 
     @Override
     public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {

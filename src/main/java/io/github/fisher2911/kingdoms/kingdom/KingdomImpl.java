@@ -286,7 +286,6 @@ public class KingdomImpl implements Kingdom {
     @Override
     public void setUpgradeLevel(String id, int level) {
         final Upgrades<?> upgrades = this.upgradeHolder.getUpgrades(id);
-        System.out.println("Are upgrades null for " + id + " - " + upgrades);
         if (upgrades == null) return;
         if (upgrades.getMaxLevel() < level) return;
         this.upgradeLevels.put(id, level);
@@ -443,6 +442,18 @@ public class KingdomImpl implements Kingdom {
             if (worldManager.isChunkLoaded(chunk.getChunk())) return false;
         }
         return true;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+        this.setDirty(true);
+    }
+
+    @Override
+    public void setDescription(String description) {
+        this.description = description;
+        this.setDirty(true);
     }
 
     @Override

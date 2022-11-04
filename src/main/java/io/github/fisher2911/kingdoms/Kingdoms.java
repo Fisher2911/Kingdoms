@@ -11,6 +11,7 @@ import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
+import io.github.fisher2911.kingdoms.kingdom.claim.MapVisualizer;
 import io.github.fisher2911.kingdoms.kingdom.invite.InviteManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationManager;
@@ -57,6 +58,7 @@ public final class Kingdoms extends JavaPlugin {
     private ConfirmationManager confirmationManager;
     private EconomyManager economyManager;
     private GuiManager guiManager;
+    private MapVisualizer mapVisualizer;
     private Economy economy;
     private BukkitTask saveTask;
 
@@ -84,11 +86,11 @@ public final class Kingdoms extends JavaPlugin {
         this.confirmationManager = new ConfirmationManager(this);
         this.economyManager = new EconomyManager(this);
         this.guiManager = new GuiManager(this);
+        this.mapVisualizer = new MapVisualizer(this);
 
         this.registerListeners();
-        this.registerCommands();
-
         this.load();
+        this.registerCommands();
 
         this.saveTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::save, 0L, this.kingdomSettings.getSaveInterval());
     }
@@ -106,7 +108,9 @@ public final class Kingdoms extends JavaPlugin {
     }
 
     public void registerCommands() {
-        this.getCommand("kingdom").setExecutor(new KingdomCommand(this, new HashMap<>()));
+        final KingdomCommand kingdomCommand = new KingdomCommand(this, new HashMap<>());
+        this.getCommand("kingdom").setExecutor(kingdomCommand);
+//        kingdomCommand.loadHelp();
     }
 
     public void load() {
@@ -213,6 +217,10 @@ public final class Kingdoms extends JavaPlugin {
 
     public GuiManager getGuiManager() {
         return guiManager;
+    }
+
+    public MapVisualizer getMapVisualizer() {
+        return mapVisualizer;
     }
 
     public Economy getEconomy() {

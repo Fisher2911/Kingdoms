@@ -12,12 +12,12 @@ import io.github.fisher2911.kingdoms.user.User;
 
 import java.util.Map;
 
-public class InfoCommand extends KCommand {
+public class NameCommand extends KCommand {
 
     private final KingdomManager kingdomManager;
 
-    public InfoCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
-        super(plugin, parent, "info", null, CommandSenderType.ANY, 0, 1, subCommands);
+    public NameCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
+        super(plugin, parent, "name", null, CommandSenderType.PLAYER, 1, -1, subCommands);
         this.kingdomManager = this.plugin.getKingdomManager();
     }
 
@@ -25,22 +25,29 @@ public class InfoCommand extends KCommand {
     public void execute(User user, String[] args, String[] previousArgs) {
         if (args.length == 0) {
             TaskChain.create(this.plugin)
-                    .runAsync(() -> this.kingdomManager.sendKingdomInfo(user, true))
+                    .runAsync(() -> this.kingdomManager.getKingdom(user.getKingdomId(), true)
+                            .ifPresentOrElse(kingdom -> MessageHandler.sendMessage(user, Message.KINGDOM_NAME_INFO),
+                                    () -> MessageHandler.sendNotInKingdom(user)))
                     .execute();
             return;
         }
-        final String kingdomName = args[0];
+        if (!args[0].equalsIgnoreCase("set")) {
+            this.sendHelp(user);
+            return;
+        }
+        if (args.length != 2) {
+            this.sendHelp(user);
+            return;
+        }
+        final String name = args[1];
         TaskChain.create(this.plugin)
-                .runAsync(() -> this.kingdomManager.getKingdomByName(kingdomName, true).ifPresentOrElse(k ->
-                                this.kingdomManager.sendKingdomInfo(user, k),
-                        () -> MessageHandler.sendMessage(user, Message.KINGDOM_NOT_FOUND)
-                ))
+                .runAsync(() -> this.kingdomManager.trySetName(user, name))
                 .execute();
-
     }
-//
+
 //    @Override
 //    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//        MessageHandler.sendMessage(user, "/k info");
+//        MessageHandler.sendMessage(user, "/k name [set] [description]");
 //    }
+
 }

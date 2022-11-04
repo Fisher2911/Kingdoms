@@ -3,6 +3,7 @@ package io.github.fisher2911.kingdoms.command.kingdom.role;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
+import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
 import io.github.fisher2911.kingdoms.message.Message;
@@ -24,8 +25,8 @@ public class SetRoleCommand extends KCommand {
     private final RoleManager roleManager;
     private final UserManager userManager;
 
-    public SetRoleCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
-        super(plugin, "setrole", null, CommandSenderType.PLAYER, 2, 2, subCommands);
+    public SetRoleCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
+        super(plugin, parent, "setrole", null, CommandSenderType.PLAYER, 2, 2, subCommands);
         this.kingdomManager = this.plugin.getKingdomManager();
         this.roleManager = this.plugin.getRoleManager();
         this.userManager = this.plugin.getUserManager();
@@ -42,10 +43,10 @@ public class SetRoleCommand extends KCommand {
                 .execute();
     }
 
-    @Override
-    public void sendHelp(User user, String[] args, String[] previousArgs) {
-        MessageHandler.sendMessage(user, "/k setrole <role> <player>");
-    }
+//    @Override
+//    public void sendHelp(User user, String[] args, String[] previousArgs) {
+//        MessageHandler.sendMessage(user, "/k setrole <role> <player>");
+//    }
 
     @Override
     public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {
