@@ -17,6 +17,7 @@ import io.github.fisher2911.kingdoms.command.kingdom.invite.JoinCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.kick.KickCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.leave.LeaveCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.map.MapCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.permission.PermissionCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.relation.RelationCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.role.SetRoleCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.teleport.HomeCommand;
@@ -46,7 +47,7 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         this.addSubCommand(new CreateCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new ClaimCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new UnclaimCommand(this.plugin, this, new HashMap<>()));
-//        this.addSubCommand(new PermissionCommand(this.plugin, this, new HashMap<>()));
+        this.addSubCommand(new PermissionCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new UpgradeCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new InviteCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new JoinCommand(this.plugin, this, new HashMap<>()));

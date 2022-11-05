@@ -43,8 +43,6 @@ public class KPermission {
     public static final KPermission USE_DOOR = register("use-door");
     public static final KPermission USE_TRAPDOOR = register("use-trapdoor");
     public static final KPermission USE_FENCE_GATE = register("use-fence-gate");
-    public static final KPermission KILL_MOBS = register("kill-mobs");
-    public static final KPermission FARM_CROPS = register("farm-crops");
     public static final KPermission CLAIM_LAND = register("claim-land", PermissionContext.KINGDOM);
     public static final KPermission UNCLAIM_LAND = register("unclaim-land");
     public static final KPermission EDIT_LOWER_ROLES_PERMISSIONS = register("edit-lower-roles-permissions", PermissionContext.KINGDOM);

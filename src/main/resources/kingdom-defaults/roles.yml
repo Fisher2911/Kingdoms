@@ -15,8 +15,6 @@ roles:
       use-door: true
       use-trapdoor: true
       use-fence-gate: true
-      kill-mobs: true
-      farm-crops: true
       claim-land: true
       unclaim-land: true
       edit-lower-roles-permissions: true
@@ -37,102 +35,102 @@ roles:
       view-bank-balance: true
       teleport-to-kingdom-home: true
       set-kingdom-home: true
+      set-kingdom-name: true
+      set-kingdom-description: true
   CoLeader:
     display-name: "<green>CoLeader</green>"
     weight: 1
     permissions:
-      mine-block: false
-      place-block: false
-      open-container: false
-      break-container: false
-      place-container: false
-      use-lever: false
-      use-button: false
-      use-pressure-plate: false
-      use-door: false
-      use-trapdoor: false
-      use-fence-gate: false
-      kill-mobs: false
-      farm-crops: false
-      claim-land: false
-      unclaim-land: false
-      edit-lower-roles-permissions: false
-      invite-member: false
-      upgrade-kingdom: false
-      kick-member: false
-      set-member-role: false
-      add-enemy: false
-      add-neutral: false
-      add-truce: false
-      add-ally: false
-      remove-enemy: false
-      remove-neutral: false
-      remove-truce: false
-      remove-ally: false
-      deposit-money: false
-      withdraw-money: false
-      view-bank-balance: false
+      mine-block: true
+      place-block: true
+      open-container: true
+      break-container: true
+      place-container: true
+      use-lever: true
+      use-button: true
+      use-pressure-plate: true
+      use-door: true
+      use-trapdoor: true
+      use-fence-gate: true
+      claim-land: true
+      unclaim-land: true
+      edit-lower-roles-permissions: true
+      invite-member: true
+      upgrade-kingdom: true
+      kick-member: true
+      set-member-role: true
+      add-enemy: true
+      add-neutral: true
+      add-truce: true
+      add-ally: true
+      remove-enemy: true
+      remove-neutral: true
+      remove-truce: true
+      remove-ally: true
+      deposit-money: true
+      withdraw-money: true
+      view-bank-balance: true
       teleport-to-kingdom-home: true
       set-kingdom-home: true
+      set-kingdom-name: false
+      set-kingdom-description: true
   Officer:
     display-name: "<green>Officer</green>"
     weight: 2
     permissions:
-      mine-block: false
-      place-block: false
-      open-container: false
-      break-container: false
-      place-container: false
-      use-lever: false
-      use-button: false
-      use-pressure-plate: false
-      use-door: false
-      use-trapdoor: false
-      use-fence-gate: false
-      kill-mobs: false
-      farm-crops: false
-      claim-land: false
+      mine-block: true
+      place-block: true
+      open-container: true
+      break-container: true
+      place-container: true
+      use-lever: true
+      use-button: true
+      use-pressure-plate: true
+      use-door: true
+      use-trapdoor: true
+      use-fence-gate: true
+      claim-land: true
       unclaim-land: false
-      edit-lower-roles-permissions: false
-      invite-member: false
-      upgrade-kingdom: false
+      edit-lower-roles-permissions: true
+      invite-member: true
+      upgrade-kingdom: true
       kick-member: false
       set-member-role: false
-      add-enemy: false
-      add-neutral: false
-      add-truce: false
+      add-enemy: true
+      add-neutral: true
+      add-truce: true
       add-ally: false
-      remove-enemy: false
-      remove-neutral: false
-      remove-truce: false
+      remove-enemy: true
+      remove-neutral: true
+      remove-truce: true
       remove-ally: false
-      deposit-money: false
-      withdraw-money: false
-      view-bank-balance: false
+      deposit-money: true
+      withdraw-money: true
+      view-bank-balance: true
       teleport-to-kingdom-home: true
-      set-kingdom-home: true
+      set-kingdom-home: false
+      set-kingdom-name: false
+      set-kingdom-description: false
   trusted:
     display-name: "<green>Trusted</green>"
     weight: 3
     permissions:
-      mine-block: false
-      place-block: false
-      open-container: false
-      break-container: false
-      place-container: false
-      use-lever: false
-      use-button: false
-      use-pressure-plate: false
-      use-door: false
-      use-trapdoor: false
-      use-fence-gate: false
-      kill-mobs: false
-      farm-crops: false
+      mine-block: true
+      place-block: true
+      open-container: true
+      break-container: true
+      place-container: true
+      use-lever: true
+      use-button: true
+      use-pressure-plate: true
+      use-door: true
+      use-trapdoor: true
+      use-fence-gate: true
       claim-land: false
       unclaim-land: false
       edit-lower-roles-permissions: false
       invite-member: false
-      upgrade-kingdom: false
+      upgrade-kingdom: true
       kick-member: false
       set-member-role: false
       add-enemy: false
@@ -143,28 +141,28 @@ roles:
       remove-neutral: false
       remove-truce: false
       remove-ally: false
-      deposit-money: false
+      deposit-money: true
       withdraw-money: false
-      view-bank-balance: false
+      view-bank-balance: true
       teleport-to-kingdom-home: true
       set-kingdom-home: false
+      set-kingdom-name: false
+      set-kingdom-description: false
   member:
     display-name: "<green>Member</green>"
     weight: 4
     permissions:
-      mine-block: false
-      place-block: false
+      mine-block: true
+      place-block: true
       open-container: false
       break-container: false
       place-container: false
-      use-lever: false
-      use-button: false
-      use-pressure-plate: false
-      use-door: false
-      use-trapdoor: false
-      use-fence-gate: false
-      kill-mobs: false
-      farm-crops: false
+      use-lever: true
+      use-button: true
+      use-pressure-plate: true
+      use-door: true
+      use-trapdoor: true
+      use-fence-gate: true
       claim-land: false
       unclaim-land: false
       edit-lower-roles-permissions: false
@@ -180,28 +178,28 @@ roles:
       remove-neutral: false
       remove-truce: false
       remove-ally: false
-      deposit-money: false
+      deposit-money: true
       withdraw-money: false
-      view-bank-balance: false
-      teleport-to-kingdom-home: true
+      view-bank-balance: true
+      teleport-to-kingdom-home: false
       set-kingdom-home: false
+      set-kingdom-name: false
+      set-kingdom-description: false
   ally:
     display-name: "<blue>Ally</blue>"
     weight: 100
     permissions:
-      mine-block: false
-      place-block: false
+      mine-block: true
+      place-block: true
       open-container: false
       break-container: false
       place-container: false
-      use-lever: false
-      use-button: false
-      use-pressure-plate: false
-      use-door: false
-      use-trapdoor: false
-      use-fence-gate: false
-      kill-mobs: false
-      farm-crops: false
+      use-lever: true
+      use-button: true
+      use-pressure-plate: true
+      use-door: true
+      use-trapdoor: true
+      use-fence-gate: true
       claim-land: false
       unclaim-land: false
       edit-lower-roles-permissions: false
@@ -219,9 +217,11 @@ roles:
       remove-ally: false
       deposit-money: false
       withdraw-money: false
-      view-bank-balance: false
-      teleport-to-kingdom-home: true
+      view-bank-balance: true
+      teleport-to-kingdom-home: false
       set-kingdom-home: false
+      set-kingdom-name: false
+      set-kingdom-description: false
   truce:
     display-name: "<yellow>Truce</yellow>"
     weight: 101
@@ -231,14 +231,12 @@ roles:
       open-container: false
       break-container: false
       place-container: false
-      use-lever: false
-      use-button: false
-      use-pressure-plate: false
-      use-door: false
-      use-trapdoor: false
-      use-fence-gate: false
-      kill-mobs: false
-      farm-crops: false
+      use-lever: true
+      use-button: true
+      use-pressure-plate: true
+      use-door: true
+      use-trapdoor: true
+      use-fence-gate: true
       claim-land: false
       unclaim-land: false
       edit-lower-roles-permissions: false
@@ -256,9 +254,11 @@ roles:
       remove-ally: false
       deposit-money: false
       withdraw-money: false
-      view-bank-balance: false
-      teleport-to-kingdom-home: true
+      view-bank-balance: true
+      teleport-to-kingdom-home: false
       set-kingdom-home: false
+      set-kingdom-name: false
+      set-kingdom-description: false
   neutral:
     display-name: "<yellow>Neutral</yellow>"
     weight: 102
@@ -271,11 +271,9 @@ roles:
       use-lever: false
       use-button: false
       use-pressure-plate: false
-      use-door: false
+      use-door: true
       use-trapdoor: false
-      use-fence-gate: false
-      kill-mobs: false
-      farm-crops: false
+      use-fence-gate: true
       claim-land: false
       unclaim-land: false
       edit-lower-roles-permissions: false
@@ -293,9 +291,11 @@ roles:
       remove-ally: false
       deposit-money: false
       withdraw-money: false
-      view-bank-balance: false
+      view-bank-balance: true
       teleport-to-kingdom-home: false
       set-kingdom-home: false
+      set-kingdom-name: false
+      set-kingdom-description: false
   enemy:
     display-name: "<red>Enemy</red>"
     weight: 103
@@ -311,8 +311,6 @@ roles:
       use-door: false
       use-trapdoor: false
       use-fence-gate: false
-      kill-mobs: false
-      farm-crops: false
       claim-land: false
       unclaim-land: false
       edit-lower-roles-permissions: false
@@ -333,3 +331,5 @@ roles:
       view-bank-balance: false
       teleport-to-kingdom-home: false
       set-kingdom-home: false
+      set-kingdom-name: false
+      set-kingdom-description: false
