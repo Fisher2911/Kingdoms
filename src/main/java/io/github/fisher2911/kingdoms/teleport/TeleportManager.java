@@ -19,6 +19,7 @@
 package io.github.fisher2911.kingdoms.teleport;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomMemberTeleportEvent;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
@@ -51,6 +52,16 @@ public class TeleportManager {
             final User user = info.getUser();
             if (!user.isOnline()) return;
             if (info.getSecondsLeft() <= 0) {
+                final KingdomMemberTeleportEvent event = new KingdomMemberTeleportEvent(
+                        user,
+                        info.getTo(),
+                        info.getPositionId()
+                );
+                Bukkit.getPluginManager().callEvent(event);
+                if (event.isCancelled()) {
+                    this.teleporting.remove(uuid);
+                    return;
+                }
                 user.getPlayer().teleport(info.getTo().toLocation());
                 this.teleporting.remove(uuid);
                 MessageHandler.sendMessage(user, Message.TELEPORT_SUCCESS);

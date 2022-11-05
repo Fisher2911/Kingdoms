@@ -80,6 +80,7 @@ public final class Kingdoms extends JavaPlugin {
     private EconomyManager economyManager;
     private GuiManager guiManager;
     private MapVisualizer mapVisualizer;
+    private KingdomCommand kingdomCommand;
     private Economy economy;
     private BukkitTask saveTask;
 
@@ -137,8 +138,8 @@ public final class Kingdoms extends JavaPlugin {
     }
 
     public void registerCommands() {
-        final KingdomCommand kingdomCommand = new KingdomCommand(this, new HashMap<>());
-        this.getCommand("kingdom").setExecutor(kingdomCommand);
+        this.kingdomCommand = new KingdomCommand(this, new HashMap<>());
+        this.getCommand("kingdom").setExecutor(this.kingdomCommand);
     }
 
     public void load() {
@@ -249,6 +250,10 @@ public final class Kingdoms extends JavaPlugin {
 
     public MapVisualizer getMapVisualizer() {
         return mapVisualizer;
+    }
+
+    public KingdomCommand getKingdomCommand() {
+        return kingdomCommand;
     }
 
     public Economy getEconomy() {

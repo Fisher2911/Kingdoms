@@ -19,12 +19,15 @@
 package io.github.fisher2911.kingdoms.listener;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.api.event.chunk.ClaimedChunkLoadEvent;
+import io.github.fisher2911.kingdoms.api.event.chunk.ClaimedChunkUnloadEvent;
 import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.world.KChunk;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
@@ -84,8 +87,7 @@ public class ClaimLoadListener extends KListener {
                 .consumeAsync(chunks -> {
                     for (ClaimedChunk chunk : chunks) {
                         this.plugin.getKingdomManager().getKingdom(chunk.getKingdomId(), true).ifPresent(kingdom -> {
-                            kingdom.addClaimedChunk(chunk);
-                            kingdom.setDirty(true);
+                            this.plugin.getServer().getPluginManager().callEvent(new ClaimedChunkLoadEvent(kingdom, chunk));
                         });
                     }
                 })
@@ -114,8 +116,7 @@ public class ClaimLoadListener extends KListener {
                 .consumeAsync(claimedChunk -> {
                     if (claimedChunk == null) return;
                     this.plugin.getKingdomManager().getKingdom(claimedChunk.getKingdomId(), true).ifPresent(kingdom -> {
-                        kingdom.addClaimedChunk(claimedChunk);
-                        kingdom.setDirty(true);
+                        this.plugin.getServer().getPluginManager().callEvent(new ClaimedChunkLoadEvent(kingdom, claimedChunk));
                     });
                 })
                 .execute();
@@ -127,30 +128,44 @@ public class ClaimLoadListener extends KListener {
         final int chunkZ = chunk.getZ();
         final UUID world = chunk.getWorld().getUID();
         final ClaimedChunk claimedChunk = this.worldManager.remove(world, chunkX, chunkZ);
-        if (claimedChunk.isWilderness() || claimedChunk.isDirty()) return;
+        if (claimedChunk.isWilderness()) return;
         final KingdomManager kingdomManager = this.plugin.getKingdomManager();
         TaskChain.create(this.plugin)
                 .runAsync(() -> {
                     this.dataManager.saveClaimedChunk(claimedChunk);
-                    kingdomManager.removeIfCanBeUnloaded(claimedChunk.getKingdomId());
+                    kingdomManager.getKingdom(claimedChunk.getKingdomId(), false).ifPresent(kingdom -> {
+                        kingdomManager.removeIfCanBeUnloaded(kingdom);
+                        Bukkit.getPluginManager().callEvent(new ClaimedChunkUnloadEvent(kingdom, claimedChunk));
+                    });
                 })
                 .execute();
     }
 
     public void onWorldUnload(WorldUnloadEvent event) {
         final UUID world = event.getWorld().getUID();
-        for (Chunk chunk : event.getWorld().getLoadedChunks()) {
-            final int chunkZ = chunk.getZ();
-            final int chunkX = chunk.getX();
-            final ClaimedChunk claimedChunk = this.worldManager.remove(world, chunkX, chunkZ);
-            if (claimedChunk.isWilderness() || claimedChunk.isDirty()) return;
-            final KingdomManager kingdomManager = this.plugin.getKingdomManager();
-            TaskChain.create(this.plugin)
-                    .runAsync(() -> {
+        TaskChain.create(this.plugin)
+                .supplySync(() -> {
+                    final List<ClaimedChunk> chunks = new ArrayList<>();
+                    for (Chunk chunk : event.getWorld().getLoadedChunks()) {
+                        final int chunkZ = chunk.getZ();
+                        final int chunkX = chunk.getX();
+                        final ClaimedChunk claimedChunk = this.worldManager.remove(world, chunkX, chunkZ);
+                        if (claimedChunk.isWilderness()) continue;
+                        chunks.add(claimedChunk);
+                    }
+                    return chunks;
+                })
+                .consumeAsync(chunks -> {
+                    for (ClaimedChunk claimedChunk : chunks) {
+                        final KingdomManager kingdomManager = this.plugin.getKingdomManager();
                         this.dataManager.saveClaimedChunk(claimedChunk);
-                        kingdomManager.removeIfCanBeUnloaded(claimedChunk.getKingdomId());
-                    })
-                    .execute();
-        }
+                        kingdomManager.getKingdom(claimedChunk.getKingdomId(), false).ifPresent(kingdom -> {
+                            kingdomManager.removeIfCanBeUnloaded(kingdom);
+                            Bukkit.getPluginManager().callEvent(new ClaimedChunkUnloadEvent(kingdom, claimedChunk));
+                        });
+                    }
+                })
+                .execute();
     }
+
 }

@@ -21,6 +21,7 @@ package io.github.fisher2911.kingdoms.gui;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.config.serializer.GuiSerializer;
 import io.github.fisher2911.kingdoms.user.User;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
@@ -70,6 +71,15 @@ public class GuiManager {
         final GuiOpener opener = this.guiMap.get(gui);
         if (opener == null) return;
         opener.open(user, metadata, keysToOverwrite);
+    }
+
+    @Nullable
+    public GuiOpener getGuiOpener(String gui) {
+        return this.guiMap.get(gui);
+    }
+
+    public void addGuiOpener(GuiOpener opener) {
+        this.guiMap.put(opener.getId(), opener);
     }
 
     public void load() {

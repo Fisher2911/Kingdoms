@@ -21,6 +21,7 @@ package io.github.fisher2911.kingdoms.kingdom.invite;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomMemberInviteEvent;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
@@ -64,6 +65,9 @@ public class InviteManager {
             MessageHandler.sendMessage(invited, Message.ALREADY_INVITED, invited);
             return;
         }
+        final KingdomMemberInviteEvent event = new KingdomMemberInviteEvent(kingdom, inviter, invited);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
         this.invitedPlayers.put(invited.getId(), invite);
         MessageHandler.sendMessage(inviter, Message.INVITED_MEMBER, invited);
         MessageHandler.sendMessage(invited, Message.RECEIVED_INVITE, kingdom, inviter);
@@ -104,4 +108,5 @@ public class InviteManager {
     public Collection<KingdomInvite> getInvitedTo(UUID invited) {
         return this.invitedPlayers.get(invited);
     }
+
 }

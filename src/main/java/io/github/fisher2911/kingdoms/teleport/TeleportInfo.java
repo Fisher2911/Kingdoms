@@ -20,6 +20,7 @@ package io.github.fisher2911.kingdoms.teleport;
 
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.world.WorldPosition;
+import org.jetbrains.annotations.Nullable;
 
 public class TeleportInfo {
 
@@ -27,12 +28,15 @@ public class TeleportInfo {
     private final WorldPosition to;
     private int secondsLeft;
     private final WorldPosition startPosition;
+    @Nullable
+    private final String positionId;
 
-    public TeleportInfo(User user, WorldPosition to, int secondsLeft, WorldPosition startPosition) {
+    public TeleportInfo(User user, WorldPosition to, int secondsLeft, WorldPosition startPosition, @Nullable String positionId) {
         this.user = user;
         this.to = to;
         this.secondsLeft = secondsLeft;
         this.startPosition = startPosition;
+        this.positionId = positionId;
     }
 
     public User getUser() {
@@ -53,6 +57,10 @@ public class TeleportInfo {
 
     public void setSecondsLeft(int secondsLeft) {
         this.secondsLeft = secondsLeft;
+    }
+
+    public String getPositionId() {
+        return positionId;
     }
 
     public void decSeconds() {

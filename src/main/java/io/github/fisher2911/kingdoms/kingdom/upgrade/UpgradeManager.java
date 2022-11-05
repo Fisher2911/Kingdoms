@@ -53,6 +53,10 @@ public class UpgradeManager extends Config {
         typeUpgradeLoaders.put(PotionUpgrades.POTION_UPGRADE_TYPE, PotionUpgrades::deserialize);
     }
 
+    public void register(Upgrades<?> upgrades) {
+        this.upgradeHolder.addUpgrade(upgrades);
+    }
+
     @Nullable
     public Upgrades<?> load(ConfigurationNode node) {
         final String type = node.node(UPGRADE_TYPE).getString("");

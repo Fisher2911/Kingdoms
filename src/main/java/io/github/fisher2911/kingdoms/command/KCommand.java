@@ -123,14 +123,14 @@ public abstract class KCommand {
 
     public abstract void execute(User user, String[] args, String[] previousArgs);
 
-    protected void addSubCommand(KCommand command, boolean updateHelp) {
+    public void addSubCommand(KCommand command, boolean updateHelp) {
         this.subCommands.put(command.name, command);
         if (updateHelp) {
             this.setHelpCommands();
         }
     }
 
-    protected void addSubCommand(KCommand command) {
+    public void addSubCommand(KCommand command) {
         this.addSubCommand(command, false);
     }
 
