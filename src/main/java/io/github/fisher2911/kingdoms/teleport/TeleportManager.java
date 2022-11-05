@@ -42,10 +42,10 @@ public class TeleportManager {
     public void tryTeleport(TeleportInfo info) {
         final UUID uuid = info.getUser().getId();
         this.teleporting.put(uuid, info);
-        this.doTeleportTask(uuid);
+        this.doTeleportTask(uuid, 0);
     }
 
-    private void doTeleportTask(UUID uuid) {
+    private void doTeleportTask(UUID uuid, int delay) {
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
             final TeleportInfo info = this.teleporting.get(uuid);
             if (info == null) return;
@@ -74,10 +74,10 @@ public class TeleportManager {
                 this.teleporting.remove(uuid);
                 return;
             }
-            info.decSeconds();
             MessageHandler.sendMessage(user, Message.TELEPORT_COUNTDOWN, info);
-            this.doTeleportTask(uuid);
-        }, 20);
+            info.decSeconds();
+            this.doTeleportTask(uuid, 20);
+        }, delay);
     }
 
 }
