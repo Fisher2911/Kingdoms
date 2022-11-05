@@ -36,7 +36,7 @@ public class RelationCommand extends KCommand {
     private final RelationManager relationManager;
 
     public RelationCommand(Kingdoms plugin, KCommand parent, String name, RelationType type) {
-        super(plugin, parent, name, null, CommandSenderType.PLAYER, 1, 1, new HashMap<>());
+        super(plugin, parent, name, "<kingdom>", null, CommandSenderType.PLAYER, 1, 1, new HashMap<>());
         this.type = type;
         this.relationManager = this.plugin.getRelationManager();
     }

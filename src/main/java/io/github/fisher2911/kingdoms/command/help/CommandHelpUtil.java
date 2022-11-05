@@ -57,7 +57,7 @@ public class CommandHelpUtil {
         page = Math.max(0, page);
         page = Math.min(page, helpList.size() / commandsPerPage);
         final boolean canSeeAdminInfo = user.hasPermission(CommandPermission.VIEW_ADMIN_COMMAND_HELP);
-        final CommandInfo info = new CommandInfo(page - 1, page + 1);
+        final CommandInfo info = new CommandInfo(page, page + 2);
         final Message headerMessage = canSeeAdminInfo ? Message.ADMIN_COMMAND_HELP_HEADER : Message.COMMAND_HELP_HEADER;
         MessageHandler.sendMessage(
                 user,

@@ -22,12 +22,14 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.config.Config;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.placeholder.PlaceholderBuilder;
+import io.github.fisher2911.kingdoms.user.ConsoleUser;
 import io.github.fisher2911.kingdoms.user.User;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.yaml.NodeStyle;
@@ -110,7 +112,12 @@ public class MessageHandler extends Config {
     }
 
     public static void sendMessage(User user, Component component) {
-        if (!user.isOnline()) return;
+        if (!user.isOnline()) {
+            if (user instanceof ConsoleUser) {
+                Bukkit.getConsoleSender().sendMessage(LEGACY_COMPONENT_SERIALIZER.serialize(component));
+            }
+            return;
+        }
         final Audience audience = INSTANCE.audiences.player(user.getPlayer());
         audience.sendMessage(component);
     }
