@@ -43,9 +43,4 @@ public class DescriptionCommand extends KCommand {
                 .execute();
     }
 
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//        MessageHandler.sendMessage(user, "/k description [set] [description]");
-//    }
-
 }

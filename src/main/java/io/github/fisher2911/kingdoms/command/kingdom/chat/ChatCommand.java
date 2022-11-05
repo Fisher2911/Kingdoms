@@ -4,7 +4,6 @@ import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
@@ -22,7 +21,7 @@ public class ChatCommand extends KCommand {
     private final UserManager userManager;
 
     public ChatCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
-        super(plugin, parent, "chat", null, CommandSenderType.PLAYER, 1, 1, subCommands);
+        super(plugin, parent, "chat", "<channel>", null, CommandSenderType.PLAYER, 1, 1, subCommands);
         this.userManager = this.plugin.getUserManager();
     }
 
@@ -35,11 +34,6 @@ public class ChatCommand extends KCommand {
         }
         this.userManager.changeChatChannel(user, chatChannel);
     }
-
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//        MessageHandler.sendMessage(user, "/k chat <channel>");
-//    }
 
     @Override
     public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {

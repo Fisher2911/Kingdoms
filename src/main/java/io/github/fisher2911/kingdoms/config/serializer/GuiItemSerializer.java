@@ -48,11 +48,6 @@ public class GuiItemSerializer implements TypeSerializer<ConditionalItem> {
     private static final String ITEM_PATH = "item";
     private static final String ACTIONS_PATH = "actions";
     private static final String CONDITIONALS_PATH = "conditionals";
-    private static final String REQUIRED_METADATA_PATH = "required-metadata";
-    private static final String CONDITIONS_PATH = "conditions";
-
-//    private static final Map<String, Supplier<Map<Object, Object>>> metadataSupplier = new HashMap<>();
-
 
     private static final String TYPE_PERMISSION = "permission";
     private static final String PERMISSION_PATH = "permission";
@@ -62,10 +57,6 @@ public class GuiItemSerializer implements TypeSerializer<ConditionalItem> {
 
     private static final String TYPE_ROLE = "role";
     private static final String ROLE_PATH = "role-id";
-//    static {
-//        metadataSupplier.put(PERMISSION_TYPE, PermissionItemSerializer::getPermissionItemMetaData);
-//    }
-
 
     @Override
     public ConditionalItem deserialize(Type type, ConfigurationNode node) throws SerializationException {
@@ -79,11 +70,6 @@ public class GuiItemSerializer implements TypeSerializer<ConditionalItem> {
             builder.addConditionalItem(ConditionSerializer.loadConditional(entry.getValue()));
         }
         return builder.build();
-//        if (conditionalsNode.virtual()) {
-//            itemItemBuilderFunction = (gui, guiItem) -> itemBuilder;
-//        } else {
-//            itemItemBuilderFunction = ConditionSerializer.loadConditional(conditionalsNode);
-//        }
     }
 
     private static BaseGuiItem deserializeItem(ConfigurationNode node) throws SerializationException {
@@ -149,7 +135,7 @@ public class GuiItemSerializer implements TypeSerializer<ConditionalItem> {
                     MessageHandler.sendMessage(user, Message.CANNOT_EDIT_KINGDOM_PERMISSION);
                     return;
                 }
-                final boolean newValue = chunk == null ? !kingdom.hasPermission(role, permission) : !kingdom.hasPermission(role, permission, chunk);
+                final boolean newValue = chunk == null ? !kingdom.hasPermission(role, permission) : !chunk.hasPermission(role, permission);
                 final RolePermissionHolder permissions;
                 permissions = Objects.requireNonNullElse(chunk, kingdom);
                 permissions.setPermission(role, permission, newValue);
@@ -178,7 +164,7 @@ public class GuiItemSerializer implements TypeSerializer<ConditionalItem> {
             if (chunk == null) {
                 return new PermissionWrapper(permission, kingdom.hasPermission(role, permission));
             }
-            return new PermissionWrapper(permission, kingdom.hasPermission(role, permission, chunk));
+            return new PermissionWrapper(permission, chunk.hasPermission(role, permission));
         });
     }
 
@@ -223,21 +209,6 @@ public class GuiItemSerializer implements TypeSerializer<ConditionalItem> {
         metadata.put(GuiKeys.UPGRADE_ID, upgradeId);
         metadata.put(GuiKeys.MAX_LEVEL_ITEM, maxLevelItem);
         builder.metadata(metadata, true);
-//        builder.placeholder((gui, item) -> {
-//            final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
-//            if (kingdom == null) return false;
-//            final Integer upgradeLevel = kingdom.getUpgradeLevel(upgradeId);
-//            if (upgradeLevel == null) return false;
-//            final Upgrades<?> upgrades = kingdom.getUpgradeHolder().getUpgrades(upgradeId);
-//            return new UpgradesWrapper(upgrades, upgradeLevel);
-//        });
-//        builder.placeholder((gui, item) -> {
-//            final Kingdom kingdom = gui.getMetadata(GuiKeys.KINGDOM, Kingdom.class);
-//            if (kingdom == null) return false;
-//            final Integer upgradeLevel = kingdom.getUpgradeLevel(upgradeId);
-//            if (upgradeLevel == null) return false;
-//            return new UpgradeLevelWrapper(kingdom, upgradeId);
-//        });
     }
 
     public static void applyRoleItemData(ConditionalItem.Builder builder, String roleId) {

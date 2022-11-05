@@ -14,7 +14,7 @@ public class PermissionCommand extends KCommand {
 
     public PermissionCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
         super(plugin, parent, "permissions", null, CommandSenderType.PLAYER, 0, -1, subCommands);
-        this.addSubCommand(new EditPermissionsCommand(this.plugin, this, new HashMap<>()));
+        this.addSubCommand(new EditPermissionsCommand(this.plugin, this, new HashMap<>()), true);
     }
 
     @Override
@@ -25,10 +25,5 @@ public class PermissionCommand extends KCommand {
         }
         this.sendHelp(user);
     }
-
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previous) {
-//        MessageHandler.sendMessage(user, "/k permission edit [role]");
-//    }
 
 }

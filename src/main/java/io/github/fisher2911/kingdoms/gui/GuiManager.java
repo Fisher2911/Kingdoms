@@ -22,6 +22,7 @@ public class GuiManager {
     public static final String MEMBERS_GUI = "members";
 
     private static final List<String> DEFAULT_FILES = List.of(
+            "chunk-permissions.yml",
             "permissions.yml",
             "main-menu.yml",
             "roles-menu.yml",

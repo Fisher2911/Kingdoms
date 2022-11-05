@@ -20,19 +20,17 @@ public class ClaimedChunk implements Claim, RolePermissionHolder, Saveable {
     private final int claimedBy;
     private final KChunk chunk;
     private final PermissionContainer permissions;
-//    private final Map<RelationType, Relation> relations;
     private boolean dirty;
 
-    public ClaimedChunk(Kingdoms plugin, int claimedBy, KChunk chunk, PermissionContainer permissions/*, Map<RelationType, Relation> relations*/) {
+    public ClaimedChunk(Kingdoms plugin, int claimedBy, KChunk chunk, PermissionContainer permissions) {
         this.plugin = plugin;
         this.claimedBy = claimedBy;
         this.chunk = chunk;
         this.permissions = permissions;
-//        this.relations = relations;
     }
 
     public static ClaimedChunk wilderness(Kingdoms plugin, KChunk at) {
-        return new ClaimedChunk(plugin, Kingdom.WILDERNESS_ID, at, PermissionContainer.empty()/*, new EnumMap<>(RelationType.class)*/);
+        return new ClaimedChunk(plugin, Kingdom.WILDERNESS_ID, at, PermissionContainer.empty());
     }
 
     @Override
@@ -49,10 +47,6 @@ public class ClaimedChunk implements Claim, RolePermissionHolder, Saveable {
     public int getKingdomId() {
         return this.claimedBy;
     }
-
-/*    public Map<RelationType, Relation> getRelations() {
-        return relations;
-    }*/
 
     public PermissionContainer getPermissions() {
         return permissions;
@@ -74,22 +68,13 @@ public class ClaimedChunk implements Claim, RolePermissionHolder, Saveable {
 
     @Override
     public boolean hasPermission(Role role, KPermission permission) {
-//        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role.id()));
-//        if (relation == null) return this.permissions.hasPermission(role, permission);
-//        return relation.hasPermission(role, permission);
         return this.permissions.hasPermission(role, permission, this.plugin.getRoleManager());
     }
 
     @Override
     public void setPermission(Role role, KPermission permission, boolean value) {
-//        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role.id()));
-//        if (relation == null) {
             this.permissions.setPermission(role, permission, value);
             this.setDirty(true);
-//            return;
-//        }
-//        relation.setPermission(role, permission, value);
-//        this.setDirty(true);
     }
 
     @Override

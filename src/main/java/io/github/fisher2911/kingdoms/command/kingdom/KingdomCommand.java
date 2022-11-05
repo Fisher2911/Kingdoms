@@ -5,7 +5,6 @@ import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.admin.AdminCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.bank.BankCommand;
-import io.github.fisher2911.kingdoms.command.kingdom.bank.DepositSubCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.chat.ChatCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.ClaimCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.UnclaimCommand;
@@ -18,7 +17,6 @@ import io.github.fisher2911.kingdoms.command.kingdom.invite.JoinCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.kick.KickCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.leave.LeaveCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.map.MapCommand;
-import io.github.fisher2911.kingdoms.command.kingdom.permission.PermissionCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.relation.RelationCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.role.SetRoleCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.teleport.HomeCommand;
@@ -42,12 +40,13 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
     private final GuiManager guiManager;
 
     public KingdomCommand(Kingdoms plugin, Map<String, KCommand> subCommands) {
-        super(plugin, null, "kingdom", "/k", null, CommandSenderType.ANY, -1, -1, subCommands);
+        super(plugin, null, "kingdom", null, CommandSenderType.ANY, -1, -1, subCommands);
         this.guiManager = this.plugin.getGuiManager();
+        RelationCommand.createAll(this.plugin, this).forEach(this::addSubCommand);
         this.addSubCommand(new CreateCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new ClaimCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new UnclaimCommand(this.plugin, this, new HashMap<>()));
-        this.addSubCommand(new PermissionCommand(this.plugin, this, new HashMap<>()));
+//        this.addSubCommand(new PermissionCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new UpgradeCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new InviteCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new JoinCommand(this.plugin, this, new HashMap<>()));
@@ -61,12 +60,9 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         this.addSubCommand(new BankCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new HomeCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new SetHomeCommand(this.plugin, this, new HashMap<>()));
-        this.addSubCommand(new DepositSubCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new NameCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new MapCommand(this.plugin, this, new HashMap<>()));
-        this.addSubCommand(new HelpCommand(this.plugin, this, new HashMap<>()));
-        RelationCommand.createAll(this.plugin, this).forEach(this::addSubCommand);
-        this.setHelpCommands();
+        this.addSubCommand(new HelpCommand(this.plugin, this, new HashMap<>()), true);
         this.sendHelp(User.CONSOLE);
     }
 
@@ -83,13 +79,7 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         } catch (Exception e) {
             e.printStackTrace();
         }
-        this.sendHelp(user);
     }
-
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previous) {
-//        MessageHandler.sendMessage(user, "/k");
-//    }
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -97,9 +87,5 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         if (user == null) return null;
         return this.getTabs(user, args, new String[0], false);
     }
-
-//    public void loadHelp() {
-//        this.commandHelpManager.load();
-//    }
 
 }

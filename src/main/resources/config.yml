@@ -12,8 +12,9 @@ kingdom-description-max-length: 100
 kingdom-map:
   width: 10
   height: 10
-  wilderness-symbol: "<hover:show_text:'Wilderness'><green>■"
-  kingdom-symbol: "<hover:show_text:'<red>Owned by %kingdom_name%'><red>■"
-  self-claimed-land-symbol: "<hover:show_text:'<red>Owned by %kingdom_name%'><yellow>■"
+  wilderness-symbol: "<hover:show_text:'Wilderness\n<yellow>%chunk_x%, %chunk_z%'><green>■"
+  kingdom-symbol: "<hover:show_text:'<red>Owned by %kingdom_name%\n<yellow>%chunk_x%, %chunk_z%'><red>■"
+  self-claimed-land-symbol: "<hover:show_text:'<red>Owned by %kingdom_name%\n<yellow>%chunk_x%, %chunk_z%'><yellow>■"
+  standing-in-symbol: "<hover:show_text:'<red>Owned by %kingdom_name%\nYou are here'><blue>■"
 commands:
   commands-per-help-page: 10

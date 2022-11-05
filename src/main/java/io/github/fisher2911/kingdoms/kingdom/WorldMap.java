@@ -70,4 +70,7 @@ public class WorldMap {
                 .forEach(this.plugin.getDataManager()::saveClaimedChunk);
     }
 
+    public UUID getWorld() {
+        return world;
+    }
 }

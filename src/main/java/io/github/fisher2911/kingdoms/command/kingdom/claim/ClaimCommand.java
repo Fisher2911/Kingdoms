@@ -25,7 +25,7 @@ public class ClaimCommand extends KCommand {
         super(plugin, parent, "claim", null, CommandSenderType.PLAYER, 0, 2, subCommands);
         this.kingdomManager = this.plugin.getKingdomManager();
         this.claimManager = this.plugin.getClaimManager();
-        this.addSubCommand(new AutoSubCommand(this.plugin, this, new HashMap<>()));
+        this.addSubCommand(new AutoSubCommand(this.plugin, this, new HashMap<>()), true);
     }
 
     @Override
@@ -43,10 +43,5 @@ public class ClaimCommand extends KCommand {
                 }, () -> MessageHandler.sendMessage(user, Message.KINGDOM_NOT_FOUND)))
                 .execute();
     }
-
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previous) {
-//        MessageHandler.sendMessage(user, "/k claim [auto]");
-//    }
 
 }

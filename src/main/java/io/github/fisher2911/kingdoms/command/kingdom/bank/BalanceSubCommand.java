@@ -23,9 +23,4 @@ public class BalanceSubCommand extends KCommand {
         this.economyManager.sendKingdomBalance(user);
     }
 
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//        MessageHandler.sendMessage(user, "/k bank balance");
-//    }
-
 }

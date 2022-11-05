@@ -36,7 +36,6 @@ public class ConditionSerializer {
     );
 
     public static ItemConditions loadConditional(ConfigurationNode source) throws SerializationException {
-//        final BaseItemBuilder item = ItemSerializer.INSTANCE.deserialize(BaseItemBuilder.class, source.node(ITEM_PATH));
         final ConditionalItem item = GuiItemSerializer.INSTANCE.deserialize(ConditionalItem.class, source);
         final List<MetadataPredicate> conditionalList = new ArrayList<>();
         for (var entry : source.node(CONDITIONS_PATH).childrenMap().entrySet()) {
@@ -96,7 +95,5 @@ public class ConditionSerializer {
             throw new RuntimeException("Could not load placeholder conditionals", e);
         }
     }
-
-//    private static List<ItemConditional>
 
 }

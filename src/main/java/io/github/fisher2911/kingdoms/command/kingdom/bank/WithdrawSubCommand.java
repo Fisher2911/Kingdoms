@@ -15,7 +15,7 @@ public class WithdrawSubCommand extends KCommand {
     private final EconomyManager economyManager;
 
     public WithdrawSubCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
-        super(plugin, parent, "withdraw", null, CommandSenderType.PLAYER, 1, 1, subCommands);
+        super(plugin, parent, "withdraw", "<amount>", null, CommandSenderType.PLAYER, 1, 1, subCommands);
         this.economyManager = this.plugin.getEconomyManager();
     }
 
@@ -28,10 +28,5 @@ public class WithdrawSubCommand extends KCommand {
         }
         this.economyManager.tryWithdraw(user, amount);
     }
-
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//        MessageHandler.sendMessage(user, "/k bank withdraw <amount>");
-//    }
 
 }

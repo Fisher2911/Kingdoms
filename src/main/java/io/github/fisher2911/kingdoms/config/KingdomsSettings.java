@@ -26,6 +26,7 @@ public class KingdomsSettings extends Config {
     private static final String KINGDOM_MAP_WILDERNESS_SYMBOL_PATH = "wilderness-symbol";
     private static final String KINGDOM_MAP_CLAIMED_LAND_SYMBOL_PATH = "kingdom-symbol";
     private static final String KINGDOM_MAP_SELF_CLAIMED_LAND_SYMBOL_PATH = "self-claimed-land-symbol";
+    private static final String KINGDOM_MAP_STANDING_IN_SYMBOL_PATH = "standing-in-symbol";
 
     private static final String COMMANDS_SECTION_PATH = "commands";
     private static final String COMMANDS_PER_HELP_PAGE = "commands-per-help-page";
@@ -43,8 +44,9 @@ public class KingdomsSettings extends Config {
     private int kingdomMapHeight;
     private String kingdomMapWildernessSymbol;
     private String kingdomMapClaimedLandSymbol;
-
     private String kingdomMapSelfClaimedLandSymbol;
+    private String kingdomMapStandingInSymbol;
+
     private int commandsPerHelpPage;
 
     public void load() {
@@ -72,6 +74,7 @@ public class KingdomsSettings extends Config {
             this.kingdomMapWildernessSymbol = source.node(KINGDOM_MAP_SECTION_PATH).node(KINGDOM_MAP_WILDERNESS_SYMBOL_PATH).getString("<green>□");
             this.kingdomMapClaimedLandSymbol = source.node(KINGDOM_MAP_SECTION_PATH).node(KINGDOM_MAP_CLAIMED_LAND_SYMBOL_PATH).getString("<red>□");
             this.kingdomMapSelfClaimedLandSymbol = source.node(KINGDOM_MAP_SECTION_PATH).node(KINGDOM_MAP_SELF_CLAIMED_LAND_SYMBOL_PATH).getString("<blue>□");
+            this.kingdomMapStandingInSymbol = source.node(KINGDOM_MAP_SECTION_PATH).node(KINGDOM_MAP_STANDING_IN_SYMBOL_PATH).getString("<yellow>□");
 
             this.commandsPerHelpPage = source.node(COMMANDS_SECTION_PATH).node(COMMANDS_PER_HELP_PAGE).getInt(5);
 
@@ -136,6 +139,10 @@ public class KingdomsSettings extends Config {
 
     public String getKingdomMapSelfClaimedLandSymbol() {
         return kingdomMapSelfClaimedLandSymbol;
+    }
+
+    public String getKingdomMapStandingInSymbol() {
+        return kingdomMapStandingInSymbol;
     }
 
     public int getCommandsPerHelpPage() {

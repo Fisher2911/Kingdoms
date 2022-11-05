@@ -1,5 +1,6 @@
 package io.github.fisher2911.kingdoms.gui;
 
+import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
@@ -34,6 +35,7 @@ public enum GuiKeys {
 
     ;
 
+    // I'll clean this up later - probably
     public static List<Object> toPlaceholders(Metadata metadata) {
         final List<Object> placeholders = new ArrayList<>();
         final Kingdom kingdom = metadata.get(GuiKeys.KINGDOM, Kingdom.class);
@@ -42,6 +44,7 @@ public enum GuiKeys {
         final String upgradeId = metadata.get(GuiKeys.UPGRADE_ID, String.class);
         final KPermission permission = metadata.get(GuiKeys.PERMISSION, KPermission.class);
         final User kingdomMember = metadata.get(GuiKeys.KINGDOM_MEMBER, User.class);
+        final ClaimedChunk chunk = metadata.get(GuiKeys.CHUNK, ClaimedChunk.class);
         final BaseGui gui = metadata.get(GuiKeys.GUI, BaseGui.class);
         if (gui != null) placeholders.add(gui);
         if (kingdom != null) placeholders.add(kingdom);
@@ -49,6 +52,9 @@ public enum GuiKeys {
         if (roleId != null && kingdom != null) {
             final Role role = kingdom.getRole(roleId);
             placeholders.add(role);
+        }
+        if (chunk != null) {
+            placeholders.add(chunk.getChunk());
         }
         if (upgradeId != null && kingdom != null) {
             final Upgrades<?> upgrades = kingdom.getUpgradeHolder().getUpgrades(upgradeId);
@@ -58,14 +64,14 @@ public enum GuiKeys {
             } else if (upgrades != null) {
                 placeholders.add(upgrades);
             }
-//            if (upgrades != null) {
-//                placeholders.add(new UpgradeLevelWrapper(kingdom, upgradeId));
-//            }
         }
         if (permission != null && kingdom != null && roleId != null) {
             final Role role = kingdom.getRole(roleId);
-            if (role != null)
+            if (chunk != null && chunk.getKingdomId() == kingdom.getId()) {
+                placeholders.add(new PermissionWrapper(permission, chunk.hasPermission(role, permission)));
+            } else if (role != null) {
                 placeholders.add(new PermissionWrapper(permission, kingdom.hasPermission(role, permission)));
+            }
         }
         if (kingdomMember != null && kingdom != null) {
             placeholders.add(new UserKingdomWrapper(kingdomMember, kingdom));

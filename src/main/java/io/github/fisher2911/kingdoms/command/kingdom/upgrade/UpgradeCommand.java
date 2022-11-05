@@ -41,8 +41,4 @@ public class UpgradeCommand extends KCommand {
                 .execute();
     }
 
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//        MessageHandler.sendMessage(user, "/k upgrades");
-//    }
 }

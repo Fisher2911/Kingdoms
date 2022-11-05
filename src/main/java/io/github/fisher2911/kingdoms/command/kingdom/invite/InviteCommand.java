@@ -3,7 +3,6 @@ package io.github.fisher2911.kingdoms.command.kingdom.invite;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.invite.InviteManager;
 import io.github.fisher2911.kingdoms.message.Message;
@@ -26,7 +25,7 @@ public class InviteCommand extends KCommand {
     private final UserManager userManager;
 
     public InviteCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
-        super(plugin, parent, "invite", null, CommandSenderType.PLAYER, 1, 1, subCommands);
+        super(plugin, parent, "invite", "<name>", null, CommandSenderType.PLAYER, 1, 1, subCommands);
         this.kingdomManager = this.plugin.getKingdomManager();
         this.inviteManager = this.plugin.getInviteManager();
         this.userManager = this.plugin.getUserManager();
@@ -45,14 +44,8 @@ public class InviteCommand extends KCommand {
                         () -> MessageHandler.sendMessage(user, Message.PLAYER_NOT_FOUND));
     }
 
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//        MessageHandler.sendMessage(user, "/k invite [player]");
-//    }
-
     @Override
     public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {
-//        return super.getTabs(user, args, previousArgs, true);
         List<String> tabs = super.getTabs(user, args, previousArgs, true);
         if (tabs == null) tabs = new ArrayList<>();
         if (args.length != 1) return tabs;

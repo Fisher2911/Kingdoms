@@ -2,6 +2,7 @@ package io.github.fisher2911.kingdoms.config.condition.impl;
 
 import io.github.fisher2911.kingdoms.config.condition.MetadataPredicate;
 import io.github.fisher2911.kingdoms.gui.GuiKeys;
+import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
@@ -35,6 +36,10 @@ public class KPermissionItemConditional implements MetadataPredicate {
                             !kingdom.hasPermission(user, editing))
             ) {
                 return false;
+            }
+            final ClaimedChunk chunk = possible.get(GuiKeys.CHUNK, ClaimedChunk.class);
+            if  (chunk != null) {
+                return kingdom.hasPermission(user, permission, chunk);
             }
             if (!kingdom.hasPermission(user, permission)) {
                 return false;

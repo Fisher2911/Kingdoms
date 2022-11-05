@@ -23,7 +23,7 @@ public class AdminCommand extends KCommand {
                 -1,
                 subCommands
         );
-        this.addSubCommand(new ReloadSubCommand(this.plugin, this, new HashMap<>()));
+        this.addSubCommand(new ReloadSubCommand(this.plugin, this, new HashMap<>()), true);
     }
 
     @Override

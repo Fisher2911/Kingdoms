@@ -15,25 +15,28 @@ items:
       material: DIAMOND
       name: "<blue>Roles"
     actions:
-      open_menu:
-        menu: roles
-        click-types: [ LEFT, RIGHT ]
+      1:
+        open_menu:
+          menu: roles
+          click-types: [ LEFT, RIGHT ]
   11:
     item:
       material: ANVIL
       name: "<blue>Upgrades"
     actions:
-      open_menu:
-        menu: upgrades
-        click-types: [ LEFT, RIGHT ]
+      1:
+        open_menu:
+          menu: upgrades
+          click-types: [ LEFT, RIGHT ]
   12:
     item:
       material: PLAYER_HEAD
       name: "<blue>Members"
     actions:
-      open_menu:
-        menu: members
-        click-types: [ LEFT, RIGHT ]
+      1:
+        open_menu:
+          menu: members
+          click-types: [ LEFT, RIGHT ]
   13:
     conditionals:
       1:
@@ -44,11 +47,13 @@ items:
           material: ENDER_PEARL
           name: "<blue>Teleport Home"
         actions:
-          close_menu:
-            click-types: [ LEFT, RIGHT ]
-          player_command:
-            command: kingdom home
-            click-types: [ LEFT, RIGHT ]
+          1:
+            close_menu:
+              click-types: [ LEFT, RIGHT ]
+          2:
+            player_command:
+              command: kingdom home
+              click-types: [ LEFT, RIGHT ]
       2:
         item:
           material: IRON_BARS
@@ -66,11 +71,13 @@ items:
           material: END_PORTAL_FRAME
           name: "<blue>Set Kingdom Home"
         actions:
-          close_menu:
-            click-types: [ LEFT, RIGHT ]
-          player_command:
-            command: kingdom sethome
-            click-types: [ LEFT, RIGHT ]
+          1:
+            close_menu:
+              click-types: [ LEFT, RIGHT ]
+          2:
+            player_command:
+              command: kingdom sethome
+              click-types: [ LEFT, RIGHT ]
       2:
         item:
           material: IRON_BARS
@@ -89,17 +96,20 @@ items:
           material: RED_WOOL
           name: "<blue>Disband Kingdom"
         actions:
-          set_item:
-            click-types: [ LEFT, RIGHT ]
-            duration: 40
-            item:
-              material: RED_WOOL
-              name: "<red>Confirm Disband"
-            actions:
-              delete_kingdom:
-                click-types: [ LEFT, RIGHT ]
-              close_menu:
-                click-types: [ LEFT, RIGHT ]
+          1:
+            set_item:
+              click-types: [ LEFT, RIGHT ]
+              duration: 40
+              item:
+                material: RED_WOOL
+                name: "<red>Confirm Disband"
+              actions:
+                1:
+                  delete_kingdom:
+                    click-types: [ LEFT, RIGHT ]
+                2:
+                  close_menu:
+                    click-types: [ LEFT, RIGHT ]
       2:
         item:
           material: IRON_BARS

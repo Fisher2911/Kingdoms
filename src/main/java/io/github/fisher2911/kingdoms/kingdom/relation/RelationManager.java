@@ -124,22 +124,6 @@ public class RelationManager {
         MessageHandler.sendMessage(kingdom, Message.REMOVED_RELATION_TO, toRelate, type);
     }
 
-//    public Map<RelationType, Relation> createRelations(Kingdom kingdom) {
-//        final Map<RelationType, Relation> relations = new EnumMap<>(RelationType.class);
-//        for (RelationType type : RelationType.values()) {
-//            relations.put(type, this.newRelation(type, kingdom));
-//        }
-//        return relations;
-//    }
-//
-//    public Relation newRelation(RelationType type, Kingdom kingdom) {
-//        final Map<KPermission, Boolean> defaultPerms = new HashMap<>(this.defaultRelationPermissions.getOrDefault(
-//                type,
-//                KPermission.mapOfAll()
-//        ));
-//        return new Relation(type, type.getRole(kingdom, this.plugin.getRoleManager()), defaultPerms);
-//    }
-
     public int getMaxRelations(Kingdom kingdom, RelationType type, int def) {
         final String upgradeId = switch (type) {
             case ALLY -> UpgradeId.MAX_ALLIES.toString();
@@ -157,8 +141,6 @@ public class RelationManager {
     public RelationType fromRole(String roleId) {
         return this.roleRelationMap.get(roleId);
     }
-
-    private static final String RELATIONS_PATH = "relations";
 
     public void load() {
         final RoleManager roleManager = this.plugin.getRoleManager();

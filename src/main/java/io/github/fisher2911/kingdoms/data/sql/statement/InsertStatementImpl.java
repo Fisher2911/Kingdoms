@@ -80,6 +80,7 @@ public class InsertStatementImpl implements SQLStatement {
                 }
             }
             statement.executeBatch();
+            connection.commit();
             if (idFinder == null) return null;
             final ResultSet keys = statement.getGeneratedKeys();
             if (keys.next()) return idFinder.find(keys);

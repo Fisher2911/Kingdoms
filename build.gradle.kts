@@ -17,7 +17,6 @@ repositories {
 
 
 dependencies {
-//    compileOnly("io.papermc.paper:paper-api:1.16.5-R0.2-SNAPSHOT")
     compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
     compileOnly("com.mojang:authlib:1.5.25")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")

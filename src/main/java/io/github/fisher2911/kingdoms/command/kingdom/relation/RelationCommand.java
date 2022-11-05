@@ -40,11 +40,6 @@ public class RelationCommand extends KCommand {
                 .execute();
     }
 
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//        MessageHandler.sendMessage(user, "/k [enemy | neutral | truce | ally]");
-//    }
-
     @Override
     public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {
         return super.getTabs(user, args, previousArgs, false);

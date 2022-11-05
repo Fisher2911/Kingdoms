@@ -21,6 +21,7 @@ public class CreateCommand extends KCommand {
                 plugin,
                 parent,
                 "create",
+                "<name>",
                 null,
                 CommandSenderType.PLAYER,
                 1,

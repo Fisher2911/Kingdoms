@@ -61,16 +61,19 @@ public class ClickActionSerializer {
 
     public static List<Consumer<InventoryEventWrapper<InventoryClickEvent>>> deserializeAll(ConfigurationNode source) throws SerializationException {
         final List<Consumer<InventoryEventWrapper<InventoryClickEvent>>> actions = new ArrayList<>();
-        for (var entry : source.childrenMap().entrySet()) {
-            if (!(entry.getKey() instanceof final String action)) continue;
-            final var consumer = deserialize(entry.getValue(), action.toUpperCase(Locale.ROOT));
-            if (consumer == null) continue;
-            actions.add(consumer);
+        for (var actionsEntry : source.childrenMap().entrySet()) {
+            final var node = actionsEntry.getValue();
+            for (var entry : node.childrenMap().entrySet()) {
+                if (!(entry.getKey() instanceof final String action)) continue;
+                final var consumer = deserialize(node.node(action), action.toUpperCase(Locale.ROOT));
+                if (consumer == null) continue;
+                actions.add(consumer);
+            }
         }
         return actions;
     }
 
-    public static Consumer<InventoryEventWrapper<InventoryClickEvent>> deserialize(
+    private static Consumer<InventoryEventWrapper<InventoryClickEvent>> deserialize(
             ConfigurationNode source,
             String actionType
     ) throws SerializationException {

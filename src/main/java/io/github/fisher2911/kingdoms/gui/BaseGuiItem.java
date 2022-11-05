@@ -31,15 +31,14 @@ public abstract class BaseGuiItem {
 
     public ItemStack getItemStack(BaseGui gui, Object... placeholders) {
         if (placeholders.length == 0) return this.itemBuilder.build(this.getPlaceholdersAsArray(this.metadata));
-        if (this.placeholders.size() == 0) return this.itemBuilder.build(/*placeholders*/ GuiKeys.toPlaceholders(
+        if (this.placeholders.size() == 0) return this.itemBuilder.build(GuiKeys.toPlaceholders(
                 this.metadata.copyWith(gui.getMetadata(), false)
         ).toArray());
         return this.itemBuilder.build(ArrayUtil.combine(this.getPlaceholdersAsArray(metadata), placeholders));
     }
 
-    protected Object[] getPlaceholdersAsArray(/*BaseGui gui, */Metadata metadata) {
-        return GuiKeys.toPlaceholders(metadata/*metadata.copyWith(gui.getMetadata())*/).toArray();
-//        return this.placeholders.stream().map(s -> s.apply(gui, this)).toArray();
+    protected Object[] getPlaceholdersAsArray(Metadata metadata) {
+        return GuiKeys.toPlaceholders(metadata).toArray();
     }
 
     public abstract BaseGuiItem withPlaceholders(List<BiFunction<BaseGui, BaseGuiItem, Object>> placeholders);
@@ -70,7 +69,6 @@ public abstract class BaseGuiItem {
     public String toString() {
         return "BaseGuiItem{" +
                 "itemBuilder=" + itemBuilder +
-//                ", placeholders=" + Arrays.toString(this.getPlaceholdersAsArray()) +
                 ", metadata=" + metadata +
                 '}';
     }

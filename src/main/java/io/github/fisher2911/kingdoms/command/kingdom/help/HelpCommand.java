@@ -12,7 +12,7 @@ import java.util.Map;
 public class HelpCommand extends KCommand {
 
     public HelpCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
-        super(plugin, parent, "help", null, CommandSenderType.PLAYER, 0, 1, subCommands);
+        super(plugin, parent, "help", "<page>", null, CommandSenderType.PLAYER, 0, 1, subCommands);
     }
 
     @Override
@@ -26,7 +26,7 @@ public class HelpCommand extends KCommand {
             this.parent.sendHelp(user);
             return;
         }
-        this.parent.sendHelp(user, page);
+        this.parent.sendHelp(user, page - 1);
     }
 
 }

@@ -22,14 +22,22 @@ gui-fillers:
           name: "<blue>%role_display_name%"
           lore:
             - "<blue>Weight: %role_weight%"
+            - "<blue>Left click to edit the Kingdom's permissions"
+            - "<blue>Right click to edit the chunk permissions"
         actions:
-          send_data:
-            click-types: [ LEFT, RIGHT ]
-            data:
-              - "role_id"
-          open_menu:
-            menu: permissions
-            click-types: [ LEFT, RIGHT ]
+          1:
+            send_data:
+              click-types: [ LEFT, RIGHT ]
+              data:
+                - "role_id"
+          2:
+            open_menu:
+              menu: permissions
+              click-types: [ LEFT ]
+          3:
+            open_menu:
+              menu: chunk-permissions
+              click-types: [ RIGHT ]
       2:
         item:
           material: BARRIER
@@ -42,19 +50,22 @@ items:
       material: ARROW
       name: "<blue>Next Page"
     actions:
-      previous_page:
-        click-types: [ LEFT, RIGHT ]
+      1:
+        previous_page:
+          click-types: [ LEFT, RIGHT ]
   40:
     item:
       material: GOLD_INGOT
       name: "<blue>Go back"
     actions:
-      previous_gui:
-        click-types: [ LEFT, RIGHT ]
+      1:
+        previous_gui:
+          click-types: [ LEFT, RIGHT ]
   44:
     item:
       material: ARROW
       name: "<blue>Next Page"
     actions:
-      next_page:
-        click-types: [ LEFT, RIGHT ]
+      1:
+        next_page:
+          click-types: [ LEFT, RIGHT ]

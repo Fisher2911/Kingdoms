@@ -167,10 +167,6 @@ public class RoleManager extends Config {
         return new HashMap<>(this.roles);
     }
 
-//    public Role getById(String id) {
-//        return this.roles.get(id);
-//    }
-
     private void addRole(Role role) {
         this.roles.put(role.id(), role);
         this.rolesByWeight.add(role);

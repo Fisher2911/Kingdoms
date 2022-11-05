@@ -3,7 +3,6 @@ package io.github.fisher2911.kingdoms.command.kingdom.permission;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.gui.GuiKeys;
 import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
@@ -61,11 +60,6 @@ public class EditChunkPermissionsCommand extends KCommand {
                         ), () -> MessageHandler.sendNotInKingdom(user)))
                 .execute();
     }
-
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previous) {
-//        MessageHandler.sendMessage(user, "/k permission edit chunk [role]");
-//    }
 
     @Override
     public @Nullable List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {

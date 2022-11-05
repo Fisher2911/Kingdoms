@@ -96,8 +96,6 @@ public abstract class KCommand {
         final String first = args[0];
         final KCommand subCommand = this.subCommands.get(first.toLowerCase());
         if (subCommand != null) {
-//            final String[] newArgs = new String[argsLength - 1];
-//            System.arraycopy(args, 1, newArgs, 0, newArgs.length);
             final String[] newArgs = this.getNewArgs(args);
             subCommand.handleArgs(sender, newArgs, newPrevious);
             return;
@@ -107,15 +105,16 @@ public abstract class KCommand {
 
     public abstract void execute(User user, String[] args, String[] previousArgs);
 
-//    public abstract void sendHelp(User user, String[] args, String[] previousArgs);
-
-    protected void addSubCommand(KCommand command) {
+    protected void addSubCommand(KCommand command, boolean updateHelp) {
         this.subCommands.put(command.name, command);
+        if (updateHelp) {
+            this.setHelpCommands();
+        }
     }
 
-    // original: [k, bank, ]
-    // old: [bank]
-    // new: [ ]
+    protected void addSubCommand(KCommand command) {
+        this.addSubCommand(command, false);
+    }
 
     @Nullable
     public List<String> getTabs(User user, String[] args, String[] previousArgs, boolean defaultTabIsNull) {
@@ -164,17 +163,21 @@ public abstract class KCommand {
         return newArgs;
     }
 
-    public void setHelpCommands() {
+    private void setHelpCommands() {
         this.commandHelp.clear();
         this.commandHelp.addAll(this.getHelp());
         this.commandHelp.sort(Comparator.comparing(CommandHelp::getUsage));
     }
 
     public void sendHelp(User user, int page) {
+        List<CommandHelp> help = this.commandHelp;
+        if (this.commandHelp.isEmpty()) {
+            help = this.getHelpList();
+        }
         CommandHelpUtil.sendCommandHelp(
                 user,
                 page,
-                this.commandHelp,
+                help,
                 this.plugin.getKingdomSettings().getCommandsPerHelpPage()
         );
     }
@@ -189,22 +192,34 @@ public abstract class KCommand {
             help.addAll(command.getHelp());
         }
         if (this.subCommands.isEmpty()) {
-            help.add(new CommandHelp(this.name, this.getUsage(), this.permission == null ? null : this.permission.getValue()));
+            help.addAll(this.getHelpList());
         }
         return help;
     }
 
-    public String getUsage() {
+    private List<CommandHelp> getHelpList() {
+        final List<CommandHelp> help = new ArrayList<>();
         final StringBuilder builder = new StringBuilder();
+        KCommand parent = this;
+        while (parent != null) {
+            if (parent.dynamicArgs != null) {
+                help.add(this.getHelp(new StringBuilder(parent.dynamicArgs)));
+            }
+            parent = parent.parent;
+        }
+        if (this.dynamicArgs == null) {
+            help.add(this.getHelp(builder));
+        }
+        return help;
+    }
+
+    private CommandHelp getHelp(StringBuilder builder) {
         KCommand parent = this;
         while (parent != null) {
             builder.insert(0, parent.name + " ");
             parent = parent.parent;
         }
-        if (this.dynamicArgs != null) builder.append(this.dynamicArgs);
-        return "/" + builder;
+        return new CommandHelp(this.name, "/" + builder, this.permission == null ? null : this.permission.getValue());
     }
-
-
 
 }

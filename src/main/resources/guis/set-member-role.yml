@@ -34,8 +34,9 @@ gui-fillers:
               glow: true
               skull-owner: "%kingdom_member_uuid%"
             actions:
-              set_member_role:
-                click-types: [ LEFT, RIGHT ]
+              1:
+                set_member_role:
+                  click-types: [ LEFT, RIGHT ]
           2:
             item:
               material: PLAYER_HEAD
@@ -63,8 +64,9 @@ gui-fillers:
                 - "<blue>Left click to set"
               skull-owner: "%kingdom_member_uuid%"
             actions:
-              set_member_role:
-                click-types: [ LEFT, RIGHT ]
+              1:
+                set_member_role:
+                  click-types: [ LEFT, RIGHT ]
           2:
             item:
               material: GOLDEN_HELMET
@@ -79,19 +81,22 @@ items:
       material: ARROW
       name: "<blue>Next Page"
     actions:
-      previous_page:
-        click-types: [ LEFT, RIGHT ]
+      1:
+        previous_page:
+          click-types: [ LEFT, RIGHT ]
   40:
     item:
       material: GOLD_INGOT
       name: "<blue>Go back"
     actions:
-      previous_gui:
-        click-types: [ LEFT, RIGHT ]
+      1:
+        previous_gui:
+          click-types: [ LEFT, RIGHT ]
   44:
     item:
       material: ARROW
       name: "<blue>Next Page"
     actions:
-      next_page:
-        click-types: [ LEFT, RIGHT ]
+      1:
+        next_page:
+          click-types: [ LEFT, RIGHT ]

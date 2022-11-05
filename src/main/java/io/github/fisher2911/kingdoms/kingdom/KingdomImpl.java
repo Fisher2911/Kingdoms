@@ -144,21 +144,13 @@ public class KingdomImpl implements Kingdom {
     @Override
     public boolean hasPermission(User user, KPermission permission) {
         final Role role = this.getRole(user);
-//        final Relation relation = this.getRelation(user.getKingdomId());
-//        if (relation != null) return relation.hasPermission(role, permission);
         return this.hasPermission(role, permission);
     }
 
     @Override
     public boolean hasPermission(User user, KPermission permission, ClaimedChunk chunk) {
+        if (chunk.getKingdomId() != this.id) return false;
         final Role role = this.getRole(user);
-//        final RelationType relationType = this.getKingdomRelation(user.getKingdomId());
-//        Relation relation = chunk.getRelations().get(relationType);
-//        if (relation != null && relation.hasPermission(role, permission, chunk)) {
-//            return true;
-//        }
-//        relation = this.getRelation(user.getKingdomId());
-//        if (relation != null) return relation.hasPermission(role, permission);
         if (chunk.getPermissions().hasPermission(role, permission, this.plugin.getRoleManager())) {
             return true;
         }
@@ -172,34 +164,19 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public void setPermission(Role role, KPermission permission, boolean value) {
-//        final Relation relation = this.relations.get(this.plugin.getRelationManager().fromRole(role.id()));
-//        if (relation == null) {
         this.permissions.setPermission(role, permission, value);
         this.setDirty(true);
-//            return;
-//        }
-//        relation.setPermission(role, permission, value);
         this.setDirty(true);
     }
 
 
     @Override
     public boolean hasPermission(Role role, KPermission permission) {
-//        final RelationType relationType = this.plugin.getRelationManager().fromRole(role.id());
-//        final Relation relation = this.relations.get(relationType);
-//        if (relation != null) return relation.hasPermission(role, permission);
         return this.permissions.hasPermission(role, permission, this.plugin.getRoleManager());
     }
 
     @Override
     public boolean hasPermission(Role role, KPermission permission, ClaimedChunk chunk) {
-//        final RelationType relationType = this.plugin.getRelationManager().fromRole(role.id());
-//        Relation relation = chunk.getRelations().get(relationType);
-//        if (relation != null && relation.hasPermission(role, permission, chunk)) {
-//            return true;
-//        }
-//        relation = this.relations.get(relationType);
-//        if (relation != null) return relation.hasPermission(role, permission);
         if (chunk.getPermissions().hasPermission(role, permission, this.plugin.getRoleManager())) {
             return true;
         }
@@ -338,22 +315,10 @@ public class KingdomImpl implements Kingdom {
         this.removeMember(user);
     }
 
-//    @Override
-//    @Nullable
-//    public Relation getRelation(int kingdomId) {
-//        if (kingdomId == this.id) return null;
-//        return this.relations.get(this.getKingdomRelation(kingdomId));
-//    }
-
     @Override
     public Map<Integer, RelationInfo> getKingdomRelations() {
         return this.kingdomRelations;
     }
-
-//    @Override
-//    public Map<RelationType, Relation> getRelations() {
-//        return this.relations;
-//    }
 
     @Override
     @Nullable
@@ -375,11 +340,6 @@ public class KingdomImpl implements Kingdom {
         if (kingdomId == this.id) return;
         this.kingdomRelations.remove(kingdomId);
     }
-
-//    @Override
-//    public void setRelation(RelationType type, Relation relation) {
-//        this.relations.put(type, relation);
-//    }
 
     @Override
     public Collection<RelationInfo> getRelations(RelationType type) {

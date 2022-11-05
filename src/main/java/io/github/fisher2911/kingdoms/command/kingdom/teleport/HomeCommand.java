@@ -29,9 +29,4 @@ public class HomeCommand extends KCommand {
         );
     }
 
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//        MessageHandler.sendMessage(user, "/k home");
-//    }
-
 }

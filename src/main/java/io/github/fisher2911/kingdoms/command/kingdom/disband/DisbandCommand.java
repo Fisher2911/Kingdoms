@@ -26,8 +26,4 @@ public class DisbandCommand extends KCommand {
                 .execute();
     }
 
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//
-//    }
 }

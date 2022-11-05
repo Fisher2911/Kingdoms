@@ -38,9 +38,5 @@ public class InfoCommand extends KCommand {
                 .execute();
 
     }
-//
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//        MessageHandler.sendMessage(user, "/k info");
-//    }
+
 }

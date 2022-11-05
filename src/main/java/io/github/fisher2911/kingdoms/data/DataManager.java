@@ -104,7 +104,7 @@ public class DataManager {
             .addFields(PERMISSIONS_ROLE_ID_COLUMN, PERMISSIONS_ID_COLUMN, PERMISSIONS_VALUE_COLUMN, PERMISSIONS_KINGDOM_ID_COLUMN)
             .build();
 
-    // Chunk Table
+    // --------------- Chunk Table ---------------
     private static final String CHUNK_TABLE_NAME = "kingdom_chunks";
     private static final SQLField CHUNK_KEY_COLUMN = new SQLField(CHUNK_TABLE_NAME, "key", SQLType.LONG, SQLKeyType.PRIMARY_KEY);
     private static final SQLField CHUNK_WORLD_UUID_COLUMN = new SQLField(CHUNK_TABLE_NAME, "world_uuid", SQLType.UUID);
@@ -221,7 +221,6 @@ public class DataManager {
     // --------------- Locations Table ---------------
     private static final String LOCATIONS_TABLE_NAME = "kingdom_locations";
     private static final SQLField LOCATIONS_ID_COLUMN = new SQLField(LOCATIONS_TABLE_NAME, "id", SQLType.varchar(30), SQLKeyType.PRIMARY_KEY);
-    //    private static final SQLField LOCATIONS_NAME_COLUMN = new SQLField(LOCATIONS_TABLE_NAME, "name", SQLType.varchar(32));
     private static final SQLField LOCATIONS_WORLD_UUID_COLUMN = new SQLField(LOCATIONS_TABLE_NAME, "world_uuid", SQLType.UUID);
     private static final SQLField LOCATIONS_X_COLUMN = new SQLField(LOCATIONS_TABLE_NAME, "x", SQLType.DOUBLE);
     private static final SQLField LOCATIONS_Y_COLUMN = new SQLField(LOCATIONS_TABLE_NAME, "y", SQLType.DOUBLE);
@@ -316,7 +315,6 @@ public class DataManager {
             PERMISSIONS_TABLE.create(connection);
             CHUNK_TABLE.create(connection);
             CHUNK_PERMISSIONS_TABLE.create(connection);
-//            CLAIMS_TABLE.create(connection);
             UPGRADE_LEVELS_TABLE.create(connection);
             RELATIONS_TABLE.create(connection);
             BANK_TABLE.create(connection);
@@ -762,9 +760,6 @@ public class DataManager {
             return roles;
         });
     }
-//        private static final SQLField RELATIONS_OTHER_KINGDOM_ID_COLUMN = new SQLField(RELATIONS_TABLE_NAME, "other_kingdom_id", SQLType.INTEGER, SQLKeyType.PRIMARY_KEY);
-//    private static final SQLField RELATIONS_ID_COLUMN = new SQLField(RELATIONS_TABLE_NAME, "relation_type", SQLType.varchar(32));
-//    private static final SQLField RELATIONS_KINGDOM_ID_COLUMN = new SQLForeignField(
 
     public void saveKingdomRelations(Connection connection, Kingdom kingdom) {
         final SQLStatement statement = SQLStatement.insert(RELATIONS_TABLE_NAME)
@@ -1069,36 +1064,6 @@ public class DataManager {
             return this.loadKingdom(connection, kingdomId);
         });
     }
-//
-//    private Set<User> getKingdomUsers(int kingdomId) {
-//        final SQLQuery<Kingdom> query = SQLQuery.<Kingdom>select(MEMBER_TABLE_NAME)
-//                .select(MEMBER_UUID_COLUMN, MEMBER_ROLE_ID_COLUMN)
-//                .where(new WhereCondition(List.of(Pair.of(MEMBER_KINGDOM_ID_COLUMN, SQLObject.of(kingdomId)))))
-//                .build();
-//        final Set<User> users = new HashSet<>();
-//
-//    }
-
-
-//    @Nullable
-//    public Optional<Kingdom> getKingdomByName(Connection connection, String name) {
-//        final SQLQuery<Kingdom> statement = SQLQuery.<Kingdom>
-//                        select(KINGDOM_TABLE_NAME)
-//                .select(KINGDOM_ID_COLUMN, )
-//                .where(new WhereCondition(List.of(Pair.of(KINGDOM_NAME_COLUMN, SQLObject.of(name)))))
-//                .build();
-//        try {
-//            statement.mapTo(connection, this::mapKingdom);
-//            final List<Kingdom> kingdoms = statement.query(connection, this::getKingdomFromResultSet);
-//            if (kingdoms.size() == 0) {
-//                return Optional.empty();
-//            }
-//            return Optional.of(kingdoms.get(0));
-//        } catch (final SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return Optional.empty();
-//    }
 
     private byte[] uuidToBytes(UUID uuid) {
         return ByteBuffer.wrap(new byte[16])

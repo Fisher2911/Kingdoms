@@ -15,17 +15,12 @@ public class BankCommand extends KCommand {
         super(plugin, parent, "bank", null, CommandSenderType.PLAYER, 1, 3, subCommands);
         this.addSubCommand(new BalanceSubCommand(plugin, this, new HashMap<>()));
         this.addSubCommand(new DepositSubCommand(plugin, this, new HashMap<>()));
-        this.addSubCommand(new WithdrawSubCommand(plugin, this, new HashMap<>()));
+        this.addSubCommand(new WithdrawSubCommand(plugin, this, new HashMap<>()), true);
     }
 
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
         this.sendHelp(user);
     }
-
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//        MessageHandler.sendMessage(user, "/k bank <deposit | withdraw | balance>");
-//    }
 
 }

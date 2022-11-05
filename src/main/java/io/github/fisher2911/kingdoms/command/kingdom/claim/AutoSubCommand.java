@@ -55,10 +55,5 @@ public class AutoSubCommand extends KCommand {
                 })
                 .execute();
     }
-//
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previous) {
-//        MessageHandler.sendMessage(user, "/k claim [auto]");
-//    }
 
 }

@@ -26,10 +26,6 @@ public class PlaceholderConditionals implements MetadataPredicate {
     }
 
     public boolean test(Metadata possible) {
-//        final List<Object> placeholders = new ArrayList<>();
-//        for (var function : this.placeholderFunctions) {
-//            placeholders.addAll(function.apply(possible));
-//        }
         final Object[] placeholders = GuiKeys.toPlaceholders(possible).toArray();
         final String parsed = PlaceholderBuilder.apply(
                 this.toParse,

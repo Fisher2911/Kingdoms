@@ -15,7 +15,7 @@ public class DepositSubCommand extends KCommand {
     private final EconomyManager economyManager;
 
     public DepositSubCommand(Kingdoms plugin, @Nullable KCommand parent, Map<String, KCommand> subCommands) {
-        super(plugin, parent, "deposit", null, CommandSenderType.PLAYER, 1, 1, subCommands);
+        super(plugin, parent, "deposit", "<amount>", null, CommandSenderType.PLAYER, 1, 1, subCommands);
         this.economyManager = this.plugin.getEconomyManager();
     }
 
@@ -28,10 +28,5 @@ public class DepositSubCommand extends KCommand {
         }
         this.economyManager.tryDeposit(user, amount);
     }
-
-//    @Override
-//    public void sendHelp(User user, String[] args, String[] previousArgs) {
-//        MessageHandler.sendMessage(user, "/k bank deposit <amount>");
-//    }
 
 }

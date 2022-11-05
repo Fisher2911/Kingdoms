@@ -52,15 +52,11 @@ public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder, S
     boolean canKick(User kicker, User toKick);
     void kick(User user);
     Map<Integer, RelationInfo> getKingdomRelations();
-//    Map<RelationType, Relation> getRelations();
     Collection<RelationInfo> getRelations(RelationType type);
     @Nullable // if self
     RelationType getKingdomRelation(int kingdomId);
-//    @Nullable // if self
-//    Relation getRelation(int kingdomId);
     void setRelation(Integer kingdomId, RelationInfo info);
     void removeRelation(Integer kingdomId);
-//    void setRelation(RelationType type, Relation relation);
     boolean isLeader(User user);
     Bank<Kingdom> getBank();
     double getBankLimit();

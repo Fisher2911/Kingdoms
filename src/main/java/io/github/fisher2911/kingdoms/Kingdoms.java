@@ -110,7 +110,6 @@ public final class Kingdoms extends JavaPlugin {
     public void registerCommands() {
         final KingdomCommand kingdomCommand = new KingdomCommand(this, new HashMap<>());
         this.getCommand("kingdom").setExecutor(kingdomCommand);
-//        kingdomCommand.loadHelp();
     }
 
     public void load() {
