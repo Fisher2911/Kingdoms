@@ -4,7 +4,6 @@ import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.util.EnumUtil;
-import io.github.fisher2911.kingdoms.util.builder.BaseItemBuilder;
 import net.objecthunter.exp4j.Expression;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -27,20 +26,18 @@ public class PotionUpgrades extends IntUpgrades implements EntryUpgrade<Integer>
             Expression expression,
             Expression priceExpression,
             int maxLevel,
-            BaseItemBuilder displayItem,
-            BaseItemBuilder maxLevelDisplayItem,
             Set<PotionEffectType> potionEffectTypes,
             Set<RelationType> appliesTo,
             boolean appliesToSelf
     ) {
-        super(id, displayName, expression, priceExpression, maxLevel, displayItem, maxLevelDisplayItem);
+        super(id, displayName, expression, priceExpression, maxLevel);
         this.potionEffectTypes = potionEffectTypes;
         this.appliesTo = appliesTo;
         this.appliesToSelf = appliesToSelf;
     }
 
     public PotionUpgrades(IntUpgrades upgrades, Set<PotionEffectType> potionEffectTypes, Set<RelationType> appliesTo, boolean appliesToSelf) {
-        super(upgrades.id, upgrades.displayName, upgrades.expression, upgrades.moneyPriceExpression, upgrades.getMaxLevel(), upgrades.displayItem, upgrades.maxLevelDisplayItem);
+        super(upgrades.id, upgrades.displayName, upgrades.expression, upgrades.moneyPriceExpression, upgrades.getMaxLevel());
         this.potionEffectTypes = potionEffectTypes;
         this.appliesTo = appliesTo;
         this.appliesToSelf = appliesToSelf;

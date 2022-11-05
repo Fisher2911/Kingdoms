@@ -22,10 +22,11 @@ gui-fillers:
     max-level-item:
       item:
         material: RED_STAINED_GLASS_PANE
-        name: "<red>Max Level Reached"
+        name: "<red>%upgrade_display_name%"
         lore:
           - ""
           - "<red>Max Level Reached"
+          - "<blue>%upgrade_display_name%: %upgrade_display_value%"
     actions:
       1:
         increase_level:

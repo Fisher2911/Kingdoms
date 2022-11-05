@@ -1,5 +1,5 @@
 name: Kingdoms
-version: '${version}'
+version: "1.0.0-beta"
 main: io.github.fisher2911.kingdoms.Kingdoms
 api-version: 1.16
 authors: [ Fisher2911 ]
@@ -8,4 +8,29 @@ softdepend: [ WorldGuard ]
 commands:
   kingdom:
     description: test
-    aliases: ["k"]
+    aliases: [ "k" ]
+permissions:
+  kingdoms.create:
+    description: Allows a player to create a kingdom
+    default: true
+  kingdoms.cmd.admin:
+    description: Allows a player to use admin commands
+    default: op
+  kingdoms.cmd.reload:
+    description: Allows a player to reload the plugin
+    default: op
+  kingdoms.cmd.info.other:
+    description: Allows a player to view other kingdoms info
+    default: true
+  kingdoms.cmd.info.self:
+    description: Allows a player to view their own kingdoms info
+    default: true
+  kingdoms.cmd.description.other:
+    description: Allows a player to view other kingdoms description
+    default: true
+  kingdoms.cmd.description.self:
+    description: Allows a player to view their own kingdoms description
+    default: true
+  kingdoms.cmd.help.admin:
+    description: Allows a player to view admin commands
+    default: op

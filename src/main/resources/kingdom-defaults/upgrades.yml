@@ -3,125 +3,41 @@ upgrades:
     type: int
     id: max-claims
     display-name: '<blue>Max Claims'
-    expression: "10 level * 5"
+    expression: "level * 5"
     money-price-expression: "level * 100"
     max-level: 10
-    display-item:
-      material: GRASS_BLOCK
-      name: '<blue>%upgrade_display_name%'
-      lore:
-        - ""
-        - "<green>Value: %upgrade_display_value%"
-        - "<red>Cost: $%upgrade_display_price%"
-    max-level-item:
-      material: BARRIER
-      name: '<blue>Max Claims'
-      lore:
-        - ""
-        - "<gray>Max claims: <gold>%upgrade_display_value%"
-        - "<red>Max Level!"
   2:
     type: int
     id: max-members
     display-name: '<blue>Max Members'
-    expression: "10 level * 5"
+    expression: "level * 2"
     money-price-expression: "level * 100"
-    max-level: 10
-    display-item:
-      material: GRASS_BLOCK
-      name: '<blue>%upgrade_display_name%'
-      lore:
-        - ""
-        - "<green>Value: %upgrade_display_value%"
-        - "<red>Cost: $%upgrade_display_price%"
-    max-level-item:
-      material: BARRIER
-      name: '<blue>Max Claims'
-      lore:
-        - ""
-        - "<gray>Max claims: <gold>%upgrade_display_value%"
-        - "<red>Max Level!"
+    max-level: 5
   3:
     type: double
     id: bank-limit
     display-name: '<blue>Bank Limit'
-    expression: "10 level * 5"
-    money-price-expression: "level * 100"
+    expression: "level * 100000"
+    money-price-expression: "level * 25000"
     max-level: 10
-    display-item:
-      material: GRASS_BLOCK
-      name: '<blue>%upgrade_display_name%'
-      lore:
-        - ""
-        - "<green>Value: %upgrade_display_value%"
-        - "<red>Cost: $%upgrade_display_price%"
-    max-level-item:
-      material: BARRIER
-      name: '<blue>Max Claims'
-      lore:
-        - ""
-        - "<gray>Max claims: <gold>%upgrade_display_value%"
-        - "<red>Max Level!"
   4:
     type: int
     id: max-allies
     display-name: '<blue>Max Allies'
-    expression: "10 level * 5"
-    money-price-expression: "level * 100"
-    max-level: 10
-    display-item:
-      material: GRASS_BLOCK
-      name: '<blue>%upgrade_display_name%'
-      lore:
-        - ""
-        - "<green>Value: %upgrade_display_value%"
-        - "<red>Cost: $%upgrade_display_price%"
-    max-level-item:
-      material: BARRIER
-      name: '<blue>Max Claims'
-      lore:
-        - ""
-        - "<gray>Max claims: <gold>%upgrade_display_value%"
-        - "<red>Max Level!"
+    expression: "level * 1"
+    money-price-expression: "level * 1000"
+    max-level: 3
   5:
     type: int
     id: max-truces
     display-name: '<blue>Max Truces'
-    expression: "10 level * 5"
-    money-price-expression: "level * 100"
-    max-level: 10
-    display-item:
-      material: GRASS_BLOCK
-      name: '<blue>%upgrade_display_name%'
-      lore:
-        - ""
-        - "<green>Value: %upgrade_display_value%"
-        - "<red>Cost: $%upgrade_display_price%"
-    max-level-item:
-      material: BARRIER
-      name: '<blue>Max Claims'
-      lore:
-        - ""
-        - "<gray>Max claims: <gold>%upgrade_display_value%"
-        - "<red>Max Level!"
+    expression: "level * 1"
+    money-price-expression: "level * 1000"
+    max-level: 4
   6:
     type: int
     id: max-enemies
     display-name: '<blue>Max Enemies'
-    expression: "10 level * 5"
-    money-price-expression: "level * 100"
-    max-level: 10
-    display-item:
-      material: GRASS_BLOCK
-      name: '<blue>%upgrade_display_name%'
-      lore:
-        - ""
-        - "<green>Value: %upgrade_display_value%"
-        - "<red>Cost: $%upgrade_display_price%"
-    max-level-item:
-      material: BARRIER
-      name: '<blue>Max Claims'
-      lore:
-        - ""
-        - "<gray>Max claims: <gold>%upgrade_display_value%"
-        - "<red>Max Level!"
+    expression: "level * 1"
+    money-price-expression: "level * 1000"
+    max-level: 4

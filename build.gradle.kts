@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.fisher2911"
-version = "1.0-SNAPSHOT"
+version = "1.0.0-beta"
 
 repositories {
     mavenCentral()
@@ -45,7 +45,7 @@ tasks {
         relocate("net.objecthunter.exp4j", "io.github.fisher2911.kingdoms.exp4j")
         relocate("net.kyori.adventure", "io.github.fisher2911.kingdoms.adventure")
         relocate("com.zaxxer.hikari", "io.github.fisher2911.kingdoms.hikari")
-        archiveFileName.set("Kingdoms.jar")
+        archiveFileName.set("Kingdoms-${version}.jar")
 
         dependencies {
             exclude(dependency("org.yaml:snakeyaml"))

@@ -66,13 +66,4 @@ public class MappedUpgrades<T> implements Upgrades<T>{
         return this.maxLevel;
     }
 
-    @Override
-    public BaseItemBuilder getGuiItem() {
-        return this.displayItem;
-    }
-
-    @Override
-    public BaseItemBuilder getMaxLevelGuiItem() {
-        return this.maxLevelDisplayItem;
-    }
 }

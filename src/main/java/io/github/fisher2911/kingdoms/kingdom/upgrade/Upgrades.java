@@ -14,7 +14,5 @@ public interface Upgrades<T> {
     Price getPriceAtLevel(int level);
     String getDisplayName();
     int getMaxLevel();
-    BaseItemBuilder getGuiItem();
-    BaseItemBuilder getMaxLevelGuiItem();
 
 }

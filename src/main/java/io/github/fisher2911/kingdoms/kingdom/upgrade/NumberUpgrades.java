@@ -1,8 +1,6 @@
 package io.github.fisher2911.kingdoms.kingdom.upgrade;
 
-import io.github.fisher2911.kingdoms.config.serializer.ItemSerializer;
 import io.github.fisher2911.kingdoms.economy.Price;
-import io.github.fisher2911.kingdoms.util.builder.BaseItemBuilder;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.jetbrains.annotations.Nullable;
@@ -20,17 +18,13 @@ public abstract class NumberUpgrades<T extends Number> implements Upgrades<T> {
     protected final Expression expression;
     protected final Expression moneyPriceExpression;
     protected final int maxLevel;
-    protected final BaseItemBuilder displayItem;
-    protected final BaseItemBuilder maxLevelDisplayItem;
 
-    public NumberUpgrades(String id, String displayName, Expression valueExpression, Expression moneyPriceExpression, int maxLevel, BaseItemBuilder displayItem, BaseItemBuilder maxLevelDisplayItem) {
+    public NumberUpgrades(String id, String displayName, Expression valueExpression, Expression moneyPriceExpression, int maxLevel) {
         this.id = id;
         this.displayName = displayName;
         this.expression = valueExpression;
         this.moneyPriceExpression = moneyPriceExpression;
         this.maxLevel = maxLevel;
-        this.displayItem = displayItem;
-        this.maxLevelDisplayItem = maxLevelDisplayItem;
     }
 
     protected Expression setVariable(int level) {
@@ -55,16 +49,6 @@ public abstract class NumberUpgrades<T extends Number> implements Upgrades<T> {
     }
 
     @Override
-    public BaseItemBuilder getGuiItem() {
-        return this.displayItem;
-    }
-
-    @Override
-    public BaseItemBuilder getMaxLevelGuiItem() {
-        return this.maxLevelDisplayItem;
-    }
-
-    @Override
     public String getDisplayValueAtLevel(int level) {
         return String.valueOf(this.getValueAtLevel(level));
     }
@@ -83,8 +67,6 @@ public abstract class NumberUpgrades<T extends Number> implements Upgrades<T> {
     private static final String EXPRESSION = "expression";
     private static final String MONEY_PRICE_EXPRESSION = "money-price-expression";
     private static final String MAX_LEVEL = "max-level";
-    private static final String DISPLAY_ITEM = "display-item";
-    private static final String MAX_LEVEL_DISPLAY_ITEM = "max-level-item";
 
     public static NumberUpgrades<?> deserialize(ConfigurationNode node, String type) {
         try {
@@ -93,11 +75,9 @@ public abstract class NumberUpgrades<T extends Number> implements Upgrades<T> {
             final Expression expression = new ExpressionBuilder(node.node(EXPRESSION).getString("")).variable(CURRENT_LEVEL_VARIABLE).build();
             final Expression moneyPriceExpression = new ExpressionBuilder(node.node(MONEY_PRICE_EXPRESSION).getString("")).variable(CURRENT_LEVEL_VARIABLE).build();
             final int maxLevel = node.node(MAX_LEVEL).getInt();
-            final BaseItemBuilder displayItem = ItemSerializer.INSTANCE.deserialize(BaseItemBuilder.class, node.node(DISPLAY_ITEM));
-            final BaseItemBuilder maxLevelDisplayItem = ItemSerializer.INSTANCE.deserialize(BaseItemBuilder.class, node.node(MAX_LEVEL_DISPLAY_ITEM));
             return switch (type.toLowerCase()) {
-                case DOUBLE_UPGRADE_TYPE -> new DoubleUpgrades(id, displayName, expression, moneyPriceExpression, maxLevel, displayItem, maxLevelDisplayItem);
-                case INT_UPGRADE_TYPE -> new IntUpgrades(id, displayName, expression, moneyPriceExpression, maxLevel, displayItem, maxLevelDisplayItem);
+                case DOUBLE_UPGRADE_TYPE -> new DoubleUpgrades(id, displayName, expression, moneyPriceExpression, maxLevel);
+                case INT_UPGRADE_TYPE -> new IntUpgrades(id, displayName, expression, moneyPriceExpression, maxLevel);
                 default -> throw new SerializationException("Invalid upgrades type: " + type);
             };
         } catch (IOException e) {
