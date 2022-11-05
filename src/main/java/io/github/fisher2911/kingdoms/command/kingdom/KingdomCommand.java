@@ -82,7 +82,6 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         this.addSubCommand(new NameCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new MapCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new HelpCommand(this.plugin, this, new HashMap<>()), true);
-        this.sendHelp(User.CONSOLE);
     }
 
     @Override

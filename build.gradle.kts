@@ -28,6 +28,7 @@ dependencies {
     implementation("net.kyori:adventure-text-minimessage:4.11.0")
     implementation("net.kyori:adventure-platform-bukkit:4.1.2")
     implementation("com.zaxxer:HikariCP:3.3.0")
+    implementation("org.bstats:bstats-bukkit:3.0.0")
 }
 
 tasks {
@@ -45,6 +46,7 @@ tasks {
         relocate("net.objecthunter.exp4j", "io.github.fisher2911.kingdoms.exp4j")
         relocate("net.kyori.adventure", "io.github.fisher2911.kingdoms.adventure")
         relocate("com.zaxxer.hikari", "io.github.fisher2911.kingdoms.hikari")
+        relocate("org.bstats", "io.github.fisher2911.kingdoms.bstats")
         archiveFileName.set("Kingdoms-${version}.jar")
 
         dependencies {

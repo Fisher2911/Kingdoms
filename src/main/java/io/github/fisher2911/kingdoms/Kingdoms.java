@@ -48,6 +48,7 @@ import io.github.fisher2911.kingdoms.user.UserManager;
 import net.milkbowl.vault.economy.Economy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -94,6 +95,8 @@ public final class Kingdoms extends JavaPlugin {
             logger.error("Could not find a valid economy plugin! Disabling plugin!");
             return;
         }
+        final int bStatsPluginId = 16799;
+        Metrics metrics = new Metrics(this, bStatsPluginId);
 
         // order matters
         this.teleportManager = new TeleportManager(this);
