@@ -14,7 +14,9 @@ public interface SQLType {
 
     SQLType BOOLEAN = () -> "BOOLEAN";
 
-    SQLType UUID= () -> "BINARY(16)";
+    SQLType UUID = () -> "BINARY(16)";
+
+    SQLType DATE_TIME = () -> "TIMESTAMP";
 
     static SQLType text(int length) {
         return () -> "TEXT(" + length + ")";

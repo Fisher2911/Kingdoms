@@ -50,7 +50,7 @@ public class SetRoleCommand extends KCommand {
         return this.kingdomManager.getKingdom(user.getKingdomId(), false)
                 .map(kingdom -> kingdom.getRoles().keySet()
                         .stream()
-                        .filter(RoleManager.UNSETTABLE_ROLES::contains)
+                        .filter(role -> !RoleManager.UNSETTABLE_ROLES.contains(role))
                         .filter(roleId -> roleId.startsWith(arg))
                         .collect(Collectors.toList())).
                 orElse(tabs);

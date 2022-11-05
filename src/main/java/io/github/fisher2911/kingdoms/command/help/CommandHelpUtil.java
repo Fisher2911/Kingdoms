@@ -63,8 +63,6 @@ public class CommandHelpUtil {
 
     private static boolean hasPermission(CommandHelp help, User user) {
         final String permission = help.getPermission();
-        final boolean hasPermission = permission == null || user.hasPermission(permission);
-        System.out.println("hasPermission: " + hasPermission + " permission: " + permission);
         return permission == null || user.hasPermission(permission);
     }
 

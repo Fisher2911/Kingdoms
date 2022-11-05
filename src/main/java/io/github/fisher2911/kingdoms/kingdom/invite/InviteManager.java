@@ -36,6 +36,10 @@ public class InviteManager {
             MessageHandler.sendMessage(invited, Message.NO_KINGDOM_PERMISSION);
             return;
         }
+        if (invited.getId().equals(inviter.getId())) {
+            MessageHandler.sendMessage(invited, Message.CANNOT_INVITE_SELF);
+            return;
+        }
         final KingdomInvite invite = new KingdomInvite(kingdom, inviter, invited, Instant.now());
         final Collection<KingdomInvite> invites = this.getInvitedTo(invited.getId());
         if (invites.contains(invite)) {

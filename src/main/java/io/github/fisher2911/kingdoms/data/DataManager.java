@@ -47,6 +47,9 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -65,8 +68,9 @@ public class DataManager {
     private static final SQLField KINGDOM_ID_COLUMN = new SQLIdField(KINGDOM_TABLE_NAME, "id", SQLType.INTEGER, SQLKeyType.PRIMARY_KEY, true);
     private static final SQLField KINGDOM_NAME_COLUMN = new SQLField(KINGDOM_TABLE_NAME, "name", SQLType.varchar());
     private static final SQLField KINGDOM_DESCRIPTION_COLUMN = new SQLField(KINGDOM_TABLE_NAME, "description", SQLType.varchar());
+    private static final SQLField KINGDOM_CREATED_DATE_COLUMN = new SQLField(KINGDOM_TABLE_NAME, "created_date", SQLType.DATE_TIME);
     private static final SQLTable KINGDOM_TABLE = SQLTable.builder(KINGDOM_TABLE_NAME)
-            .addFields(KINGDOM_ID_COLUMN, KINGDOM_NAME_COLUMN, KINGDOM_DESCRIPTION_COLUMN)
+            .addFields(KINGDOM_ID_COLUMN, KINGDOM_NAME_COLUMN, KINGDOM_DESCRIPTION_COLUMN, KINGDOM_CREATED_DATE_COLUMN)
             .build();
 
 
@@ -329,7 +333,13 @@ public class DataManager {
     public Kingdom newKingdom(User creator, String name) {
         final RoleManager roleManager = this.plugin.getRoleManager();
         try {
-            final int id = this.createKingdom(this.getConnection(), name, this.plugin.getKingdomSettings().getDefaultKingdomDescription());
+            final LocalDateTime now = LocalDateTime.now();
+            final int id = this.createKingdom(
+                    this.getConnection(),
+                    name,
+                    this.plugin.getKingdomSettings().getDefaultKingdomDescription(),
+                    now
+            );
             final Kingdom kingdom = new KingdomImpl(
                     this.plugin,
                     id,
@@ -344,11 +354,11 @@ public class DataManager {
                     new HashMap<>(),
                     Bank.createKingdomBank(0),
                     roleManager.createKingdomRoles(),
-                    new KingdomLocations(new HashMap<>())
+                    new KingdomLocations(new HashMap<>()),
+                    now
             );
             kingdom.addMember(creator);
             kingdom.setRole(creator, roleManager.getLeaderRole(kingdom));
-            this.saveKingdom(kingdom);
             return kingdom;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -356,12 +366,13 @@ public class DataManager {
         }
     }
 
-    private int createKingdom(Connection connection, String name, String desc) throws SQLException {
+    private int createKingdom(Connection connection, String name, String desc, LocalDateTime createdAt) throws SQLException {
         final SQLStatement statement = SQLStatement.insert(KINGDOM_TABLE_NAME).
                 add(KINGDOM_NAME_COLUMN).
                 add(KINGDOM_DESCRIPTION_COLUMN).
+                add(KINGDOM_CREATED_DATE_COLUMN).
                 build();
-        final List<Object> values = List.of(name, desc);
+        final List<Object> values = List.of(name, desc, createdAt.atOffset(ZoneOffset.UTC));
         final Integer id = statement.insert(connection, List.of(() -> values), 1, SQLStatement.INTEGER_ID_FINDER);
         if (id == null) {
             throw new IllegalStateException("Could not create kingdom");
@@ -1003,6 +1014,7 @@ public class DataManager {
             final int id = results.getInt(KINGDOM_ID_COLUMN.getName());
             final String name = results.getString(KINGDOM_NAME_COLUMN.getName());
             final String description = results.getString(KINGDOM_DESCRIPTION_COLUMN.getName());
+            final Timestamp creationTime = results.getTimestamp(KINGDOM_CREATED_DATE_COLUMN.getName());
             TaskChain.create(this.plugin)
                     .runSync(() -> {
                         for (ClaimedChunk chunk : chunks) {
@@ -1024,7 +1036,8 @@ public class DataManager {
                     kingdomRelations,
                     bank,
                     roles,
-                    locations
+                    locations,
+                    creationTime.toLocalDateTime()
             );
         }));
     }

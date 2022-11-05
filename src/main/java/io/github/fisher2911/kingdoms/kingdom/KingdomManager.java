@@ -17,7 +17,6 @@ import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
-import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.teleport.TeleportInfo;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.world.WorldPosition;
@@ -71,10 +70,6 @@ public class KingdomManager {
         MessageHandler.sendMessage(user, Message.CREATED_KINGDOM, kingdom);
         this.kingdoms.put(kingdom.getId(), kingdom);
         this.byName.put(kingdom.getName(), kingdom);
-        user.setKingdomId(kingdom.getId());
-        TaskChain.create(this.plugin)
-                .runAsync(() -> this.dataManager.saveUser(user))
-                .execute();
         return Optional.of(kingdom);
     }
 

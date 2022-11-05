@@ -8,10 +8,8 @@ import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
-import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.Map;
 
 public class NameCommand extends KCommand {
@@ -25,7 +23,6 @@ public class NameCommand extends KCommand {
 
     @Override
     public void execute(User user, String[] args, String[] previousArgs) {
-        Bukkit.broadcastMessage(Arrays.toString(args));
         if (args.length == 0) {
             TaskChain.create(this.plugin)
                     .runAsync(() -> this.kingdomManager.getKingdom(user.getKingdomId(), true)
