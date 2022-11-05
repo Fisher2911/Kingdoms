@@ -99,6 +99,7 @@ public enum Message {
     ADMIN_COMMAND_HELP_HEADER,
     ADMIN_COMMAND_HELP_FOOTER,
     CANNOT_INVITE_SELF,
+    CANNOT_CLAIM_HERE,
 
     ;
 

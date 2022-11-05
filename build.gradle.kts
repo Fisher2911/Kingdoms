@@ -13,6 +13,7 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://oss.sonatype.org/content/repositories/central")
     maven("https://jitpack.io")
+    maven("https://maven.enginehub.org/repo/")
 }
 
 
@@ -20,6 +21,7 @@ dependencies {
     compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
     compileOnly("com.mojang:authlib:1.5.25")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.7-SNAPSHOT")
     implementation("org.spongepowered:configurate-yaml:4.1.2")
     implementation("net.objecthunter:exp4j:0.4.8")
     implementation("net.kyori:adventure-api:4.11.0")

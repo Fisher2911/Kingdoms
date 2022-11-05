@@ -113,3 +113,4 @@ admin-command-help-format: "<green>%command_help_usage%"
 admin-command-help-header: "<gradient:#42d7f5:#08a4ff>--------Kingdoms Help--------"
 admin-command-help-footer: "<gold><click:run_command:/k help %command_info_previous_page_number%><gold>«<gradient:#42d7f5:#08a4ff>--------Kingdoms Help--------<click:run_command:/k help %command_info_next_page_number%><gold>»</click>"
 cannot-invite-self: <red>You cannot invite yourself
+cannot-claim-here: <red>You cannot claim here

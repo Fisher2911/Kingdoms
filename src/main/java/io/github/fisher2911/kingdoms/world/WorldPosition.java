@@ -7,6 +7,10 @@ import java.util.UUID;
 
 public record WorldPosition(UUID world, Position position) {
 
+    public static WorldPosition at(UUID world, double x, double y, double z) {
+        return new WorldPosition(world, Position.at(x, y, z));
+    }
+
     public static WorldPosition fromLocation(Location location) {
         return new WorldPosition(location.getWorld().getUID(), Position.fromLocation(location));
     }

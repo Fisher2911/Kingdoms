@@ -56,6 +56,10 @@ public class ClaimManager {
     }
 
     public void tryClaim(User user, Kingdom kingdom, ClaimedChunk chunk) {
+        if (!this.plugin.getHooks().canClaimAt(chunk.getChunk().getCenter().toLocation())) {
+            MessageHandler.sendMessage(user, Message.CANNOT_CLAIM_HERE);
+            return;
+        }
         if (!kingdom.hasPermission(user, KPermission.CLAIM_LAND)) {
             MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
             return;

@@ -14,7 +14,7 @@ import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -27,7 +27,7 @@ public class WildernessKingdom implements Kingdom {
     private final String name = "Wilderness";
     private final PermissionContainer empty = PermissionContainer.empty();
     private final Bank<Kingdom> bank = Bank.createKingdomBank(0);
-    private final LocalDateTime creationDate = LocalDateTime.MIN;
+    private final Instant creationDate = Instant.MIN;
 
     private WildernessKingdom() {}
 
@@ -279,7 +279,7 @@ public class WildernessKingdom implements Kingdom {
     }
 
     @Override
-    public LocalDateTime getDateCreated() {
+    public Instant getCreatedAt() {
         return this.creationDate;
     }
 }

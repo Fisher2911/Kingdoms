@@ -17,6 +17,10 @@ public record KChunk(UUID world, int x, int z) {
         return (long) x & 0xffffffffL | ((long) z & 0xffffffffL) << 32;
     }
 
+    public WorldPosition getCenter() {
+        return WorldPosition.at(this.world, this.x * 16 + 8, 0, this.z * 16 + 8);
+    }
+
     @Override
     public String toString() {
         return "KChunk{" +

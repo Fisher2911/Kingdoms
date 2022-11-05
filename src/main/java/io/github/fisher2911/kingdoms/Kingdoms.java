@@ -8,6 +8,7 @@ import io.github.fisher2911.kingdoms.economy.EconomyManager;
 import io.github.fisher2911.kingdoms.economy.PriceManager;
 import io.github.fisher2911.kingdoms.gui.GuiListener;
 import io.github.fisher2911.kingdoms.gui.GuiManager;
+import io.github.fisher2911.kingdoms.hook.Hooks;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
@@ -42,6 +43,7 @@ public final class Kingdoms extends JavaPlugin {
 
     private final Logger logger = LogManager.getLogger(Kingdoms.class);
 
+    private Hooks hooks;
     private TeleportManager teleportManager;
     private GlobalListener globalListener;
     private UpgradeManager upgradeManager;
@@ -61,6 +63,12 @@ public final class Kingdoms extends JavaPlugin {
     private MapVisualizer mapVisualizer;
     private Economy economy;
     private BukkitTask saveTask;
+
+    @Override
+    public void onLoad() {
+        this.hooks = new Hooks();
+        this.hooks.load();
+    }
 
     @Override
     public void onEnable() {
@@ -224,5 +232,9 @@ public final class Kingdoms extends JavaPlugin {
 
     public Economy getEconomy() {
         return economy;
+    }
+
+    public Hooks getHooks() {
+        return hooks;
     }
 }

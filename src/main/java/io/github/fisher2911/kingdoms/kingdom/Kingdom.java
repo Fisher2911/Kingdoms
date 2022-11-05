@@ -15,7 +15,7 @@ import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgradeable;
 import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -65,6 +65,6 @@ public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder, S
     Role getRole(String id);
     KingdomLocations getLocations();
     boolean canBeUnloaded(Kingdoms plugin);
-    LocalDateTime getDateCreated();
+    Instant getCreatedAt();
 
 }

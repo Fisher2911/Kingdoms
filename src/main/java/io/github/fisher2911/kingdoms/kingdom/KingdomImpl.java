@@ -19,6 +19,7 @@ import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,7 +48,7 @@ public class KingdomImpl implements Kingdom {
     private final Bank<Kingdom> bank;
     private final Map<String, Role> roles;
     private final KingdomLocations locations;
-    private final LocalDateTime createdAt;
+    private final Instant createdAt;
     private boolean dirty;
 
     public KingdomImpl(
@@ -65,7 +66,7 @@ public class KingdomImpl implements Kingdom {
             Bank<Kingdom> bank,
             Map<String, Role> roles,
             KingdomLocations locations,
-            LocalDateTime createdAt
+            Instant createdAt
     ) {
         this.plugin = plugin;
         this.id = id;
@@ -423,7 +424,7 @@ public class KingdomImpl implements Kingdom {
     }
 
     @Override
-    public LocalDateTime getDateCreated() {
+    public Instant getCreatedAt() {
         return this.createdAt;
     }
 

@@ -48,8 +48,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -333,7 +332,7 @@ public class DataManager {
     public Kingdom newKingdom(User creator, String name) {
         final RoleManager roleManager = this.plugin.getRoleManager();
         try {
-            final LocalDateTime now = LocalDateTime.now();
+            final Instant now = Instant.now();
             final int id = this.createKingdom(
                     this.getConnection(),
                     name,
@@ -366,13 +365,13 @@ public class DataManager {
         }
     }
 
-    private int createKingdom(Connection connection, String name, String desc, LocalDateTime createdAt) throws SQLException {
+    private int createKingdom(Connection connection, String name, String desc, Instant createdAt) throws SQLException {
         final SQLStatement statement = SQLStatement.insert(KINGDOM_TABLE_NAME).
                 add(KINGDOM_NAME_COLUMN).
                 add(KINGDOM_DESCRIPTION_COLUMN).
                 add(KINGDOM_CREATED_DATE_COLUMN).
                 build();
-        final List<Object> values = List.of(name, desc, createdAt.atOffset(ZoneOffset.UTC));
+        final List<Object> values = List.of(name, desc, new Timestamp(createdAt.toEpochMilli()));
         final Integer id = statement.insert(connection, List.of(() -> values), 1, SQLStatement.INTEGER_ID_FINDER);
         if (id == null) {
             throw new IllegalStateException("Could not create kingdom");
@@ -412,12 +411,13 @@ public class DataManager {
     }
 
     private void saveKingdom(Connection connection, Kingdom kingdom) throws SQLException {
-        final SQLStatement statement = SQLStatement.insert(KINGDOM_TABLE_NAME).
-                add(KINGDOM_ID_COLUMN).
-                add(KINGDOM_NAME_COLUMN).
-                add(KINGDOM_DESCRIPTION_COLUMN).
-                build();
-        final List<Object> values = List.of(kingdom.getId(), kingdom.getName(), kingdom.getDescription());
+        final SQLStatement statement = SQLStatement.insert(KINGDOM_TABLE_NAME)
+                .add(KINGDOM_ID_COLUMN)
+                .add(KINGDOM_NAME_COLUMN)
+                .add(KINGDOM_DESCRIPTION_COLUMN)
+                .add(KINGDOM_CREATED_DATE_COLUMN)
+                .build();
+        final List<Object> values = List.of(kingdom.getId(), kingdom.getName(), kingdom.getDescription(), Timestamp.from(kingdom.getCreatedAt()));
         statement.insert(connection, List.of(() -> values), 1);
     }
 
@@ -975,7 +975,7 @@ public class DataManager {
     private Optional<Kingdom> loadKingdom(Connection connection, int kingdomId) throws SQLException {
         if (kingdomId == Kingdom.WILDERNESS_ID) return Optional.empty();
         final SQLQuery<Kingdom> query = SQLQuery.<Kingdom>select(KINGDOM_TABLE_NAME)
-                .select(KINGDOM_ID_COLUMN, KINGDOM_NAME_COLUMN, KINGDOM_DESCRIPTION_COLUMN)
+                .select(KINGDOM_ID_COLUMN, KINGDOM_NAME_COLUMN, KINGDOM_DESCRIPTION_COLUMN, KINGDOM_CREATED_DATE_COLUMN)
                 .where(WhereCondition.of(KINGDOM_ID_COLUMN, () -> kingdomId))
                 .build();
 
@@ -1037,7 +1037,7 @@ public class DataManager {
                     bank,
                     roles,
                     locations,
-                    creationTime.toLocalDateTime()
+                    creationTime.toInstant()
             );
         }));
     }

@@ -6,6 +6,10 @@ import java.util.UUID;
 
 public record Position(double x, double y, double z, float yaw, float pitch) {
 
+    public static Position at(double x, double y, double z) {
+        return new Position(x, y, z, 0, 0);
+    }
+
     public static Position fromLocation(Location location) {
         return new Position(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
     }
