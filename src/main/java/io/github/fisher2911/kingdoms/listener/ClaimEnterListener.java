@@ -30,7 +30,6 @@ import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -126,7 +125,7 @@ public class ClaimEnterListener extends KListener {
                 .supplyAsync(() -> this.kingdomManager.getKingdom(user.getKingdomId(), true))
                 .consumeSync(opt -> opt.ifPresent(kingdom -> {
                     if (claimMode == ClaimMode.CLAIM) {
-                        if (!kingdom.hasPermission(user, KPermission.CLAIM_LAND, chunk)) return;
+                        if (!kingdom.hasPermission(user, KPermission.CLAIM_LAND)) return;
                         this.claimManager.tryClaim(user, kingdom, chunk);
                         return;
                     }
