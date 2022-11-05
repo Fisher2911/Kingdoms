@@ -19,6 +19,7 @@
 package io.github.fisher2911.kingdoms.teleport;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomMemberTeleportEvent;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
@@ -41,16 +42,26 @@ public class TeleportManager {
     public void tryTeleport(TeleportInfo info) {
         final UUID uuid = info.getUser().getId();
         this.teleporting.put(uuid, info);
-        this.doTeleportTask(uuid);
+        this.doTeleportTask(uuid, 0);
     }
 
-    private void doTeleportTask(UUID uuid) {
+    private void doTeleportTask(UUID uuid, int delay) {
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
             final TeleportInfo info = this.teleporting.get(uuid);
             if (info == null) return;
             final User user = info.getUser();
             if (!user.isOnline()) return;
             if (info.getSecondsLeft() <= 0) {
+                final KingdomMemberTeleportEvent event = new KingdomMemberTeleportEvent(
+                        user,
+                        info.getTo(),
+                        info.getPositionId()
+                );
+                Bukkit.getPluginManager().callEvent(event);
+                if (event.isCancelled()) {
+                    this.teleporting.remove(uuid);
+                    return;
+                }
                 user.getPlayer().teleport(info.getTo().toLocation());
                 this.teleporting.remove(uuid);
                 MessageHandler.sendMessage(user, Message.TELEPORT_SUCCESS);
@@ -63,10 +74,10 @@ public class TeleportManager {
                 this.teleporting.remove(uuid);
                 return;
             }
-            info.decSeconds();
             MessageHandler.sendMessage(user, Message.TELEPORT_COUNTDOWN, info);
-            this.doTeleportTask(uuid);
-        }, 20);
+            info.decSeconds();
+            this.doTeleportTask(uuid, 20);
+        }, delay);
     }
 
 }

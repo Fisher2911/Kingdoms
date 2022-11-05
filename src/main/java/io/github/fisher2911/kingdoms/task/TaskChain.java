@@ -32,7 +32,7 @@ public class TaskChain<T, R> {
     private final Kingdoms plugin;
     private final Queue<Task> queue;
 
-    public TaskChain(Kingdoms plugin, Queue<Task> queue) {
+    private TaskChain(Kingdoms plugin, Queue<Task> queue) {
         this.plugin = plugin;
         this.queue = queue;
     }
@@ -162,6 +162,7 @@ public class TaskChain<T, R> {
         public int getDelay() {
             return delay;
         }
+
     }
 
 }

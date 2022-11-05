@@ -19,6 +19,7 @@
 package io.github.fisher2911.kingdoms.user;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.api.event.user.UserLoadEvent;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.message.Message;
@@ -82,6 +83,7 @@ public class UserManager {
                     return newUser;
                 })
                 .sync(user -> {
+                    Bukkit.getPluginManager().callEvent(new UserLoadEvent(user));
                     this.addUser(user);
                     user.onJoin(player);
                     return user.getKingdomId();
@@ -117,8 +119,6 @@ public class UserManager {
 
     public void saveAndRemove(UUID uuid) {
         final User user = this.removeUser(uuid);
-        if (user == null) return;
-        this.byName.remove(user.getName());
         TaskChain.create(this.plugin)
                 .runAsync(() -> this.dataManager.saveUser(user))
                 .execute();
@@ -128,6 +128,7 @@ public class UserManager {
     public User removeUser(UUID uuid) {
         final User user = this.userMap.remove(uuid);
         if (user == null) return null;
+        Bukkit.getPluginManager().callEvent(new UserLoadEvent(user));
         this.byName.remove(user.getName());
         return user;
     }

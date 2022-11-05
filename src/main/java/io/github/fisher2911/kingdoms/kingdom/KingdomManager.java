@@ -19,6 +19,20 @@
 package io.github.fisher2911.kingdoms.kingdom;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomAttemptCreateEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomCreateEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomDisbandEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomJoinEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomLoadEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomMemberKickEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomMemberLeaveEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomMemberStartTeleportEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomSetDescriptionEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomSetHomeEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomSetMemberRoleEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomSetNameEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomUnloadEvent;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomUpgradeEvent;
 import io.github.fisher2911.kingdoms.command.CommandPermission;
 import io.github.fisher2911.kingdoms.config.KingdomsSettings;
 import io.github.fisher2911.kingdoms.confirm.Confirmation;
@@ -38,6 +52,7 @@ import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
 import io.github.fisher2911.kingdoms.teleport.TeleportInfo;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.world.WorldPosition;
+import org.bukkit.Bukkit;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,10 +99,14 @@ public class KingdomManager {
             MessageHandler.sendMessage(user, Message.CANNOT_AFFORD_TO_CREATE_KINGDOM);
             return empty;
         }
-        final Kingdom kingdom = this.dataManager.newKingdom(user, name);
+        final KingdomAttemptCreateEvent attemptCreateEvent = new KingdomAttemptCreateEvent(user, name);
+        Bukkit.getPluginManager().callEvent(attemptCreateEvent);
+        if (attemptCreateEvent.isCancelled()) return empty;
+        final Kingdom kingdom = this.dataManager.newKingdom(user, attemptCreateEvent.getName());
         MessageHandler.sendMessage(user, Message.CREATED_KINGDOM, kingdom);
         this.kingdoms.put(kingdom.getId(), kingdom);
         this.byName.put(kingdom.getName(), kingdom);
+        Bukkit.getPluginManager().callEvent(new KingdomCreateEvent(kingdom, user));
         return Optional.of(kingdom);
     }
 
@@ -105,6 +124,9 @@ public class KingdomManager {
             MessageHandler.sendMessage(user, Message.OTHER_KINGDOM_FULL, kingdom);
             return empty;
         }
+        final KingdomJoinEvent kingdomJoinEvent = new KingdomJoinEvent(kingdom, user);
+        Bukkit.getPluginManager().callEvent(kingdomJoinEvent);
+        if (kingdomJoinEvent.isCancelled()) return empty;
         kingdom.addMember(user);
         MessageHandler.sendMessage(user, Message.JOINED_KINGDOM, kingdom);
         return Optional.of(kingdom);
@@ -131,7 +153,10 @@ public class KingdomManager {
             MessageHandler.sendMessage(user, Message.CANNOT_AFFORD_TO_UPGRADE, wrapper);
             return;
         }
-        kingdom.setUpgradeLevel(upgradesId, upgradeLevel + 1);
+        final KingdomUpgradeEvent kingdomUpgradeEvent = new KingdomUpgradeEvent(kingdom, user, upgrades, upgradeLevel + 1);
+        Bukkit.getPluginManager().callEvent(kingdomUpgradeEvent);
+        if (kingdomUpgradeEvent.isCancelled()) return;
+        kingdom.setUpgradeLevel(upgradesId, kingdomUpgradeEvent.getNewLevel());
         MessageHandler.sendMessage(user, Message.LEVEL_UP_UPGRADE_SUCCESSFUL, new UpgradesWrapper(upgrades, upgradeLevel + 1));
     }
 
@@ -147,6 +172,7 @@ public class KingdomManager {
         kingdom.ifPresent(k -> {
             this.kingdoms.put(k.getId(), k);
             this.byName.put(k.getName(), k);
+            Bukkit.getPluginManager().callEvent(new KingdomLoadEvent(k));
         });
         return kingdom;
     }
@@ -214,7 +240,10 @@ public class KingdomManager {
             MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
             return;
         }
-        kingdom.setDescription(description);
+        final KingdomSetDescriptionEvent kingdomSetDescriptionEvent = new KingdomSetDescriptionEvent(kingdom, user, description);
+        Bukkit.getPluginManager().callEvent(kingdomSetDescriptionEvent);
+        if (kingdomSetDescriptionEvent.isCancelled()) return;
+        kingdom.setDescription(kingdomSetDescriptionEvent.getDescription());
         MessageHandler.sendMessage(user, Message.CHANGED_KINGDOM_DESCRIPTION, kingdom);
     }
 
@@ -237,7 +266,10 @@ public class KingdomManager {
             MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
             return;
         }
-        kingdom.setName(name);
+        final KingdomSetNameEvent kingdomSetNameEvent = new KingdomSetNameEvent(kingdom, user, name);
+        Bukkit.getPluginManager().callEvent(kingdomSetNameEvent);
+        if (kingdomSetNameEvent.isCancelled()) return;
+        kingdom.setName(kingdomSetNameEvent.getName());
         MessageHandler.sendMessage(user, Message.CHANGED_KINGDOM_NAME, kingdom);
     }
 
@@ -252,6 +284,9 @@ public class KingdomManager {
             MessageHandler.sendMessage(kicker, Message.NO_KINGDOM_PERMISSION);
             return;
         }
+        final KingdomMemberKickEvent kingdomKickEvent = new KingdomMemberKickEvent(kingdom, kicker, toKick);
+        Bukkit.getPluginManager().callEvent(kingdomKickEvent);
+        if (kingdomKickEvent.isCancelled()) return;
         kingdom.kick(toKick);
         MessageHandler.sendMessage(kicker, Message.KICKED_OTHER, toKick);
         MessageHandler.sendMessage(toKick, Message.KICKED_FROM_KINGDOM, kicker, kingdom);
@@ -287,7 +322,10 @@ public class KingdomManager {
             MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
             return;
         }
-        kingdom.setRole(toSet, role);
+        final KingdomSetMemberRoleEvent kingdomMemberSetRoleEvent = new KingdomSetMemberRoleEvent(kingdom, user, toSet, role);
+        Bukkit.getPluginManager().callEvent(kingdomMemberSetRoleEvent);
+        if (kingdomMemberSetRoleEvent.isCancelled()) return;
+        kingdom.setRole(toSet, kingdomMemberSetRoleEvent.getRole());
         MessageHandler.sendMessage(user, Message.SET_OTHER_ROLE, toSet, role);
         MessageHandler.sendMessage(toSet, Message.OWN_ROLE_SET, user, role);
     }
@@ -300,6 +338,9 @@ public class KingdomManager {
                         MessageHandler.sendMessage(user, Message.LEADER_CANNOT_LEAVE_KINGDOM);
                         return;
                     }
+                    final KingdomMemberLeaveEvent kingdomMemberLeaveEvent = new KingdomMemberLeaveEvent(kingdom, user);
+                    Bukkit.getPluginManager().callEvent(kingdomMemberLeaveEvent);
+                    if (kingdomMemberLeaveEvent.isCancelled()) return;
                     kingdom.removeMember(user);
                     MessageHandler.sendMessage(kingdom, Message.MEMBER_LEFT_KINGDOM, user);
                     MessageHandler.sendMessage(user, Message.YOU_LEFT_KINGDOM, kingdom);
@@ -328,6 +369,9 @@ public class KingdomManager {
                         );
                         return;
                     }
+                    final KingdomDisbandEvent kingdomDisbandEvent = new KingdomDisbandEvent(kingdom, user);
+                    Bukkit.getPluginManager().callEvent(kingdomDisbandEvent);
+                    if (kingdomDisbandEvent.isCancelled()) return;
                     this.disband(user, kingdom, searchDatabase);
                 }, () -> MessageHandler.sendNotInKingdom(user));
     }
@@ -354,8 +398,11 @@ public class KingdomManager {
                 MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
                 return;
             }
-            kingdom.getLocations().setPosition(KingdomLocations.HOME, worldPosition);
-            MessageHandler.sendMessage(user, Message.SET_KINGDOM_HOME, kingdom, worldPosition);
+            final KingdomSetHomeEvent kingdomSetHomeEvent = new KingdomSetHomeEvent(kingdom, user, worldPosition);
+            Bukkit.getPluginManager().callEvent(kingdomSetHomeEvent);
+            if (kingdomSetHomeEvent.isCancelled()) return;
+            kingdom.getLocations().setPosition(KingdomLocations.HOME, kingdomSetHomeEvent.getPosition());
+            MessageHandler.sendMessage(user, Message.SET_KINGDOM_HOME, kingdom, kingdomSetHomeEvent.getPosition());
         }, () -> MessageHandler.sendNotInKingdom(user));
 
     }
@@ -374,12 +421,21 @@ public class KingdomManager {
             if (!user.isOnline()) return;
             final WorldPosition currentPosition = user.getPosition();
             if (currentPosition == null) return;
+            final KingdomMemberStartTeleportEvent kingdomMemberStartTeleportEvent = new KingdomMemberStartTeleportEvent(
+                    user,
+                    worldPosition,
+                    id,
+                    this.plugin.getKingdomSettings().getTeleportDelay()
+            );
+            Bukkit.getPluginManager().callEvent(kingdomMemberStartTeleportEvent);
+            if (kingdomMemberStartTeleportEvent.isCancelled()) return;
             this.plugin.getTeleportManager().tryTeleport(
                     new TeleportInfo(
                             user,
-                            worldPosition,
-                            this.plugin.getKingdomSettings().getTeleportDelay(),
-                            currentPosition
+                            kingdomMemberStartTeleportEvent.getTo(),
+                            kingdomMemberStartTeleportEvent.getDelay(),
+                            currentPosition,
+                            kingdomMemberStartTeleportEvent.getPositionId()
                     )
             );
 
@@ -404,6 +460,9 @@ public class KingdomManager {
         if (!kingdom.canBeUnloaded(this.plugin)) return false;
         this.dataManager.saveKingdom(kingdom);
         kingdom.getClaimedChunks().forEach(this.plugin.getWorldManager()::remove);
+        this.kingdoms.remove(kingdom.getId());
+        this.byName.remove(kingdom.getName());
+        Bukkit.getPluginManager().callEvent(new KingdomUnloadEvent(kingdom));
         return true;
     }
 

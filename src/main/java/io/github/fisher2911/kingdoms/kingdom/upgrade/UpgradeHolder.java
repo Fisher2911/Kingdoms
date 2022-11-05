@@ -43,6 +43,14 @@ public class UpgradeHolder {
         }
     }
 
+    public void addUpgrade(Upgrades<?> upgrades) {
+        this.upgradesMap.put(upgrades.getId(), upgrades);
+        this.upgradeIdOrder.add(upgrades.getId());
+        if (upgrades instanceof final EntryUpgrade<?> upgrade) {
+            this.entryUpgrades.add(upgrade);
+        }
+    }
+
     public List<String> getUpgradeIdOrder() {
         return upgradeIdOrder;
     }

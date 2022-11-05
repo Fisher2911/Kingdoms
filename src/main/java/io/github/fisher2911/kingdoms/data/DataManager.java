@@ -21,6 +21,8 @@ package io.github.fisher2911.kingdoms.data;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomSaveEvent;
+import io.github.fisher2911.kingdoms.api.event.user.UserSaveEvent;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.data.sql.SQLType;
 import io.github.fisher2911.kingdoms.data.sql.condition.WhereCondition;
@@ -55,6 +57,7 @@ import io.github.fisher2911.kingdoms.util.Pair;
 import io.github.fisher2911.kingdoms.world.KChunk;
 import io.github.fisher2911.kingdoms.world.Position;
 import io.github.fisher2911.kingdoms.world.WorldPosition;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -423,6 +426,7 @@ public class DataManager {
             this.saveLocations(connection, kingdom);
             connection.commit();
             kingdom.setDirty(false);
+            Bukkit.getPluginManager().callEvent(new KingdomSaveEvent(kingdom));
         } catch (final SQLException e) {
             e.printStackTrace();
         }
@@ -898,7 +902,7 @@ public class DataManager {
         }
     }
 
-    public void saveUser(Connection connection, User user) throws SQLException {
+    private void saveUser(Connection connection, User user) throws SQLException {
         connection.setAutoCommit(false);
         final SQLStatement statement = SQLStatement.insert(USER_TABLE_NAME)
                 .add(USER_UUID_COLUMN)
@@ -918,6 +922,7 @@ public class DataManager {
             statement.insert(connection, suppliers, batchSize);
             connection.commit();
             user.setDirty(false);
+            Bukkit.getPluginManager().callEvent(new UserSaveEvent(user));
         } catch (final SQLException e) {
             e.printStackTrace();
         }
