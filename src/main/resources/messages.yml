@@ -32,7 +32,7 @@ received-invite: <green>You were invited to join %kingdom_name% by %user_name%
 not-invited-to-kingdom: <red>You have not been invited to that kingdom
 successful-reload: <green>Config files reloaded successfully
 kingdom-info: |-
-  <gradient:#42d7f5:#08a4ff>--------%kingdom_name%--------
+  <gradient:#42d7f5:#08a4ff>--------Kingdom: %kingdom_name%--------
   <green>Description: %kingdom_description%
   <blue>Members: %kingdom_members%
   <gold>Allies: %kingdom_allies%

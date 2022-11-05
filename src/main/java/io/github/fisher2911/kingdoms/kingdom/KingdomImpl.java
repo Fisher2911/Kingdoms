@@ -38,7 +38,6 @@ import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -209,7 +208,7 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public Collection<ClaimedChunk> getClaimedChunks() {
-        return this.claims;
+        return new HashSet<>(this.claims);
     }
 
     @Override
