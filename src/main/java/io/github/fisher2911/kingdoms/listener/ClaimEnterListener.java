@@ -19,6 +19,7 @@
 package io.github.fisher2911.kingdoms.listener;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.api.event.user.UserChangeChunksEvent;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
@@ -30,6 +31,7 @@ import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -66,6 +68,9 @@ public class ClaimEnterListener extends KListener {
 
         final User user = this.userManager.forceGet(event.getPlayer());
         if (user == null) return;
+        final UserChangeChunksEvent userChangeChunksEvent = new UserChangeChunksEvent(user, fromChunk, toChunk);
+        Bukkit.getPluginManager().callEvent(userChangeChunksEvent);
+        if (userChangeChunksEvent.isCancelled()) return;
 
         if (fromChunk.getKingdomId() == toChunk.getKingdomId()) {
             this.enterSameChunkToClaim(user, toChunk);
