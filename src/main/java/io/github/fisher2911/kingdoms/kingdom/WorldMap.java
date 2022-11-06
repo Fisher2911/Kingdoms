@@ -65,7 +65,8 @@ public class WorldMap {
     }
 
     public ClaimedChunk remove(int x, int z) {
-        return this.chunks.remove(KChunk.chunkKeyAt(x, z));
+        final ClaimedChunk chunk = this.chunks.remove(KChunk.chunkKeyAt(x, z));
+        return chunk == null ? ClaimedChunk.wilderness(this.plugin, KChunk.at(this.world, x, z)) : chunk;
     }
 
     public boolean isChunkLoaded(KChunk chunk) {

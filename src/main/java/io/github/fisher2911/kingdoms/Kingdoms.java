@@ -102,7 +102,7 @@ public final class Kingdoms extends JavaPlugin {
         // order matters
         this.teleportManager = new TeleportManager(this);
         this.dataManager = new DataManager(this);
-        this.globalListener = new GlobalListener();
+        this.globalListener = new GlobalListener(this);
         this.upgradeManager = new UpgradeManager(this);
         this.userManager = new UserManager(this, new HashMap<>());
         this.priceManager = new PriceManager();
