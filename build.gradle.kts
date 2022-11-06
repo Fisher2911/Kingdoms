@@ -44,7 +44,7 @@ tasks {
     }
 
     shadowJar {
-        relocate("org.spongepowered.configurate", "io.github.fisher2911.kindomgs.configurate.yaml")
+        relocate("org.spongepowered.configurate", "io.github.fisher2911.kingdoms.configurate.yaml")
         relocate("net.objecthunter.exp4j", "io.github.fisher2911.kingdoms.exp4j")
         relocate("net.kyori.adventure", "io.github.fisher2911.kingdoms.adventure")
         relocate("com.zaxxer.hikari", "io.github.fisher2911.kingdoms.hikari")
