@@ -86,7 +86,7 @@ public final class Kingdoms extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        this.hooks = new Hooks();
+        this.hooks = new Hooks(this);
         this.hooks.load();
     }
 

@@ -28,6 +28,7 @@ import io.github.fisher2911.kingdoms.command.kingdom.claim.ClaimCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.claim.UnclaimCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.disband.DisbandCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.help.HelpCommand;
+import io.github.fisher2911.kingdoms.command.kingdom.info.DescriptionCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.info.InfoCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.info.NameCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.invite.InviteCommand;
@@ -80,6 +81,7 @@ public class KingdomCommand extends KCommand implements TabExecutor, TabComplete
         this.addSubCommand(new HomeCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new SetHomeCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new NameCommand(this.plugin, this, new HashMap<>()));
+        this.addSubCommand(new DescriptionCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new MapCommand(this.plugin, this, new HashMap<>()));
         this.addSubCommand(new HelpCommand(this.plugin, this, new HashMap<>()), true);
     }

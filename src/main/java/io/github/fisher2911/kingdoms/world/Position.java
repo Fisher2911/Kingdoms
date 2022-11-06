@@ -80,6 +80,14 @@ public record Position(double x, double y, double z, float yaw, float pitch) {
         return (int) this.z;
     }
 
+    public int getChunkX() {
+        return this.getBlockX() >> 4;
+    }
+
+    public int getChunkZ() {
+        return this.getBlockZ() >> 4;
+    }
+
     public boolean isSameBlock(Position position) {
         return this.getBlockX() == position.getBlockX() && this.getBlockY() == position.getBlockY() && this.getBlockZ() == position.getBlockZ();
     }
