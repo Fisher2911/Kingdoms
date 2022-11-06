@@ -94,13 +94,13 @@ public class ClaimEnterListener extends KListener {
         final Player player = event.getPlayer();
         TaskChain.create(this.plugin)
                 .supplyAsync(() -> this.kingdomManager.getKingdom(chunk.getKingdomId(), true))
-                .consumeSync(opt -> opt.ifPresentOrElse(kingdom -> {
+                .consumeSync(opt -> opt.ifPresent(kingdom -> {
                             MessageHandler.sendMessage(user, Message.ENTERED_KINGDOM_LAND, kingdom);
                             final ClaimMode claimMode = this.claimManager.getClaimMode(player.getUniqueId());
                             if (claimMode == ClaimMode.UNCLAIM && kingdom.hasPermission(user, KPermission.UNCLAIM_LAND, chunk)) {
                                 this.claimManager.tryUnClaim(user, kingdom, chunk);
                             }
-                        }, () -> MessageHandler.sendMessage(user, "test")))
+                        }))
                 .execute();
 
     }
