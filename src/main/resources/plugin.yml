@@ -1,5 +1,5 @@
 name: Kingdoms
-version: "1.0.1-beta"
+version: "1.0.2-beta"
 main: io.github.fisher2911.kingdoms.Kingdoms
 api-version: 1.16
 authors: [ Fisher2911 ]
