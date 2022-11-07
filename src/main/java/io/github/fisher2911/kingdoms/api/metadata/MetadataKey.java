@@ -16,23 +16,11 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.fisher2911.kingdoms.kingdom;
+package io.github.fisher2911.kingdoms.api.metadata;
 
-import io.github.fisher2911.kingdoms.api.metadata.MetadataKey;
-import io.github.fisher2911.kingdoms.kingdom.permission.KPermissible;
-import io.github.fisher2911.kingdoms.world.KChunk;
-import org.jetbrains.annotations.Nullable;
+import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.UUID;
+public record MetadataKey(JavaPlugin plugin, String identifier) {
 
-public interface Claim extends KPermissible {
-
-    boolean isWilderness();
-    int getKingdomId();
-    @Nullable
-    <T> T getData(MetadataKey key, Class<T> clazz);
-    void set(MetadataKey key, Object value);
-    UUID getWorld();
-    KChunk getChunk();
 
 }

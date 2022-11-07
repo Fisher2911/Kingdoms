@@ -19,16 +19,17 @@
 package io.github.fisher2911.kingdoms.kingdom;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.api.metadata.MetadataKey;
 import io.github.fisher2911.kingdoms.data.Saveable;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import io.github.fisher2911.kingdoms.kingdom.permission.RolePermissionHolder;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
+import io.github.fisher2911.kingdoms.util.Metadata;
 import io.github.fisher2911.kingdoms.world.KChunk;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -38,13 +39,22 @@ public class ClaimedChunk implements Claim, RolePermissionHolder, Saveable {
     private final int claimedBy;
     private final KChunk chunk;
     private final PermissionContainer permissions;
+    /**
+     * The metadata for this chunk, not persistent so make sure to add the data on chunk load
+     */
+    private final Metadata metadata;
     private boolean dirty;
 
-    public ClaimedChunk(Kingdoms plugin, int claimedBy, KChunk chunk, PermissionContainer permissions) {
+    public ClaimedChunk(Kingdoms plugin, int claimedBy, KChunk chunk, PermissionContainer permissions, Metadata metadata) {
         this.plugin = plugin;
         this.claimedBy = claimedBy;
         this.chunk = chunk;
         this.permissions = permissions;
+        this.metadata = metadata;
+    }
+
+    public ClaimedChunk(Kingdoms plugin, int claimedBy, KChunk chunk, PermissionContainer permissions) {
+        this(plugin, claimedBy, chunk, permissions, new Metadata(new HashMap<>()));
     }
 
     public static ClaimedChunk wilderness(Kingdoms plugin, KChunk at) {
@@ -71,15 +81,6 @@ public class ClaimedChunk implements Claim, RolePermissionHolder, Saveable {
     }
 
     @Override
-    @Nullable
-    // todo
-    public <T> T getData(String key) {
-        final World world = Bukkit.getWorld(this.chunk.world());
-        if (world == null) return null;
-        return null;
-    }
-
-    @Override
     public UUID getWorld() {
         return this.chunk.world();
     }
@@ -93,6 +94,16 @@ public class ClaimedChunk implements Claim, RolePermissionHolder, Saveable {
     public void setPermission(Role role, KPermission permission, boolean value) {
             this.permissions.setPermission(role, permission, value);
             this.setDirty(true);
+    }
+
+    @Override
+    public <T> @Nullable T getData(MetadataKey key, Class<T> clazz) {
+        return this.metadata.get(key, clazz);
+    }
+
+    @Override
+    public void set(MetadataKey key, Object value) {
+        this.metadata.set(key, value);
     }
 
     @Override
