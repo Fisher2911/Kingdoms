@@ -31,7 +31,7 @@ public interface Claim extends KPermissible {
     int getKingdomId();
     @Nullable
     <T> T getData(MetadataKey key, Class<T> clazz);
-    void set(MetadataKey key, Object value);
+    void setData(MetadataKey key, Object value);
     UUID getWorld();
     KChunk getChunk();
 

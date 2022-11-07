@@ -102,7 +102,7 @@ public class ClaimedChunk implements Claim, RolePermissionHolder, Saveable {
     }
 
     @Override
-    public void set(MetadataKey key, Object value) {
+    public void setData(MetadataKey key, Object value) {
         this.metadata.set(key, value);
     }
 
