@@ -27,8 +27,10 @@ import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContext;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeHolder;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
+import io.github.fisher2911.kingdoms.listener.GlobalListener;
 import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
+import io.github.fisher2911.kingdoms.world.KChunk;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -98,8 +100,19 @@ public class KingdomsApi {
      * have the {@link io.github.fisher2911.kingdoms.kingdom.WildernessKingdom} id as the owner
      */
     @NotNull
-    public ClaimedChunk getAt(@NotNull Location location) {
+    public ClaimedChunk getClaimAt(@NotNull Location location) {
         return this.plugin.getWorldManager().getAt(location);
+    }
+
+    /**
+     *
+     * @param chunk the chunk to get the {@link ClaimedChunk} for
+     * @return a {@link ClaimedChunk} which will either be owned by an {@link Kingdom} or be unclaimed and
+     * have the {@link io.github.fisher2911.kingdoms.kingdom.WildernessKingdom} id as the owner
+     */
+    @NotNull
+    public ClaimedChunk getClaimAt(@NotNull KChunk chunk) {
+        return this.plugin.getWorldManager().getAt(chunk);
     }
 
     /**
@@ -183,6 +196,14 @@ public class KingdomsApi {
      */
     public void addSubCommand(KCommand command, boolean updateHelp) {
         this.plugin.getKingdomCommand().addSubCommand(command, updateHelp);
+    }
+
+    /**
+     *
+     * @return the {@link GlobalListener} instance
+     */
+    public GlobalListener getGlobalListener() {
+        return this.plugin.getGlobalListener();
     }
 
 }

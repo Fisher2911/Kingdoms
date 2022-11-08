@@ -69,6 +69,10 @@ public class WorldManager {
         return worldMap.getAt(chunkX, chunkZ);
     }
 
+    public ClaimedChunk getAt(KChunk chunk) {
+        return this.getAt(chunk.world(), chunk.x(), chunk.z());
+    }
+
     public ClaimedChunk remove(UUID world, int chunkX, int chunkZ) {
         final WorldMap worldMap = this.getWorldMap(world);
         if (worldMap == null) return null;

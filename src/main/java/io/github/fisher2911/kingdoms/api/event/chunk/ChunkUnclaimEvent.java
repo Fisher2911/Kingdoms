@@ -24,7 +24,6 @@ import io.github.fisher2911.kingdoms.user.User;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class ChunkUnclaimEvent extends ClaimedChunkEvent implements Cancellable {
 
@@ -34,20 +33,30 @@ public class ChunkUnclaimEvent extends ClaimedChunkEvent implements Cancellable 
         return HANDLERS;
     }
 
+    @NotNull
     private final User user;
+    @NotNull
+    private final ClaimedChunk previousChunk;
     private boolean cancelled;
 
-    public ChunkUnclaimEvent(Kingdom kingdom, ClaimedChunk chunk, User user) {
+    public ChunkUnclaimEvent(@NotNull Kingdom kingdom, @NotNull ClaimedChunk chunk, @NotNull ClaimedChunk previousChunk, @NotNull User user) {
         super(kingdom, chunk);
+        this.previousChunk = previousChunk;
         this.user = user;
     }
 
-    public ChunkUnclaimEvent(Kingdom kingdom, boolean isAsync, ClaimedChunk chunk, User user) {
+    public ChunkUnclaimEvent(@NotNull Kingdom kingdom, boolean isAsync, @NotNull ClaimedChunk chunk, @NotNull ClaimedChunk previousChunk, @NotNull User user) {
         super(kingdom, isAsync, chunk);
+        this.previousChunk = previousChunk;
         this.user = user;
     }
 
-    @Nullable
+    @NotNull
+    public ClaimedChunk getPreviousChunk() {
+        return previousChunk;
+    }
+
+    @NotNull
     public User getUser() {
         return user;
     }
