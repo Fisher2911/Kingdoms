@@ -68,6 +68,14 @@ public record Position(double x, double y, double z, float yaw, float pitch) {
         return new BlockPosition((int) this.x, (int) this.y, (int) this.z);
     }
 
+    public double distanceSq(Position position) {
+        return Math.pow(this.x - position.x, 2) + Math.pow(this.y - position.y, 2) + Math.pow(this.z - position.z, 2);
+    }
+
+    public double distance(Position position) {
+        return Math.sqrt(this.distanceSq(position));
+    }
+
     public int getBlockX() {
         return (int) this.x;
     }
