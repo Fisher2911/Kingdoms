@@ -290,6 +290,7 @@ public class KingdomImpl implements Kingdom {
         if (upgrades == null) return;
         if (upgrades.getMaxLevel() < level) return;
         this.upgradeLevels.put(id, level);
+        this.setDirty(true);
     }
 
     @Override

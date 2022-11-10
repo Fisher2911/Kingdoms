@@ -176,7 +176,7 @@ public class DataManager {
 
     // --------------- Upgrade Levels Table ---------------
     private static final String UPGRADE_LEVELS_TABLE_NAME = "kingdom_upgrade_levels";
-    private static final SQLField UPGRADE_LEVELS_ID_COLUMN = new SQLField(UPGRADE_LEVELS_TABLE_NAME, "id", SQLType.varchar(32), SQLKeyType.PRIMARY_KEY);
+    private static final SQLField UPGRADE_LEVELS_ID_COLUMN = new SQLField(UPGRADE_LEVELS_TABLE_NAME, "id", SQLType.varchar(32), SQLKeyType.UNIQUE);
     private static final SQLField UPGRADE_LEVELS_LEVEL_COLUMN = new SQLField(UPGRADE_LEVELS_TABLE_NAME, "level", SQLType.INTEGER);
     private static final SQLField UPGRADE_LEVELS_KINGDOM_ID_COLUMN = new SQLForeignField(
             UPGRADE_LEVELS_TABLE_NAME,
@@ -693,6 +693,7 @@ public class DataManager {
             final List<Object> objects = new ArrayList<>();
             final String id = entry.getKey();
             final int level = entry.getValue();
+            Bukkit.broadcastMessage("Saving upgrade: " + id + " with level " + level);
             objects.add(id);
             objects.add(level);
             objects.add(kingdom.getId());
