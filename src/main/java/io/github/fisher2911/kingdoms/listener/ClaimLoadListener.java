@@ -58,36 +58,6 @@ public class ClaimLoadListener extends KListener {
             if (!claimedChunk.isWilderness()) continue;
             this.dataManager.queueChunkToLoad(claimedChunk.getChunk(), true);
         }
-//        TaskChain.create(this.plugin)
-//                .supplyAsync(() -> {
-//                    final List<ClaimedChunk> chunks = new ArrayList<>();
-//                    for (Chunk chunk : event.getWorld().getLoadedChunks()) {
-//                        final ClaimedChunk claimedChunk = this.dataManager.loadClaimedChunk(KChunk.chunkKeyAt(chunk.getX(), chunk.getZ()));
-//                        if (claimedChunk == null) continue;
-//                        chunks.add(claimedChunk);
-//                    }
-//                    return chunks;
-//                })
-//                .sync(chunks -> {
-//                    final Set<ClaimedChunk> notWilderness = new HashSet<>();
-//                    for (ClaimedChunk chunk : chunks) {
-//                        this.worldManager.setChunk(chunk);
-//                        final int kingdomId = chunk.getKingdomId();
-//                        if (chunk.isWilderness() || this.plugin.getKingdomManager().getKingdom(kingdomId, false).isPresent()) {
-//                            continue;
-//                        }
-//                        notWilderness.add(chunk);
-//                    }
-//                    return notWilderness;
-//                })
-//                .consumeAsync(chunks -> {
-//                    for (ClaimedChunk chunk : chunks) {
-//                        this.plugin.getKingdomManager().getKingdom(chunk.getKingdomId(), true).ifPresent(kingdom -> {
-//                            this.plugin.getServer().getPluginManager().callEvent(new ClaimedChunkLoadEvent(kingdom, chunk));
-//                        });
-//                    }
-//                })
-//                .execute();
     }
 
     public void onChunkLoad(ChunkLoadEvent event) {
@@ -98,27 +68,6 @@ public class ClaimLoadListener extends KListener {
         final ClaimedChunk claimedChunk = this.worldManager.getAt(world, chunkX, chunkZ);
         if (!claimedChunk.isWilderness()) return;
         this.dataManager.queueChunkToLoad(claimedChunk.getChunk(), true);
-//        TaskChain.create(this.plugin)
-//                .supplyAsync(() -> this.dataManager.loadClaimedChunk(KChunk.chunkKeyAt(chunkX, chunkZ)))
-//                .sync(claimedChunk -> {
-//                    if (claimedChunk == null) {
-//                        this.worldManager.setToWilderness(world, chunkX, chunkZ);
-//                        return null;
-//                    }
-//                    this.worldManager.setChunk(claimedChunk);
-//                    final int kingdomId = claimedChunk.getKingdomId();
-//                    if (claimedChunk.isWilderness() || this.plugin.getKingdomManager().getKingdom(kingdomId, false).isPresent()) {
-//                        return null;
-//                    }
-//                    return claimedChunk;
-//                })
-//                .consumeAsync(claimedChunk -> {
-//                    if (claimedChunk == null) return;
-//                    this.plugin.getKingdomManager().getKingdom(claimedChunk.getKingdomId(), true).ifPresent(kingdom -> {
-//                        this.plugin.getServer().getPluginManager().callEvent(new ClaimedChunkLoadEvent(kingdom, claimedChunk));
-//                    });
-//                })
-//                .execute();
     }
 
     public void onChunkUnload(ChunkUnloadEvent event) {
@@ -129,16 +78,6 @@ public class ClaimLoadListener extends KListener {
         final ClaimedChunk claimedChunk = this.worldManager.remove(world, chunkX, chunkZ);
         if (claimedChunk.isWilderness()) return;
         this.dataManager.queueChunkToUnload(claimedChunk.getChunk(), true);
-//        final KingdomManager kingdomManager = this.plugin.getKingdomManager();
-//        TaskChain.create(this.plugin)
-//                .runAsync(() -> {
-//                    this.dataManager.saveClaimedChunk(claimedChunk);
-//                    kingdomManager.getKingdom(claimedChunk.getKingdomId(), false).ifPresent(kingdom -> {
-//                        kingdomManager.removeIfCanBeUnloaded(kingdom);
-//                        Bukkit.getPluginManager().callEvent(new ClaimedChunkUnloadEvent(kingdom, claimedChunk));
-//                    });
-//                })
-//                .execute();
     }
 
     public void onWorldUnload(WorldUnloadEvent event) {
@@ -148,29 +87,6 @@ public class ClaimLoadListener extends KListener {
             if (!claimedChunk.isWilderness()) continue;
             this.dataManager.queueChunkToUnload(claimedChunk.getChunk(), true);
         }
-//        TaskChain.create(this.plugin)
-//                .supplySync(() -> {
-//                    final List<ClaimedChunk> chunks = new ArrayList<>();
-//                    for (Chunk chunk : event.getWorld().getLoadedChunks()) {
-//                        final int chunkZ = chunk.getZ();
-//                        final int chunkX = chunk.getX();
-//                        final ClaimedChunk claimedChunk = this.worldManager.remove(world, chunkX, chunkZ);
-//                        if (claimedChunk.isWilderness()) continue;
-//                        chunks.add(claimedChunk);
-//                    }
-//                    return chunks;
-//                })
-//                .consumeAsync(chunks -> {
-//                    for (ClaimedChunk claimedChunk : chunks) {
-//                        final KingdomManager kingdomManager = this.plugin.getKingdomManager();
-//                        this.dataManager.saveClaimedChunk(claimedChunk);
-//                        kingdomManager.getKingdom(claimedChunk.getKingdomId(), false).ifPresent(kingdom -> {
-//                            kingdomManager.removeIfCanBeUnloaded(kingdom);
-//                            Bukkit.getPluginManager().callEvent(new ClaimedChunkUnloadEvent(kingdom, claimedChunk));
-//                        });
-//                    }
-//                })
-//                .execute();
     }
 
 }
