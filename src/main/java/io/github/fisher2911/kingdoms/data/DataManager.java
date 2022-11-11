@@ -648,7 +648,6 @@ public class DataManager {
     }
 
     public void queueChunkToUnload(KChunk chunk, boolean startTaskIfNotRunning) {
-        this.plugin.getLogger().info("Queueing chunk: " + chunk);
         this.onChunkUnloadDelayedLoader.addToQueue(chunk, startTaskIfNotRunning);
     }
 
@@ -709,7 +708,6 @@ public class DataManager {
             final List<Object> objects = new ArrayList<>();
             final String id = entry.getKey();
             final int level = entry.getValue();
-            Bukkit.broadcastMessage("Saving upgrade: " + id + " with level " + level);
             objects.add(id);
             objects.add(level);
             objects.add(kingdom.getId());
