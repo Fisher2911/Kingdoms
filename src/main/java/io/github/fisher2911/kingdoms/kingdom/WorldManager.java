@@ -20,8 +20,8 @@ package io.github.fisher2911.kingdoms.kingdom;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.world.KChunk;
+import io.github.fisher2911.kingdoms.world.WorldPosition;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 
@@ -48,10 +48,18 @@ public class WorldManager {
     }
 
     public ClaimedChunk getAt(Location location) {
-        final Chunk chunk = location.getChunk();
-        final int chunkX = chunk.getX();
-        final int chunkZ = chunk.getZ();
-        final UUID world = location.getWorld().getUID();
+//        final Chunk chunk = location.getChunk();
+//        final int chunkX = chunk.getX();
+//        final int chunkZ = chunk.getZ();
+//        final UUID world = location.getWorld().getUID();
+//        return this.getAt(world, chunkX, chunkZ);
+        return this.getAt(WorldPosition.fromLocation(location));
+    }
+
+    public ClaimedChunk getAt(WorldPosition worldPosition) {
+        final int chunkX = worldPosition.position().getChunkX();
+        final int chunkZ = worldPosition.position().getChunkZ();
+        final UUID world = worldPosition.world();
         return this.getAt(world, chunkX, chunkZ);
     }
 
@@ -59,6 +67,10 @@ public class WorldManager {
         final WorldMap worldMap = this.getWorldMap(world);
         if (worldMap == null) return ClaimedChunk.wilderness(this.plugin, KChunk.at(world, chunkX, chunkZ));
         return worldMap.getAt(chunkX, chunkZ);
+    }
+
+    public ClaimedChunk getAt(KChunk chunk) {
+        return this.getAt(chunk.world(), chunk.x(), chunk.z());
     }
 
     public ClaimedChunk remove(UUID world, int chunkX, int chunkZ) {
@@ -101,9 +113,10 @@ public class WorldManager {
         }
     }
 
-    public void saveDirty() {
+    public void saveDirty(boolean onMainThread, boolean force) {
         for (WorldMap worldMap : this.worldMaps.values()) {
-            worldMap.saveDirty();
+            worldMap.saveDirty(onMainThread, force);
         }
     }
+
 }

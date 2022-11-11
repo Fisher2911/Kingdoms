@@ -18,6 +18,7 @@
 
 package io.github.fisher2911.kingdoms.kingdom;
 
+import io.github.fisher2911.kingdoms.api.metadata.MetadataKey;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermissible;
 import io.github.fisher2911.kingdoms.world.KChunk;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +30,8 @@ public interface Claim extends KPermissible {
     boolean isWilderness();
     int getKingdomId();
     @Nullable
-    <T> T getData(String key);
+    <T> T getData(MetadataKey key, Class<T> clazz);
+    void setData(MetadataKey key, Object value);
     UUID getWorld();
     KChunk getChunk();
 

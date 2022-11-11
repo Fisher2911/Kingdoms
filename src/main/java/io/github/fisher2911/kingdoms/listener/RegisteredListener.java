@@ -16,11 +16,14 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.fisher2911.kingdoms.hook;
+package io.github.fisher2911.kingdoms.listener;
 
-public enum HookType {
+import org.bukkit.event.Event;
+import org.bukkit.event.EventPriority;
 
-    CLAIM,
-    PAPI,
+import java.util.Collection;
+import java.util.function.Consumer;
+
+public record RegisteredListener(Class<? extends Event> clazz, Collection<Consumer<Event>> consumers, EventPriority priority) {
 
 }

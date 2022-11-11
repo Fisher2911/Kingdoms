@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.fisher2911"
-version = "1.0.1-beta"
+version = "3.0.0-beta"
 
 repositories {
     mavenCentral()
@@ -14,6 +14,7 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/central")
     maven("https://jitpack.io")
     maven("https://maven.enginehub.org/repo/")
+    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
 }
 
 
@@ -22,6 +23,8 @@ dependencies {
     compileOnly("com.mojang:authlib:1.5.25")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.7-SNAPSHOT")
+    compileOnly("me.clip:placeholderapi:2.11.2")
+    compileOnly("org.xerial:sqlite-jdbc:3.39.2.0")
     implementation("org.spongepowered:configurate-yaml:4.1.2")
     implementation("net.objecthunter:exp4j:0.4.8")
     implementation("net.kyori:adventure-api:4.11.0")
@@ -42,7 +45,7 @@ tasks {
     }
 
     shadowJar {
-        relocate("org.spongepowered.configurate", "io.github.fisher2911.kindomgs.configurate.yaml")
+        relocate("org.spongepowered.configurate", "io.github.fisher2911.kingdoms.configurate.yaml")
         relocate("net.objecthunter.exp4j", "io.github.fisher2911.kingdoms.exp4j")
         relocate("net.kyori.adventure", "io.github.fisher2911.kingdoms.adventure")
         relocate("com.zaxxer.hikari", "io.github.fisher2911.kingdoms.hikari")

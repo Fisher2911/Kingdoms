@@ -19,6 +19,7 @@
 package io.github.fisher2911.kingdoms.kingdom;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.world.KChunk;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -45,27 +46,26 @@ public class WorldMap {
     }
 
     public ClaimedChunk getAt(int x, int z) {
-        return this.chunks.getOrDefault(KChunk.chunkKeyAt(x, z), ClaimedChunk.wilderness(this.plugin, KChunk.at(this.world, x, z)));
+        return this.chunks.computeIfAbsent(KChunk.chunkKeyAt(x, z), k -> ClaimedChunk.wilderness(this.plugin, KChunk.at(this.world, x, z)));
     }
 
     public void setChunk(ClaimedChunk chunk) {
-        if (chunk.isWilderness()) {
-            this.setToWilderness(chunk.getChunk());
-            return;
-        }
-        this.chunks.put(chunk.getChunk().getChunkKey(), chunk);
+        final ClaimedChunk previous = this.chunks.put(chunk.getChunk().getChunkKey(), chunk);
+        if (previous == null) return;
+        chunk.putAllMetadata(previous.getMetadataCopy());
     }
 
     public void setToWilderness(int x, int z) {
-        this.chunks.remove(KChunk.chunkKeyAt(x, z));
+        this.setToWilderness(KChunk.at(this.world, x, z));
     }
 
     public void setToWilderness(KChunk chunk) {
-        this.chunks.remove(chunk.getChunkKey());
+        this.setChunk(ClaimedChunk.wilderness(this.plugin, chunk));
     }
 
     public ClaimedChunk remove(int x, int z) {
-        return this.chunks.remove(KChunk.chunkKeyAt(x, z));
+        final ClaimedChunk chunk = this.chunks.remove(KChunk.chunkKeyAt(x, z));
+        return chunk == null ? ClaimedChunk.wilderness(this.plugin, KChunk.at(this.world, x, z)) : chunk;
     }
 
     public boolean isChunkLoaded(KChunk chunk) {
@@ -75,17 +75,19 @@ public class WorldMap {
     public boolean isChunkLoaded(int x, int z) {
         final long chunkKey = KChunk.chunkKeyAt(x, z);
         final ClaimedChunk claimed = this.chunks.get(chunkKey);
-        if (claimed.isWilderness()) return false;
+        if (claimed == null) return false;
         final World world = Bukkit.getWorld(this.world);
         if (world == null) return false;
         return world.isChunkLoaded(x, z);
     }
 
-    public void saveDirty() {
+    public void saveDirty(boolean onMainThread, boolean force) {
+        final DataManager dataManager = this.plugin.getDataManager();
         this.chunks.values()
                 .stream()
-                .filter(ClaimedChunk::isDirty)
-                .forEach(this.plugin.getDataManager()::saveClaimedChunk);
+                .filter(c -> c.isDirty() && !c.isWilderness())
+                .forEach(chunk -> dataManager.queueChunkToUnload(chunk.getChunk(), !onMainThread));
+        if (force) dataManager.forceSaveAllChunks(onMainThread);
     }
 
     public UUID getWorld() {

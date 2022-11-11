@@ -32,7 +32,7 @@ public class DescriptionCommand extends KCommand {
     private final KingdomManager kingdomManager;
 
     public DescriptionCommand(Kingdoms plugin, KCommand parent, Map<String, KCommand> subCommands) {
-        super(plugin, parent, "description", null, CommandSenderType.PLAYER, 1, -1, subCommands);
+        super(plugin, parent, "description", "[description] | set <description>", null, CommandSenderType.PLAYER, 0, -1, subCommands);
         this.kingdomManager = this.plugin.getKingdomManager();
     }
 

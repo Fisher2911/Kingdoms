@@ -99,6 +99,7 @@ public class KingdomManager {
             MessageHandler.sendMessage(user, Message.CANNOT_AFFORD_TO_CREATE_KINGDOM);
             return empty;
         }
+        name = MessageHandler.removeAllTags(name);
         final KingdomAttemptCreateEvent attemptCreateEvent = new KingdomAttemptCreateEvent(user, name);
         Bukkit.getPluginManager().callEvent(attemptCreateEvent);
         if (attemptCreateEvent.isCancelled()) return empty;
@@ -240,6 +241,7 @@ public class KingdomManager {
             MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
             return;
         }
+        description = MessageHandler.removeUnsafeTags(description);
         final KingdomSetDescriptionEvent kingdomSetDescriptionEvent = new KingdomSetDescriptionEvent(kingdom, user, description);
         Bukkit.getPluginManager().callEvent(kingdomSetDescriptionEvent);
         if (kingdomSetDescriptionEvent.isCancelled()) return;
@@ -266,6 +268,12 @@ public class KingdomManager {
             MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
             return;
         }
+        final Optional<Kingdom> otherKingdom = this.getKingdomByName(name, true);
+        if (otherKingdom.isPresent()) {
+            MessageHandler.sendMessage(user, Message.KINGDOM_ALREADY_EXISTS, otherKingdom.get());
+            return;
+        }
+        name = MessageHandler.removeAllTags(name);
         final KingdomSetNameEvent kingdomSetNameEvent = new KingdomSetNameEvent(kingdom, user, name);
         Bukkit.getPluginManager().callEvent(kingdomSetNameEvent);
         if (kingdomSetNameEvent.isCancelled()) return;

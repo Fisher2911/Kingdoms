@@ -35,13 +35,13 @@ import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeHolder;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeId;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.user.User;
+import io.github.fisher2911.kingdoms.util.collections.DirtyMap;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -54,16 +54,16 @@ public class KingdomImpl implements Kingdom {
     private final int id;
     private String name;
     private String description;
-    private final Map<UUID, User> members;
-    private final Map<UUID, Role> userRoles;
+    private final DirtyMap<UUID, User> members;
+    private final DirtyMap<UUID, Role> userRoles;
     private final Multimap<Role, UUID> roleUsers;
     private final PermissionContainer permissions;
     private final Set<ClaimedChunk> claims;
     private final UpgradeHolder upgradeHolder;
-    private final Map<String, Integer> upgradeLevels;
-    private final Map<Integer, RelationInfo> kingdomRelations;
+    private final DirtyMap<String, Integer> upgradeLevels;
+    private final DirtyMap<Integer, RelationInfo> kingdomRelations;
     private final Bank<Kingdom> bank;
-    private final Map<String, Role> roles;
+    private final DirtyMap<String, Role> roles;
     private final KingdomLocations locations;
     private final Instant createdAt;
     private boolean dirty;
@@ -73,15 +73,15 @@ public class KingdomImpl implements Kingdom {
             int id,
             String name,
             String description,
-            Map<UUID, User> members,
-            Map<UUID, Role> userRoles,
+            DirtyMap<UUID, User> members,
+            DirtyMap<UUID, Role> userRoles,
             PermissionContainer permissions,
             Set<ClaimedChunk> claims,
             UpgradeHolder upgradeHolder,
-            Map<String, Integer> upgradeLevels,
-            Map<Integer, RelationInfo> kingdomRelations,
+            DirtyMap<String, Integer> upgradeLevels,
+            DirtyMap<Integer, RelationInfo> kingdomRelations,
             Bank<Kingdom> bank,
-            Map<String, Role> roles,
+            DirtyMap<String, Role> roles,
             KingdomLocations locations,
             Instant createdAt
     ) {
@@ -89,8 +89,8 @@ public class KingdomImpl implements Kingdom {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.members = members;
-        this.userRoles = userRoles;
+        this.members = new DirtyMap<>(members);
+        this.userRoles = new DirtyMap(userRoles);
         this.roleUsers = Multimaps.newSetMultimap(new HashMap<>(), HashSet::new);
         for (var entry : this.userRoles.entrySet()) {
             this.roleUsers.put(entry.getValue(), entry.getKey());
@@ -98,10 +98,10 @@ public class KingdomImpl implements Kingdom {
         this.permissions = permissions;
         this.claims = claims;
         this.upgradeHolder = upgradeHolder;
-        this.upgradeLevels = upgradeLevels;
-        this.kingdomRelations = kingdomRelations;
+        this.upgradeLevels = new DirtyMap<>(upgradeLevels);
+        this.kingdomRelations = new DirtyMap<>(kingdomRelations);
         this.bank = bank;
-        this.roles = roles;
+        this.roles = new DirtyMap<>(roles);
         this.locations = locations;
         this.createdAt = createdAt;
         this.dirty = true;
@@ -139,7 +139,7 @@ public class KingdomImpl implements Kingdom {
     }
 
     @Override
-    public Map<UUID, Role> getUserRoles() {
+    public DirtyMap<UUID, Role> getUserRoles() {
         return this.userRoles;
     }
 
@@ -188,7 +188,6 @@ public class KingdomImpl implements Kingdom {
     @Override
     public void setPermission(Role role, KPermission permission, boolean value) {
         this.permissions.setPermission(role, permission, value);
-        this.setDirty(true);
         this.setDirty(true);
     }
 
@@ -290,6 +289,7 @@ public class KingdomImpl implements Kingdom {
         if (upgrades == null) return;
         if (upgrades.getMaxLevel() < level) return;
         this.upgradeLevels.put(id, level);
+        this.setDirty(true);
     }
 
     @Override
@@ -303,7 +303,7 @@ public class KingdomImpl implements Kingdom {
     }
 
     @Override
-    public Map<String, Integer> getUpgradeLevels() {
+    public DirtyMap<String, Integer> getUpgradeLevels() {
         return this.upgradeLevels;
     }
 
@@ -340,7 +340,7 @@ public class KingdomImpl implements Kingdom {
     }
 
     @Override
-    public Map<Integer, RelationInfo> getKingdomRelations() {
+    public DirtyMap<Integer, RelationInfo> getKingdomRelations() {
         return this.kingdomRelations;
     }
 
@@ -392,7 +392,7 @@ public class KingdomImpl implements Kingdom {
     }
 
     @Override
-    public Map<String, Role> getRoles() {
+    public DirtyMap<String, Role> getRoles() {
         return this.roles;
     }
 
@@ -408,7 +408,7 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public boolean isDirty() {
-        return this.locations.isDirty() || this.permissions.isDirty() || this.dirty;
+        return this.locations.isDirty() || this.permissions.isDirty() || this.bank.isDirty() || this.dirty;
     }
 
     @Override
@@ -479,4 +479,5 @@ public class KingdomImpl implements Kingdom {
     public int hashCode() {
         return Objects.hash(getId());
     }
+
 }

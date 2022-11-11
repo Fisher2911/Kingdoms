@@ -33,17 +33,27 @@ public class ChunkClaimEvent extends ClaimedChunkEvent implements Cancellable {
         return HANDLERS;
     }
 
+    @NotNull
+    private final ClaimedChunk previousChunk;
+    @NotNull
     private final User user;
     private boolean cancelled;
 
-    public ChunkClaimEvent(@NotNull Kingdom kingdom, @NotNull ClaimedChunk chunk, @NotNull User user) {
+    public ChunkClaimEvent(@NotNull Kingdom kingdom, @NotNull ClaimedChunk chunk, @NotNull ClaimedChunk previousChunk, @NotNull User user) {
         super(kingdom, chunk);
+        this.previousChunk = previousChunk;
         this.user = user;
     }
 
-    public ChunkClaimEvent(@NotNull Kingdom kingdom, boolean isAsync, @NotNull ClaimedChunk chunk, @NotNull User user) {
+    public ChunkClaimEvent(@NotNull Kingdom kingdom, boolean isAsync, @NotNull ClaimedChunk chunk, @NotNull ClaimedChunk previousChunk, @NotNull User user) {
         super(kingdom, isAsync, chunk);
+        this.previousChunk = previousChunk;
         this.user = user;
+    }
+
+    @NotNull
+    public ClaimedChunk getPreviousChunk() {
+        return previousChunk;
     }
 
     @NotNull

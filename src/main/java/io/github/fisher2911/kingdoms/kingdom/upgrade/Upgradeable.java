@@ -19,9 +19,8 @@
 package io.github.fisher2911.kingdoms.kingdom.upgrade;
 
 import io.github.fisher2911.kingdoms.economy.Price;
+import io.github.fisher2911.kingdoms.util.collections.DirtyMap;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
 
 public interface Upgradeable {
 
@@ -36,6 +35,6 @@ public interface Upgradeable {
 
     <T> T getUpgradesValue(String id, Class<? extends Upgrades<T>> clazz);
 
-    Map<String, Integer> getUpgradeLevels();
+    DirtyMap<String, Integer> getUpgradeLevels();
 
 }

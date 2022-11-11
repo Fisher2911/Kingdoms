@@ -16,11 +16,28 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.fisher2911.kingdoms.hook;
+package io.github.fisher2911.kingdoms.hook.papi;
 
-public enum HookType {
+import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.hook.Hook;
+import io.github.fisher2911.kingdoms.hook.HookType;
 
-    CLAIM,
-    PAPI,
+import java.util.List;
+
+public class PAPIHook extends Hook {
+
+    private static final String ID = "PlaceholderAPI";
+
+    private final Kingdoms plugin;
+
+    public PAPIHook(Kingdoms plugin) {
+        super(ID, List.of(HookType.PAPI));
+        this.plugin = plugin;
+    }
+
+    @Override
+    public void onLoad() {
+        new KingdomsExpansion(this.plugin).register();
+    }
 
 }

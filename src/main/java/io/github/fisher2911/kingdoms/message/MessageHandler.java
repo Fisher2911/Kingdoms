@@ -28,6 +28,8 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -43,6 +45,20 @@ import java.util.Map;
 public class MessageHandler extends Config {
 
     public static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+        public static final MiniMessage SAFE_MINI_MESSAGE = MiniMessage.builder()
+            .tags(TagResolver.resolver(
+                StandardTags.decorations(),
+                StandardTags.clickEvent(),
+                StandardTags.insertion(),
+                StandardTags.hoverEvent(),
+                StandardTags.font(),
+                StandardTags.keybind(),
+                StandardTags.newline(),
+                StandardTags.selector(),
+                StandardTags.transition(),
+                StandardTags.translatable()
+            ))
+            .build();
     public static final LegacyComponentSerializer LEGACY_COMPONENT_SERIALIZER = LegacyComponentSerializer.builder()
             .hexColors()
             .useUnusualXRepeatedCharacterHexFormat()
@@ -63,6 +79,14 @@ public class MessageHandler extends Config {
 
     public static String serialize(String s) {
         return LEGACY_COMPONENT_SERIALIZER.serialize(MINI_MESSAGE.deserialize(s));
+    }
+
+    public static String removeUnsafeTags(String s) {
+        return SAFE_MINI_MESSAGE.stripTags(s);
+    }
+
+    public static String removeAllTags(String s) {
+        return MINI_MESSAGE.stripTags(s);
     }
 
     public static void sendMessage(User user, Message message) {

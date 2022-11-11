@@ -22,6 +22,7 @@ import io.github.fisher2911.kingdoms.data.sql.dialect.SQLDialect;
 import io.github.fisher2911.kingdoms.data.sql.dialect.SystemDialect;
 import io.github.fisher2911.kingdoms.data.sql.field.SQLField;
 import io.github.fisher2911.kingdoms.util.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -77,7 +78,7 @@ public class InsertStatementImpl implements SQLStatement {
     }
 
     @Override
-    public <ID> ID insert(Connection connection, List<Supplier<List<Object>>> values, int batchSize, IDFinder<ID> idFinder) throws SQLException {
+    public <ID> ID insert(Connection connection, List<Supplier<List<Object>>> values, int batchSize, @Nullable IDFinder<ID> idFinder) throws SQLException {
         try (var statement = connection.prepareStatement(this.createStatement(), Statement.RETURN_GENERATED_KEYS)) {
             int batches = 0;
             if (SystemDialect.getDialect() == SQLDialect.SQLITE) {

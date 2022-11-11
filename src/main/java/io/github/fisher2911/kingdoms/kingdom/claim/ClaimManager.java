@@ -19,6 +19,8 @@
 package io.github.fisher2911.kingdoms.kingdom.claim;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.api.event.chunk.ChunkClaimEvent;
+import io.github.fisher2911.kingdoms.api.event.chunk.ChunkUnclaimEvent;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
@@ -26,8 +28,10 @@ import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.world.KChunk;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 
 import java.util.HashMap;
@@ -96,6 +100,10 @@ public class ClaimManager {
                 chunk.getChunk(),
                 kingdom.getDefaultChunkPermissions()
         );
+        claimedChunk.setDirty(true);
+        final ChunkClaimEvent event = new ChunkClaimEvent(kingdom, chunk, claimedChunk, user);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
         this.worldManager.setChunk(claimedChunk);
         kingdom.addClaimedChunk(claimedChunk);
         MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_CLAIM, claimedChunk.getChunk());
@@ -129,23 +137,29 @@ public class ClaimManager {
         this.tryUnClaim(user, kingdom, chunk.getWorld().getUID(), x, z);
     }
 
-    public void tryUnClaim(User user, Kingdom kingdom, ClaimedChunk at) {
-        if (at.getKingdomId() != kingdom.getId()) {
-            MessageHandler.sendMessage(user, Message.NOT_CLAIMED_BY_KINGDOM, at.getChunk());
+    public void tryUnClaim(User user, Kingdom kingdom, ClaimedChunk chunk) {
+        if (chunk.getKingdomId() != kingdom.getId()) {
+            MessageHandler.sendMessage(user, Message.NOT_CLAIMED_BY_KINGDOM, chunk.getChunk());
             return;
         }
-        if (!kingdom.hasPermission(user, KPermission.UNCLAIM_LAND, at)) {
+        if (!kingdom.hasPermission(user, KPermission.UNCLAIM_LAND, chunk)) {
             MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
             return;
         }
         final ClaimedChunk claimedChunk = new ClaimedChunk(
                 this.plugin,
                 kingdom.getId(),
-                at.getChunk(),
+                chunk.getChunk(),
                 kingdom.getDefaultChunkPermissions()
         );
+        final ChunkUnclaimEvent event = new ChunkUnclaimEvent(kingdom, chunk, claimedChunk, user);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
         this.worldManager.setToWilderness(claimedChunk.getChunk());
         kingdom.removeClaimedChunk(claimedChunk);
+        TaskChain.create(this.plugin)
+                .runAsync(() -> this.plugin.getDataManager().deleteChunk(claimedChunk.getChunk()))
+                .execute();
         MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_UNCLAIM, claimedChunk.getChunk());
     }
 

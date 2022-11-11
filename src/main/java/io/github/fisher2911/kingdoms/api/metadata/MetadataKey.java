@@ -16,11 +16,11 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.fisher2911.kingdoms.hook;
+package io.github.fisher2911.kingdoms.api.metadata;
 
-public enum HookType {
+import org.bukkit.plugin.java.JavaPlugin;
 
-    CLAIM,
-    PAPI,
+public record MetadataKey(JavaPlugin plugin, String identifier) {
+
 
 }

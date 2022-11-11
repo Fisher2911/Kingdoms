@@ -16,11 +16,22 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.fisher2911.kingdoms.hook;
+package io.github.fisher2911.kingdoms.data;
 
-public enum HookType {
+import java.util.Collection;
 
-    CLAIM,
-    PAPI,
+public interface DelayedLoader<T> {
+
+    int getSizeUntilLoad();
+
+    int getMaxTicksUntilLoad();
+
+    void addToQueue(T t, boolean startTaskIfNotRunning);
+
+    boolean isEmpty();
+
+    Collection<T> getToLoad();
+
+    void forceLoadAll(boolean onMainThread);
 
 }

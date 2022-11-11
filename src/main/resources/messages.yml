@@ -34,6 +34,7 @@ successful-reload: <green>Config files reloaded successfully
 kingdom-info: |-
   <gradient:#42d7f5:#08a4ff>--------Kingdom: %kingdom_name%--------
   <green>Description: %kingdom_description%
+  <pink>Claimed chunks: %kingdom_total_claims%
   <blue>Members: %kingdom_members%
   <gold>Allies: %kingdom_allies%
   <yellow>Truces: %kingdom_truces%
