@@ -30,7 +30,6 @@ import io.github.fisher2911.kingdoms.message.Message;
 import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.util.Metadata;
 import io.github.fisher2911.kingdoms.world.KChunk;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -153,7 +152,6 @@ public class ClaimManager {
                 chunk.getChunk(),
                 kingdom.getDefaultChunkPermissions()
         );
-        final Metadata previousData = claimedChunk.getMetadataCopy();
         final ChunkUnclaimEvent event = new ChunkUnclaimEvent(kingdom, chunk, claimedChunk, user);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) return;

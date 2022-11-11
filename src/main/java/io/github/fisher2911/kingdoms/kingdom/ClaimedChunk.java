@@ -110,6 +110,10 @@ public class ClaimedChunk implements Claim, RolePermissionHolder, Saveable {
         return this.metadata.copy();
     }
 
+    public void putAllMetadata(Metadata metadata) {
+        this.metadata.putAll(metadata, false);
+    }
+
     @Override
     public boolean isDirty() {
         return this.dirty || this.permissions.isDirty();

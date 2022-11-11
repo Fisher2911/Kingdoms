@@ -50,7 +50,9 @@ public class WorldMap {
     }
 
     public void setChunk(ClaimedChunk chunk) {
-        this.chunks.put(chunk.getChunk().getChunkKey(), chunk);
+        final ClaimedChunk previous = this.chunks.put(chunk.getChunk().getChunkKey(), chunk);
+        if (previous == null) return;
+        chunk.putAllMetadata(previous.getMetadataCopy());
     }
 
     public void setToWilderness(int x, int z) {
@@ -58,7 +60,7 @@ public class WorldMap {
     }
 
     public void setToWilderness(KChunk chunk) {
-        this.chunks.put(chunk.getChunkKey(), ClaimedChunk.wilderness(this.plugin, chunk));
+        this.setChunk(ClaimedChunk.wilderness(this.plugin, chunk));
     }
 
     public ClaimedChunk remove(int x, int z) {
@@ -73,7 +75,7 @@ public class WorldMap {
     public boolean isChunkLoaded(int x, int z) {
         final long chunkKey = KChunk.chunkKeyAt(x, z);
         final ClaimedChunk claimed = this.chunks.get(chunkKey);
-        if (claimed.isWilderness()) return false;
+        if (claimed == null) return false;
         final World world = Bukkit.getWorld(this.world);
         if (world == null) return false;
         return world.isChunkLoaded(x, z);
@@ -83,7 +85,7 @@ public class WorldMap {
         final DataManager dataManager = this.plugin.getDataManager();
         this.chunks.values()
                 .stream()
-                .filter(ClaimedChunk::isDirty)
+                .filter(c -> c.isDirty() && !c.isWilderness())
                 .forEach(chunk -> dataManager.queueChunkToUnload(chunk.getChunk(), !onMainThread));
         if (force) dataManager.forceSaveAllChunks(onMainThread);
     }
