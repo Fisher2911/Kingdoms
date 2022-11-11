@@ -16,25 +16,22 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.fisher2911.kingdoms.kingdom.upgrade;
+package io.github.fisher2911.kingdoms.data;
 
-import io.github.fisher2911.kingdoms.economy.Price;
-import io.github.fisher2911.kingdoms.util.collections.DirtyMap;
-import org.jetbrains.annotations.Nullable;
+import java.util.Collection;
 
-public interface Upgradeable {
+public interface DelayedLoader<T> {
 
-    UpgradeHolder getUpgradeHolder();
+    int getSizeUntilLoad();
 
-    void setUpgradeLevel(String id, int level);
+    int getMaxTicksUntilLoad();
 
-    @Nullable
-    Integer getUpgradeLevel(String id);
+    void addToQueue(T t, boolean startTaskIfNotRunning);
 
-    Price getUpgradePrice(String id);
+    boolean isEmpty();
 
-    <T> T getUpgradesValue(String id, Class<? extends Upgrades<T>> clazz);
+    Collection<T> getToLoad();
 
-    DirtyMap<String, Integer> getUpgradeLevels();
+    void forceLoadAll(boolean onMainThread);
 
 }

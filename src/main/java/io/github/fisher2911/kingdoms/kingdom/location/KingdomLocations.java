@@ -19,23 +19,21 @@
 package io.github.fisher2911.kingdoms.kingdom.location;
 
 import io.github.fisher2911.kingdoms.data.Saveable;
+import io.github.fisher2911.kingdoms.util.collections.DirtyMap;
 import io.github.fisher2911.kingdoms.world.WorldPosition;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
 
 public class KingdomLocations implements Saveable {
 
     public static final String HOME = "home";
 
-    private final Map<String, WorldPosition> savedPositions;
-    private boolean dirty;
+    private final DirtyMap<String, WorldPosition> savedPositions;
 
-    public KingdomLocations(final Map<String, WorldPosition> savedPositions) {
+    public KingdomLocations(final DirtyMap<String, WorldPosition> savedPositions) {
         this.savedPositions = savedPositions;
     }
 
-    public Map<String, WorldPosition> getSavedPositions() {
+    public DirtyMap<String, WorldPosition> getSavedPositions() {
         return savedPositions;
     }
 
@@ -45,17 +43,16 @@ public class KingdomLocations implements Saveable {
     }
 
     public WorldPosition setPosition(String id, WorldPosition position) {
-        this.dirty = true;
         return this.savedPositions.put(id, position);
     }
 
     @Override
     public boolean isDirty() {
-        return this.dirty;
+        return this.savedPositions.isDirty();
     }
 
     @Override
     public void setDirty(boolean dirty) {
-        this.dirty = dirty;
+        this.savedPositions.setDirty(dirty);
     }
 }

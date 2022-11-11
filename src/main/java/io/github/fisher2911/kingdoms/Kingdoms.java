@@ -83,6 +83,7 @@ public final class Kingdoms extends JavaPlugin {
     private KingdomCommand kingdomCommand;
     private Economy economy;
     private BukkitTask saveTask;
+    private boolean disabling;
 
     @Override
     public void onLoad() {
@@ -122,11 +123,15 @@ public final class Kingdoms extends JavaPlugin {
         this.load();
         this.registerCommands();
 
-        this.saveTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::save, 0L, this.kingdomSettings.getSaveInterval());
+        this.saveTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            if (this.disabling) return;
+            this.save();
+        }, 0L, this.kingdomSettings.getSaveInterval());
     }
 
     @Override
     public void onDisable() {
+        this.disabling = true;
         if (this.saveTask != null && !this.saveTask.isCancelled()) this.saveTask.cancel();
         this.save();
     }
@@ -134,7 +139,7 @@ public final class Kingdoms extends JavaPlugin {
     public void save() {
         this.userManager.saveDirty();
         this.kingdomManager.saveDirty();
-        this.worldManager.saveDirty();
+        this.worldManager.saveDirty(this.disabling, true);
     }
 
     public void registerCommands() {

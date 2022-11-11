@@ -84,6 +84,9 @@ public class PlaceholderBuilder {
         put(Kingdom.class, Placeholder.KINGDOM_ENEMIES, k -> castAndParseKingdom(k,
                 kingdom -> getRelationString(kingdom, RelationType.ENEMY))
         );
+        put(Kingdom.class, Placeholder.KINGDOM_TOTAL_CLAIMS, k -> castAndParseKingdom(k,
+                kingdom -> kingdom.getClaimedChunks().size())
+        );
 
         put(PermissionWrapper.class,
                 Placeholder.PERMISSION_VALUE,

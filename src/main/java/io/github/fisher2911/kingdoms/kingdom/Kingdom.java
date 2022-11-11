@@ -31,11 +31,11 @@ import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgradeable;
 import io.github.fisher2911.kingdoms.user.User;
+import io.github.fisher2911.kingdoms.util.collections.DirtyMap;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -50,7 +50,7 @@ public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder, S
     void setDescription(String description);
     Collection<User> getMembers();
     int getMaxMembers();
-    Map<UUID, Role> getUserRoles();
+    DirtyMap<UUID, Role> getUserRoles();
     void consumeRoles(Consumer<User> consumer, Role... roles);
     PermissionContainer getPermissions();
     PermissionContainer getDefaultChunkPermissions();
@@ -70,7 +70,7 @@ public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder, S
     int getTotalPossibleChunks();
     boolean canKick(User kicker, User toKick);
     void kick(User user);
-    Map<Integer, RelationInfo> getKingdomRelations();
+    DirtyMap<Integer, RelationInfo> getKingdomRelations();
     Collection<RelationInfo> getRelations(RelationType type);
     @Nullable // if self
     RelationType getKingdomRelation(int kingdomId);
@@ -79,7 +79,7 @@ public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder, S
     boolean isLeader(User user);
     Bank<Kingdom> getBank();
     double getBankLimit();
-    Map<String, Role> getRoles();
+    DirtyMap<String, Role> getRoles();
     Role getRole(String id);
     KingdomLocations getLocations();
     boolean canBeUnloaded(Kingdoms plugin);

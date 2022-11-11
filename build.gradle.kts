@@ -24,6 +24,7 @@ dependencies {
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.7-SNAPSHOT")
     compileOnly("me.clip:placeholderapi:2.11.2")
+    compileOnly("org.xerial:sqlite-jdbc:3.39.2.0")
     implementation("org.spongepowered:configurate-yaml:4.1.2")
     implementation("net.objecthunter:exp4j:0.4.8")
     implementation("net.kyori:adventure-api:4.11.0")

@@ -89,7 +89,7 @@ public class PermissionContainer implements Saveable {
 
 
     public MapOfMaps<String, KPermission, Boolean> getPermissions() {
-        return this.permissions;
+        return new MapOfMaps<>(this.permissions);
     }
 
     @Override

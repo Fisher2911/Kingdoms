@@ -30,12 +30,13 @@ import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeHolder;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.user.User;
+import io.github.fisher2911.kingdoms.util.collections.DirtyMap;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -46,6 +47,10 @@ public class WildernessKingdom implements Kingdom {
     private final PermissionContainer empty = PermissionContainer.empty();
     private final Bank<Kingdom> bank = Bank.createKingdomBank(0);
     private final Instant creationDate = Instant.MIN;
+    private final DirtyMap<String, Role> roles = new DirtyMap<>(Collections.unmodifiableMap(new HashMap<>()));
+    private final DirtyMap<UUID, Role> userRoles = new DirtyMap<>(Collections.unmodifiableMap(new HashMap<>()));
+    private final DirtyMap<Integer, RelationInfo> kingdomRelations = new DirtyMap<>(Collections.unmodifiableMap(new HashMap<>()));
+
 
     private WildernessKingdom() {}
 
@@ -97,8 +102,8 @@ public class WildernessKingdom implements Kingdom {
     }
 
     @Override
-    public Map<UUID, Role> getUserRoles() {
-        return Collections.emptyMap();
+    public DirtyMap<UUID, Role> getUserRoles() {
+        return this.userRoles;
     }
 
     @Override
@@ -197,8 +202,8 @@ public class WildernessKingdom implements Kingdom {
     }
 
     @Override
-    public Map<Integer, RelationInfo> getKingdomRelations() {
-        return Collections.emptyMap();
+    public DirtyMap<Integer, RelationInfo> getKingdomRelations() {
+        return this.kingdomRelations;
     }
 
     @Override
@@ -237,8 +242,8 @@ public class WildernessKingdom implements Kingdom {
     }
 
     @Override
-    public Map<String, Role> getRoles() {
-        return Collections.emptyMap();
+    public DirtyMap<String, Role> getRoles() {
+        return this.roles;
     }
 
     @Override
@@ -292,7 +297,7 @@ public class WildernessKingdom implements Kingdom {
     }
 
     @Override
-    public Map<String, Integer> getUpgradeLevels() {
+    public DirtyMap<String, Integer> getUpgradeLevels() {
         return null;
     }
 

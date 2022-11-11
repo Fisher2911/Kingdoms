@@ -59,8 +59,8 @@ public class ClaimEnterListener extends KListener {
 
     public void onPlayerMove(PlayerMoveEvent event) {
         if (event.getTo() == null || !this.hasChangedBlock(event.getFrom(), event.getTo())) return;
-        final Location from = event.getFrom();
-        final Location to = event.getTo();
+        final Location from = event.getFrom().getBlock().getLocation();
+        final Location to = event.getTo().getBlock().getLocation();
         final ClaimedChunk fromChunk = this.worldManager.getAt(from);
         final ClaimedChunk toChunk = this.worldManager.getAt(to);
 

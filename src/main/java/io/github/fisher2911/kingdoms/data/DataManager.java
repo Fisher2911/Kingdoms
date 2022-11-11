@@ -54,24 +54,24 @@ import io.github.fisher2911.kingdoms.user.BukkitUser;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.util.MapOfMaps;
 import io.github.fisher2911.kingdoms.util.Pair;
+import io.github.fisher2911.kingdoms.util.collections.DirtyMap;
 import io.github.fisher2911.kingdoms.world.KChunk;
 import io.github.fisher2911.kingdoms.world.Position;
 import io.github.fisher2911.kingdoms.world.WorldPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -284,47 +284,40 @@ public class DataManager {
 
     private final Kingdoms plugin;
     private final Path databasePath;
+    private final DelayedLoader<KChunk> onChunkLoadDelayedLoader;
+    private final DelayedLoader<KChunk> onChunkUnloadDelayedLoader;
     private final Supplier<Connection> dataSource;
 
     public DataManager(Kingdoms plugin) {
         this.plugin = plugin;
         this.databasePath = this.plugin.getDataFolder().toPath().resolve("database").resolve("kingdoms.db");
         this.dataSource = this.init();
+        this.onChunkLoadDelayedLoader = ChunkDelayedLoader.createForLoadingChunks(this.plugin, 50, 40, 1);
+        this.onChunkUnloadDelayedLoader = ChunkDelayedLoader.createForUnloadingChunks(this.plugin, 50, 40, 1);
     }
-
-    private Connection connection;
 
     private Supplier<Connection> init() {
         final File folder = this.databasePath.getParent().toFile();
         if (!folder.exists()) {
             folder.mkdirs();
         }
-        if (SystemDialect.getDialect() == SQLDialect.SQLITE) {
-            return () -> {
-                try {
-                    if (this.connection != null && !this.connection.isClosed()) return this.connection;
-                    this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.databasePath);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                return this.connection;
-            };
-        }
         final HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:sqlite:" + this.databasePath);
-        config.setConnectionTimeout(5000);
+//        config.setConnectionTimeout(5000);
+        if (SystemDialect.getDialect() == SQLDialect.SQLITE) {
+            config.setJdbcUrl("jdbc:sqlite:" + this.databasePath);
+        }
         final HikariDataSource dataSource = new HikariDataSource(config);
         return () -> {
             try {
                 return dataSource.getConnection();
             } catch (SQLException e) {
+                e.printStackTrace();
                 throw new IllegalStateException("Could not get connection", e);
             }
         };
     }
 
     public void load() {
-        this.init();
         this.createTables();
     }
 
@@ -352,10 +345,10 @@ public class DataManager {
 
     public Kingdom newKingdom(User creator, String name) {
         final RoleManager roleManager = this.plugin.getRoleManager();
-        try {
+        try (final Connection connection = this.getConnection()) {
             final Instant now = Instant.now();
             final int id = this.createKingdom(
-                    this.getConnection(),
+                    connection,
                     name,
                     this.plugin.getKingdomSettings().getDefaultKingdomDescription(),
                     now
@@ -365,16 +358,16 @@ public class DataManager {
                     id,
                     name,
                     this.plugin.getKingdomSettings().getDefaultKingdomDescription(),
-                    new HashMap<>(),
-                    new HashMap<>(),
+                    new DirtyMap<>(new HashMap<>()),
+                    new DirtyMap<>(new HashMap<>()),
                     roleManager.getDefaultRolePermissions(),
                     new HashSet<>(),
                     this.plugin.getUpgradeManager().getUpgradeHolder(),
-                    new HashMap<>(),
-                    new HashMap<>(),
+                    new DirtyMap<>(new HashMap<>()),
+                    new DirtyMap<>(new HashMap<>()),
                     Bank.createKingdomBank(0),
-                    roleManager.createKingdomRoles(),
-                    new KingdomLocations(new HashMap<>()),
+                    new DirtyMap<>(roleManager.createKingdomRoles()),
+                    new KingdomLocations(new DirtyMap<>(new HashMap<>())),
                     now
             );
             kingdom.addMember(creator);
@@ -414,7 +407,6 @@ public class DataManager {
 
     public void saveKingdom(Kingdom kingdom) {
         try (final Connection connection = this.getConnection()) {
-            connection.setAutoCommit(false);
             this.saveKingdom(connection, kingdom);
             this.saveMembers(connection, kingdom);
             this.savePermissions(connection, kingdom);
@@ -424,7 +416,6 @@ public class DataManager {
             this.saveRoles(connection, kingdom);
             this.saveKingdomRelations(connection, kingdom);
             this.saveLocations(connection, kingdom);
-            connection.commit();
             kingdom.setDirty(false);
             Bukkit.getPluginManager().callEvent(new KingdomSaveEvent(kingdom));
         } catch (final SQLException e) {
@@ -444,13 +435,15 @@ public class DataManager {
     }
 
     private void saveMembers(Connection connection, Kingdom kingdom) throws SQLException {
+        final DirtyMap<UUID, Role> roles = kingdom.getUserRoles();
+        if (!roles.isDirty()) return;
         final SQLStatement statement = SQLStatement.insert(MEMBER_TABLE_NAME)
                 .add(MEMBER_KINGDOM_ID_COLUMN)
                 .add(MEMBER_UUID_COLUMN)
                 .add(MEMBER_ROLE_ID_COLUMN)
                 .build();
         final List<Supplier<List<Object>>> suppliers = new ArrayList<>();
-        for (var entry : kingdom.getUserRoles().entrySet()) {
+        for (var entry : roles.entrySet()) {
             final List<Object> values = new ArrayList<>();
             final UUID uuid = entry.getKey();
             final Role role = entry.getValue();
@@ -460,15 +453,16 @@ public class DataManager {
             suppliers.add(() -> values);
         }
         statement.insert(connection, suppliers, kingdom.getMembers().size());
+        roles.setDirty(false);
     }
 
-    public Map<UUID, String> loadMembers(Connection connection, int kingdomId) throws SQLException {
-        final SQLQuery<Map<UUID, String>> query = SQLQuery.<Map<UUID, String>>select(MEMBER_TABLE_NAME)
+    public DirtyMap<UUID, String> loadMembers(Connection connection, int kingdomId) throws SQLException {
+        final SQLQuery<DirtyMap<UUID, String>> query = SQLQuery.<DirtyMap<UUID, String>>select(MEMBER_TABLE_NAME)
                 .select(MEMBER_UUID_COLUMN, MEMBER_ROLE_ID_COLUMN)
                 .where(WhereCondition.of(MEMBER_KINGDOM_ID_COLUMN, () -> kingdomId))
                 .build();
         return query.mapTo(connection, resultSet -> {
-            final Map<UUID, String> members = new HashMap<>();
+            final DirtyMap<UUID, String> members = new DirtyMap<>(new HashMap<>());
             while (resultSet.next()) {
                 final UUID uuid = this.bytesToUUID(resultSet.getBytes(MEMBER_UUID_COLUMN.getName()));
                 final String roleId = resultSet.getString(MEMBER_ROLE_ID_COLUMN.getName());
@@ -480,6 +474,7 @@ public class DataManager {
 
     private void savePermissions(Connection connection, Kingdom kingdom) {
         final PermissionContainer permissions = kingdom.getPermissions();
+        if (!permissions.isDirty()) return;
         final SQLStatement statement = SQLStatement.insert(PERMISSIONS_TABLE_NAME)
                 .add(PERMISSIONS_KINGDOM_ID_COLUMN)
                 .add(PERMISSIONS_ROLE_ID_COLUMN)
@@ -503,6 +498,7 @@ public class DataManager {
             }
             try {
                 statement.insert(connection, suppliers, batchSize);
+                permissions.setDirty(false);
             } catch (final SQLException e) {
                 e.printStackTrace();
             }
@@ -529,27 +525,21 @@ public class DataManager {
         });
     }
 
-    public void saveClaimedChunks(Collection<ClaimedChunk> chunks) {
-        try {
-            for (ClaimedChunk chunk : chunks) {
-                if (!chunk.isDirty()) continue;
-                this.saveClaimedChunk(this.getConnection(), chunk);
-            }
+    protected void saveClaimedChunks(Collection<ClaimedChunk> chunks) {
+        try (final Connection connection = this.getConnection()) {
+            this.saveClaimedChunks(connection, chunks);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void saveClaimedChunk(ClaimedChunk chunk) {
-        try {
-            this.saveClaimedChunk(this.getConnection(), chunk);
-        } catch (SQLException e) {
-            e.printStackTrace();
+    private void saveClaimedChunks(Connection connection, Collection<ClaimedChunk> chunks) throws SQLException {
+        final List<Supplier<List<Object>>> values = new ArrayList<>();
+        for (ClaimedChunk chunk : chunks) {
+            if (chunk.isWilderness() || !chunk.isDirty()) continue;
+            final KChunk kChunk = chunk.getChunk();
+            values.add(() -> List.of(chunk.getChunk().getChunkKey(), chunk.getKingdomId(), uuidToBytes(chunk.getWorld()), kChunk.x(), kChunk.z()));
         }
-    }
-
-    private void saveClaimedChunk(Connection connection, ClaimedChunk chunk) throws SQLException {
-        if (chunk.getKingdomId() == Kingdom.WILDERNESS_ID) return;
         final SQLStatement statement = SQLStatement.insert(CHUNK_TABLE_NAME)
                 .add(CHUNK_KEY_COLUMN)
                 .add(CHUNK_KINGDOM_ID_COLUMN)
@@ -557,14 +547,11 @@ public class DataManager {
                 .add(CHUNK_X_COLUMN)
                 .add(CHUNK_Z_COLUMN)
                 .build();
-        final KChunk kChunk = chunk.getChunk();
-        final List<Object> values = List.of(chunk.getChunk().getChunkKey(), chunk.getKingdomId(), uuidToBytes(chunk.getWorld()), kChunk.x(), kChunk.z());
-        statement.insert(connection, List.of(() -> values), 1);
-        this.saveChunkPermissions(connection, chunk);
+        statement.insert(connection, values, 1);
+        this.saveChunkPermissions(connection, chunks);
     }
 
-    private void saveChunkPermissions(Connection connection, ClaimedChunk chunk) {
-        if (chunk.getKingdomId() == Kingdom.WILDERNESS_ID) return;
+    private void saveChunkPermissions(Connection connection, Collection<ClaimedChunk> chunks) {
         final SQLStatement statement = SQLStatement.insert(CHUNK_PERMISSIONS_TABLE_NAME)
                 .add(CHUNK_PERMISSIONS_ROLE_ID_COLUMN)
                 .add(CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN)
@@ -573,38 +560,43 @@ public class DataManager {
                 .add(CHUNK_PERMISSIONS_WORLD_UUID_COLUMN)
                 .add(CHUNK_PERMISSIONS_KINGDOM_ID_COLUMN)
                 .build();
-        final List<Supplier<List<Object>>> suppliers = new ArrayList<>();
-        int batchSize;
-        final PermissionContainer permissions = chunk.getPermissions();
-        for (var rolePermissionsEntry : permissions.getPermissions().entrySet()) {
-            final String role = rolePermissionsEntry.getKey();
-            batchSize = rolePermissionsEntry.getValue().size();
-            for (var entry : rolePermissionsEntry.getValue().entrySet()) {
-                final List<Object> objects = new ArrayList<>();
-                final KPermission permission = entry.getKey();
-                final boolean value = entry.getValue();
-                objects.add(role);
-                objects.add(permission.getIntId());
-                objects.add(value);
-                objects.add(chunk.getChunk().getChunkKey());
-                objects.add(uuidToBytes(chunk.getChunk().world()));
-                objects.add(chunk.getKingdomId());
-                suppliers.add(() -> objects);
-            }
-            try {
-                statement.insert(connection, suppliers, batchSize);
-                chunk.setDirty(false);
-            } catch (final SQLException e) {
-                e.printStackTrace();
+        for (ClaimedChunk chunk : chunks) {
+            final List<Supplier<List<Object>>> suppliers = new ArrayList<>();
+            int batchSize;
+            final PermissionContainer permissions = chunk.getPermissions();
+            if (!permissions.isDirty()) continue;
+            for (var rolePermissionsEntry : permissions.getPermissions().entrySet()) {
+                final String role = rolePermissionsEntry.getKey();
+                batchSize = rolePermissionsEntry.getValue().size();
+                for (var entry : rolePermissionsEntry.getValue().entrySet()) {
+                    final List<Object> objects = new ArrayList<>();
+                    final KPermission permission = entry.getKey();
+                    final boolean value = entry.getValue();
+                    objects.add(role);
+                    objects.add(permission.getIntId());
+                    objects.add(value);
+                    objects.add(chunk.getChunk().getChunkKey());
+                    objects.add(uuidToBytes(chunk.getChunk().world()));
+                    objects.add(chunk.getKingdomId());
+                    suppliers.add(() -> objects);
+                }
+                try {
+                    statement.insert(connection, suppliers, batchSize);
+                    chunk.setDirty(false);
+                    permissions.setDirty(false);
+                } catch (final SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
-    private PermissionContainer loadChunkPermissions(Connection connection, long chunkKey, int kingdomId) throws SQLException {
+    private PermissionContainer loadChunkPermissions(Connection connection, UUID world, long chunkKey, int kingdomId) throws SQLException {
         final SQLQuery<PermissionContainer> query = SQLQuery.<PermissionContainer>select(CHUNK_PERMISSIONS_TABLE_NAME)
                 .select(CHUNK_PERMISSIONS_ROLE_ID_COLUMN, CHUNK_PERMISSIONS_PERMISSION_ID_COLUMN, CHUNK_PERMISSIONS_VALUE_COLUMN)
                 .where(new WhereCondition(List.of(
                         Pair.of(CHUNK_PERMISSIONS_ID_COLUMN, () -> chunkKey),
+                        Pair.of(CHUNK_PERMISSIONS_WORLD_UUID_COLUMN, () -> uuidToBytes(world)),
                         Pair.of(CHUNK_PERMISSIONS_KINGDOM_ID_COLUMN, () -> kingdomId)
                 )
                 ))
@@ -639,7 +631,7 @@ public class DataManager {
                 final int x = results.getInt(CHUNK_X_COLUMN.getName());
                 final int z = results.getInt(CHUNK_Z_COLUMN.getName());
                 final KChunk chunk = new KChunk(world, x, z);
-                final PermissionContainer permissions = this.loadChunkPermissions(connection, chunkKey, kingdomId);
+                final PermissionContainer permissions = this.loadChunkPermissions(connection, world, chunkKey, kingdomId);
                 final ClaimedChunk claimedChunk = new ClaimedChunk(this.plugin, kingdomId, chunk, permissions);
                 chunks.add(claimedChunk);
             }
@@ -647,48 +639,72 @@ public class DataManager {
         });
     }
 
-    @Nullable
-    public ClaimedChunk loadClaimedChunk(long chunkKey) {
-        try {
-            return this.loadClaimedChunk(this.getConnection(), chunkKey);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not load chunk with key " + chunkKey, e);
-        }
+    public void queueChunkToLoad(KChunk chunk, boolean startTaskIfNotRunning) {
+        this.onChunkLoadDelayedLoader.addToQueue(chunk, startTaskIfNotRunning);
     }
 
-    @Nullable
-    public ClaimedChunk loadClaimedChunk(Connection connection, long chunkKey) throws SQLException {
-        final SQLQuery<ClaimedChunk> statement = SQLQuery.<ClaimedChunk>select(CHUNK_TABLE_NAME)
-                .select(CHUNK_WORLD_UUID_COLUMN, CHUNK_X_COLUMN, CHUNK_Z_COLUMN, CHUNK_KINGDOM_ID_COLUMN)
-                .where(WhereCondition.of(CHUNK_KEY_COLUMN, () -> chunkKey))
-                .build();
-        return statement.mapTo(connection, results -> {
-            if (!results.next()) return null;
-            final int kingdomId = results.getInt(CHUNK_KINGDOM_ID_COLUMN.getName());
-            final int x = results.getInt(CHUNK_X_COLUMN.getName());
-            final int z = results.getInt(CHUNK_Z_COLUMN.getName());
-            final UUID world = bytesToUUID(results.getBytes(CHUNK_WORLD_UUID_COLUMN.getName()));
-            final PermissionContainer container = this.loadChunkPermissions(connection, chunkKey, kingdomId);
-            return new ClaimedChunk(this.plugin, kingdomId, KChunk.at(world, x, z), container);
-        });
+    public void forceLoadAllChunks(boolean onMainThread) {
+        this.onChunkLoadDelayedLoader.forceLoadAll(onMainThread);
+    }
+
+    public void queueChunkToUnload(KChunk chunk, boolean startTaskIfNotRunning) {
+        this.plugin.getLogger().info("Queueing chunk: " + chunk);
+        this.onChunkUnloadDelayedLoader.addToQueue(chunk, startTaskIfNotRunning);
+    }
+
+    public void forceSaveAllChunks(boolean onMainThread) {
+        this.onChunkUnloadDelayedLoader.forceLoadAll(onMainThread);
+    }
+
+    protected Collection<ClaimedChunk> loadClaimedChunks(Collection<KChunk> chunks) {
+        try (final Connection connection = this.getConnection()) {
+            return this.loadClaimedChunks(connection, chunks);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptySet();
+    }
+
+    protected Collection<ClaimedChunk> loadClaimedChunks(Connection connection, Collection<KChunk> chunks) throws SQLException {
+        final Set<ClaimedChunk> loaded = new HashSet<>();
+        for (KChunk chunk : chunks) {
+            final long chunkKey = chunk.getChunkKey();
+            final UUID world = chunk.world();
+            final SQLQuery<ClaimedChunk> statement = SQLQuery.<ClaimedChunk>select(CHUNK_TABLE_NAME)
+                    .select(CHUNK_X_COLUMN, CHUNK_Z_COLUMN, CHUNK_KINGDOM_ID_COLUMN)
+                    .where(new WhereCondition(List.of(
+                            Pair.of(CHUNK_KEY_COLUMN, () -> chunkKey),
+                            Pair.of(CHUNK_WORLD_UUID_COLUMN, () -> uuidToBytes(world))
+                    )))
+                    .build();
+            final var claimedChunk = statement.mapTo(connection, results -> {
+                if (!results.next()) return null;
+                final int kingdomId = results.getInt(CHUNK_KINGDOM_ID_COLUMN.getName());
+                final int x = results.getInt(CHUNK_X_COLUMN.getName());
+                final int z = results.getInt(CHUNK_Z_COLUMN.getName());
+                final PermissionContainer container = this.loadChunkPermissions(connection, world, chunkKey, kingdomId);
+                return new ClaimedChunk(this.plugin, kingdomId, KChunk.at(world, x, z), container);
+            });
+            if (claimedChunk == null) continue;
+            loaded.add(claimedChunk);
+        }
+        return loaded;
     }
 
     private void saveClaimedChunks(Connection connection, Kingdom kingdom) throws SQLException {
-        for (final ClaimedChunk chunk : kingdom.getClaimedChunks()) {
-            if (chunk.isDirty()) continue;
-            saveClaimedChunk(connection, chunk);
-        }
+        this.saveClaimedChunks(connection, kingdom.getClaimedChunks());
     }
 
     public void saveUpgradeLevels(Connection connection, Kingdom kingdom) throws SQLException {
+        final DirtyMap<String, Integer> levels = kingdom.getUpgradeLevels();
+        if (!levels.isDirty()) return;
         final SQLStatement statement = SQLStatement.insert(UPGRADE_LEVELS_TABLE_NAME)
                 .add(UPGRADE_LEVELS_ID_COLUMN)
                 .add(UPGRADE_LEVELS_LEVEL_COLUMN)
                 .add(UPGRADE_LEVELS_KINGDOM_ID_COLUMN)
                 .build();
         final List<Supplier<List<Object>>> suppliers = new ArrayList<>();
-        int batchSize = kingdom.getUpgradeLevels().size();
+        int batchSize = levels.size();
         for (var entry : kingdom.getUpgradeLevels().entrySet()) {
             final List<Object> objects = new ArrayList<>();
             final String id = entry.getKey();
@@ -700,17 +716,18 @@ public class DataManager {
             suppliers.add(() -> objects);
         }
         statement.insert(connection, suppliers, batchSize);
+        levels.setDirty(false);
     }
 
-    public Map<String, Integer> loadUpgradeLevels(Connection connection, int kingdomId) throws SQLException {
-        final SQLQuery<Map<String, Integer>> query = SQLQuery.<Map<String, Integer>>select(UPGRADE_LEVELS_TABLE_NAME)
+    public DirtyMap<String, Integer> loadUpgradeLevels(Connection connection, int kingdomId) throws SQLException {
+        final SQLQuery<DirtyMap<String, Integer>> query = SQLQuery.<DirtyMap<String, Integer>>select(UPGRADE_LEVELS_TABLE_NAME)
                 .select(UPGRADE_LEVELS_ID_COLUMN, UPGRADE_LEVELS_LEVEL_COLUMN)
                 .where(new WhereCondition(List.of(
                         Pair.of(UPGRADE_LEVELS_KINGDOM_ID_COLUMN, () -> kingdomId)
                 )))
                 .build();
         return query.mapTo(connection, results -> {
-            final Map<String, Integer> levels = new HashMap<>();
+            final DirtyMap<String, Integer> levels = new DirtyMap<>(new HashMap<>());
             while (results.next()) {
                 final String id = results.getString(UPGRADE_LEVELS_ID_COLUMN.getName());
                 final int level = results.getInt(UPGRADE_LEVELS_LEVEL_COLUMN.getName());
@@ -721,6 +738,8 @@ public class DataManager {
     }
 
     public void saveBank(Connection connection, Kingdom kingdom) {
+        final Bank<Kingdom> bank = kingdom.getBank();
+        if (!bank.isDirty()) return;
         final SQLStatement statement = SQLStatement.insert(BANK_TABLE_NAME)
                 .add(BANK_MONEY_COLUMN)
                 .add(BANK_KINGDOM_ID_COLUMN)
@@ -728,11 +747,12 @@ public class DataManager {
         final List<Supplier<List<Object>>> suppliers = new ArrayList<>();
         int batchSize = 1;
         final List<Object> objects = new ArrayList<>();
-        objects.add(kingdom.getBank().getBalance());
+        objects.add(bank.getBalance());
         objects.add(kingdom.getId());
         suppliers.add(() -> objects);
         try {
             statement.insert(connection, suppliers, batchSize);
+            bank.setDirty(false);
         } catch (final SQLException e) {
             e.printStackTrace();
         }
@@ -753,6 +773,8 @@ public class DataManager {
     }
 
     public void saveRoles(Connection connection, Kingdom kingdom) {
+        final DirtyMap<String, Role> roles = kingdom.getRoles();
+        if (!roles.isDirty()) return;
         final SQLStatement statement = SQLStatement.insert(ROLES_TABLE_NAME)
                 .add(ROLES_ID_COLUMN)
                 .add(ROLES_NAME_COLUMN)
@@ -761,7 +783,7 @@ public class DataManager {
                 .build();
         final List<Supplier<List<Object>>> suppliers = new ArrayList<>();
         int batchSize = kingdom.getRoles().size();
-        for (var entry : kingdom.getRoles().entrySet()) {
+        for (var entry : roles.entrySet()) {
             final List<Object> objects = new ArrayList<>();
             final String id = entry.getKey();
             final Role role = entry.getValue();
@@ -773,18 +795,19 @@ public class DataManager {
         }
         try {
             statement.insert(connection, suppliers, batchSize);
+            roles.setDirty(false);
         } catch (final SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public Map<String, Role> loadRoles(Connection connection, int kingdomId) throws SQLException {
-        final SQLQuery<Map<String, Role>> query = SQLQuery.<Map<String, Role>>select(ROLES_TABLE_NAME)
+    public DirtyMap<String, Role> loadRoles(Connection connection, int kingdomId) throws SQLException {
+        final SQLQuery<DirtyMap<String, Role>> query = SQLQuery.<DirtyMap<String, Role>>select(ROLES_TABLE_NAME)
                 .select(ROLES_ID_COLUMN, ROLES_NAME_COLUMN, ROLES_WEIGHT_COLUMN)
                 .where(WhereCondition.of(ROLES_KINGDOM_ID_COLUMN, () -> kingdomId))
                 .build();
         return query.mapTo(connection, results -> {
-            final Map<String, Role> roles = new HashMap<>();
+            final DirtyMap<String, Role> roles = new DirtyMap<>(new HashMap<>());
             while (results.next()) {
                 final String id = results.getString(ROLES_ID_COLUMN.getName());
                 final String name = results.getString(ROLES_NAME_COLUMN.getName());
@@ -796,14 +819,16 @@ public class DataManager {
     }
 
     public void saveKingdomRelations(Connection connection, Kingdom kingdom) {
+        final DirtyMap<Integer, RelationInfo> relations = kingdom.getKingdomRelations();
+        if (!relations.isDirty()) return;
         final SQLStatement statement = SQLStatement.insert(RELATIONS_TABLE_NAME)
                 .add(RELATIONS_OTHER_KINGDOM_ID_COLUMN)
                 .add(RELATIONS_ID_COLUMN)
                 .add(RELATIONS_KINGDOM_ID_COLUMN)
                 .build();
         final List<Supplier<List<Object>>> suppliers = new ArrayList<>();
-        int batchSize = kingdom.getKingdomRelations().size();
-        for (var entry : kingdom.getKingdomRelations().entrySet()) {
+        int batchSize = relations.size();
+        for (var entry : relations.entrySet()) {
             final List<Object> objects = new ArrayList<>();
             final int otherKingdom = entry.getKey();
             final RelationInfo relation = entry.getValue();
@@ -814,20 +839,21 @@ public class DataManager {
         }
         try {
             statement.insert(connection, suppliers, batchSize);
+            relations.setDirty(false);
         } catch (final SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public Map<Integer, RelationInfo> loadKingdomRelations(Connection connection, int kingomId) throws SQLException {
-        final SQLQuery<Map<Integer, RelationInfo>> query = SQLQuery.<Map<Integer, RelationInfo>>select(RELATIONS_TABLE_NAME)
+    public DirtyMap<Integer, RelationInfo> loadKingdomRelations(Connection connection, int kingomId) throws SQLException {
+        final SQLQuery<DirtyMap<Integer, RelationInfo>> query = SQLQuery.<DirtyMap<Integer, RelationInfo>>select(RELATIONS_TABLE_NAME)
                 .select(RELATIONS_OTHER_KINGDOM_ID_COLUMN, RELATIONS_ID_COLUMN)
                 .select(KINGDOM_NAME_COLUMN)
                 .where(WhereCondition.of(RELATIONS_KINGDOM_ID_COLUMN, () -> kingomId))
                 .join(RELATIONS_KINGDOM_ID_COLUMN, KINGDOM_ID_COLUMN, SQLJoinType.LEFT_JOIN)
                 .build();
         return query.mapTo(connection, results -> {
-            final Map<Integer, RelationInfo> relations = new HashMap<>();
+            final DirtyMap<Integer, RelationInfo> relations = new DirtyMap<>(new HashMap<>());
             while (results.next()) {
                 final int otherKingdom = results.getInt(RELATIONS_OTHER_KINGDOM_ID_COLUMN.getAliasName());
                 final String relationType = results.getString(RELATIONS_ID_COLUMN.getAliasName());
@@ -839,6 +865,8 @@ public class DataManager {
     }
 
     public void saveLocations(Connection connection, Kingdom kingdom) {
+        final KingdomLocations locations = kingdom.getLocations();
+        if (!locations.isDirty()) return;
         final SQLStatement statement = SQLStatement.insert(LOCATIONS_TABLE_NAME)
                 .add(LOCATIONS_ID_COLUMN)
                 .add(LOCATIONS_WORLD_UUID_COLUMN)
@@ -850,8 +878,8 @@ public class DataManager {
                 .add(LOCATIONS_KINGDOM_ID_COLUMN)
                 .build();
         final List<Supplier<List<Object>>> suppliers = new ArrayList<>();
-        int batchSize = kingdom.getLocations().getSavedPositions().size();
-        for (var entry : kingdom.getLocations().getSavedPositions().entrySet()) {
+        int batchSize = locations.getSavedPositions().size();
+        for (var entry : locations.getSavedPositions().entrySet()) {
             final List<Object> objects = new ArrayList<>();
             final String id = entry.getKey();
             final WorldPosition worldPosition = entry.getValue();
@@ -869,6 +897,7 @@ public class DataManager {
         }
         try {
             statement.insert(connection, suppliers, batchSize);
+            locations.setDirty(false);
         } catch (final SQLException e) {
             e.printStackTrace();
         }
@@ -880,7 +909,7 @@ public class DataManager {
                 .where(WhereCondition.of(LOCATIONS_KINGDOM_ID_COLUMN, () -> kingdomId))
                 .build();
         return query.mapTo(connection, results -> {
-            final KingdomLocations locations = new KingdomLocations(new HashMap<>());
+            final KingdomLocations locations = new KingdomLocations(new DirtyMap<>(new HashMap<>()));
             while (results.next()) {
                 final String id = results.getString(LOCATIONS_ID_COLUMN.getName());
                 final UUID worldUUID = bytesToUUID(results.getBytes(LOCATIONS_WORLD_UUID_COLUMN.getName()));
@@ -896,15 +925,14 @@ public class DataManager {
     }
 
     public void saveUser(User user) {
-        try {
-            saveUser(this.getConnection(), user);
+        try (final Connection connection = this.getConnection()) {
+            saveUser(connection, user);
         } catch (final SQLException e) {
             e.printStackTrace();
         }
     }
 
     private void saveUser(Connection connection, User user) throws SQLException {
-        connection.setAutoCommit(false);
         final SQLStatement statement = SQLStatement.insert(USER_TABLE_NAME)
                 .add(USER_UUID_COLUMN)
                 .add(USER_NAME_COLUMN)
@@ -921,7 +949,6 @@ public class DataManager {
         suppliers.add(() -> objects);
         try {
             statement.insert(connection, suppliers, batchSize);
-            connection.commit();
             user.setDirty(false);
             Bukkit.getPluginManager().callEvent(new UserSaveEvent(user));
         } catch (final SQLException e) {
@@ -930,8 +957,8 @@ public class DataManager {
     }
 
     public Optional<User> loadUser(UUID uuid) {
-        try {
-            return this.loadUser(this.getConnection(), uuid);
+        try (final Connection connection = this.getConnection()) {
+            return this.loadUser(connection, uuid);
         } catch (SQLException e) {
             e.printStackTrace();
             return Optional.empty();
@@ -939,8 +966,8 @@ public class DataManager {
     }
 
     public Optional<User> loadUserByName(String name) {
-        try {
-            return this.loadUserByName(this.getConnection(), name);
+        try (final Connection connection = this.getConnection()) {
+            return this.loadUserByName(connection, name);
         } catch (SQLException e) {
             e.printStackTrace();
             return Optional.empty();
@@ -988,8 +1015,8 @@ public class DataManager {
     }
 
     public Optional<Kingdom> loadKingdom(int kingdomId) {
-        try {
-            return this.loadKingdom(this.getConnection(), kingdomId);
+        try (final Connection connection = this.getConnection()) {
+            return this.loadKingdom(connection, kingdomId);
         } catch (SQLException e) {
             e.printStackTrace();
             return Optional.empty();
@@ -1004,11 +1031,11 @@ public class DataManager {
                 .build();
 
         final Set<ClaimedChunk> chunks = this.loadClaimedChunks(connection, kingdomId);
-        final Map<String, Integer> upgradeLevels = this.loadUpgradeLevels(connection, kingdomId);
+        final DirtyMap<String, Integer> upgradeLevels = this.loadUpgradeLevels(connection, kingdomId);
 
-        final Map<String, Role> roles = this.loadRoles(connection, kingdomId);
-        final Map<UUID, String> memberRoleIds = this.loadMembers(connection, kingdomId);
-        final Map<UUID, Role> memberRoles = new HashMap<>();
+        final DirtyMap<String, Role> roles = this.loadRoles(connection, kingdomId);
+        final DirtyMap<UUID, String> memberRoleIds = this.loadMembers(connection, kingdomId);
+        final DirtyMap<UUID, Role> memberRoles = new DirtyMap<>(new HashMap<>());
         for (final Map.Entry<UUID, String> entry : memberRoleIds.entrySet()) {
             final Role role = roles.get(entry.getValue());
             if (role == null) {
@@ -1016,7 +1043,7 @@ public class DataManager {
             }
             memberRoles.put(entry.getKey(), role);
         }
-        final Map<UUID, User> users = new HashMap<>();
+        final DirtyMap<UUID, User> users = new DirtyMap<>(new HashMap<>());
         for (UUID uuid : memberRoles.keySet()) {
             final User user = this.plugin.getUserManager().forceGet(uuid);
             if (user != null) {
@@ -1031,7 +1058,7 @@ public class DataManager {
         }
         final PermissionContainer permissions = this.loadPermissions(connection, kingdomId, roles);
         final Bank<Kingdom> bank = this.loadBank(connection, kingdomId);
-        final Map<Integer, RelationInfo> kingdomRelations = this.loadKingdomRelations(connection, kingdomId);
+        final DirtyMap<Integer, RelationInfo> kingdomRelations = this.loadKingdomRelations(connection, kingdomId);
         final KingdomLocations locations = this.loadKingdomLocations(connection, kingdomId);
         return Optional.ofNullable(query.mapTo(connection, results -> {
             if (!results.next()) return null;
@@ -1067,8 +1094,8 @@ public class DataManager {
     }
 
     public void deleteKingdom(int kingdomId) {
-        try {
-            this.deleteKingdom(this.getConnection(), kingdomId);
+        try (final Connection connection = this.getConnection()) {
+            this.deleteKingdom(connection, kingdomId);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1081,9 +1108,34 @@ public class DataManager {
                 .execute(connection);
     }
 
+    public void deleteChunk(KChunk chunk) {
+        this.deleteChunks(Collections.singleton(chunk));
+    }
+
+    public void deleteChunks(Collection<KChunk> chunks) {
+        try (final Connection connection = this.getConnection()) {
+            this.deleteChunks(connection, chunks);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deleteChunks(Connection connection, Collection<KChunk> chunks) throws SQLException {
+        for (KChunk chunk : chunks) {
+            DeleteStatement.builder(CHUNK_TABLE)
+                    .where(new WhereCondition(List.of(
+                            Pair.of(CHUNK_WORLD_UUID_COLUMN, () -> this.uuidToBytes(chunk.world())),
+                            Pair.of(CHUNK_X_COLUMN, chunk::x),
+                            Pair.of(CHUNK_Z_COLUMN, chunk::z)
+                    )))
+                    .build()
+                    .execute(connection);
+        }
+    }
+
     public Optional<Kingdom> loadKingdomByName(String name) {
-        try {
-            return this.loadKingdomByName(this.getConnection(), name);
+        try (final Connection connection = this.getConnection()) {
+            return this.loadKingdomByName(connection, name);
         } catch (SQLException e) {
             e.printStackTrace();
             return Optional.empty();
@@ -1095,7 +1147,7 @@ public class DataManager {
                 .select(KINGDOM_ID_COLUMN)
                 .where(WhereCondition.of(KINGDOM_NAME_COLUMN, () -> name))
                 .build();
-        return query.mapTo(this.getConnection(), results -> {
+        return query.mapTo(connection, results -> {
             if (!results.next()) return Optional.empty();
             final int kingdomId = results.getInt(KINGDOM_ID_COLUMN.getName());
             return this.loadKingdom(connection, kingdomId);

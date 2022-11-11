@@ -113,9 +113,10 @@ public class WorldManager {
         }
     }
 
-    public void saveDirty() {
+    public void saveDirty(boolean onMainThread, boolean force) {
         for (WorldMap worldMap : this.worldMaps.values()) {
-            worldMap.saveDirty();
+            worldMap.saveDirty(onMainThread, force);
         }
     }
+
 }

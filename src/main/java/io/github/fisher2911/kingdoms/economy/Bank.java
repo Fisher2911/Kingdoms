@@ -18,17 +18,19 @@
 
 package io.github.fisher2911.kingdoms.economy;
 
+import io.github.fisher2911.kingdoms.data.Saveable;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.BiFunction;
 
-public class Bank<T> {
+public class Bank<T> implements Saveable {
 
     private final Collection<BiFunction<T, Double, TransactionResultType>> depositPredicates;
     private final Collection<BiFunction<T, Double, TransactionResultType>> withdrawPredicates;
     private double balance;
+    private boolean dirty;
 
     public Bank(Collection<BiFunction<T, Double, TransactionResultType>> depositPredicates, Collection<BiFunction<T, Double, TransactionResultType>> withdrawPredicates, double balance) {
         this.depositPredicates = depositPredicates;
@@ -62,6 +64,7 @@ public class Bank<T> {
         }
         if (this.balance < withdrawAmount) return TransactionResult.of(TransactionResultType.NOT_ENOUGH_FUNDS, this.balance);
         this.balance -= withdrawAmount;
+        this.setDirty(true);
         return TransactionResult.of(lastSuccess, this.balance);
     }
 
@@ -78,6 +81,7 @@ public class Bank<T> {
             if (!result.isSuccessful()) return TransactionResult.of(result, this.balance);
         }
         this.balance += depositAmount;
+        this.setDirty(true);
         return TransactionResult.of(lastSuccess, this.balance);
     }
 
@@ -87,5 +91,17 @@ public class Bank<T> {
 
     public void setBalance(double balance) {
         this.balance = balance;
+        this.setDirty(true);
     }
+
+    @Override
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    @Override
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
 }
