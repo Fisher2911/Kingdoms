@@ -36,6 +36,7 @@ public class Bank<T> implements Saveable {
         this.depositPredicates = depositPredicates;
         this.withdrawPredicates = withdrawPredicates;
         this.balance = balance;
+        this.dirty = true;
     }
 
     public static Bank<Kingdom> createKingdomBank(double startBalance) {

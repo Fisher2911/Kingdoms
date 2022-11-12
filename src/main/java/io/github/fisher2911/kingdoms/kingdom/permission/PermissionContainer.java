@@ -37,6 +37,7 @@ public class PermissionContainer implements Saveable {
 
     public PermissionContainer(MapOfMaps<String, KPermission, Boolean> permissions) {
         this.permissions = permissions;
+        if (!this.permissions.isEmpty()) this.dirty = true;
     }
 
     /**

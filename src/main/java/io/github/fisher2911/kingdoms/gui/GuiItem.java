@@ -19,7 +19,6 @@
 package io.github.fisher2911.kingdoms.gui;
 
 import io.github.fisher2911.kingdoms.gui.wrapper.InventoryEventWrapper;
-import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.util.Metadata;
 import io.github.fisher2911.kingdoms.util.builder.BaseItemBuilder;
 import org.bukkit.Material;
@@ -114,7 +113,6 @@ public class GuiItem extends BaseGuiItem {
 
     @Override
     public BaseGuiItem withMetaData(Metadata metadata, boolean overwrite) {
-        final User user = metadata.get(GuiKeys.KINGDOM_MEMBER, User.class);
         return new GuiItem(this.itemBuilder, this.metadata.copyWith(metadata, overwrite), this.clickHandler, this.dragHandler, this.placeholders);
     }
 
