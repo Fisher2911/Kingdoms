@@ -302,7 +302,6 @@ public class DataManager {
             folder.mkdirs();
         }
         final HikariConfig config = new HikariConfig();
-//        config.setConnectionTimeout(5000);
         if (SystemDialect.getDialect() == SQLDialect.SQLITE) {
             config.setJdbcUrl("jdbc:sqlite:" + this.databasePath);
         }
@@ -764,7 +763,7 @@ public class DataManager {
                 )))
                 .build();
         return query.mapTo(connection, results -> {
-            if (!results.next()) return null;
+            if (!results.next()) return Bank.createKingdomBank(0);
             final double money = results.getDouble(BANK_MONEY_COLUMN.getName());
             return Bank.createKingdomBank(money);
         });
@@ -811,6 +810,10 @@ public class DataManager {
                 final String name = results.getString(ROLES_NAME_COLUMN.getName());
                 final int weight = results.getInt(ROLES_WEIGHT_COLUMN.getName());
                 roles.put(id, new Role(id, name, weight));
+            }
+            if (roles.isEmpty()) {
+//                 fix if the original roles didn't save
+                return new DirtyMap<>(this.plugin.getRoleManager().createKingdomRoles());
             }
             return roles;
         });

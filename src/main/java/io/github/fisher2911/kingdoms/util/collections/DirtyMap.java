@@ -33,6 +33,7 @@ public class DirtyMap<K, V> implements Map<K, V>, Saveable {
 
     public DirtyMap(Map<K, V> internal) {
         this.internal = internal;
+        if (!this.internal.isEmpty()) this.dirty = true;
     }
 
     @Override
