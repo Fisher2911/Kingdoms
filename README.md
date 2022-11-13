@@ -1,6 +1,6 @@
 ## Wiki coming soon
 
-#Features:
+# Features:
 
 - Creating kingdoms and adding members
 - Upgrading bank limit, max claims, max members, max relationships, using equations for both price and values, and more upgrades to come
