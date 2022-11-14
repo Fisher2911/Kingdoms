@@ -28,6 +28,7 @@ public enum CommandPermission {
     VIEW_OTHER_KINGDOM_DESCRIPTION("kingdoms.cmd.description.other"),
     VIEW_SELF_KINGDOM_DESCRIPTION("kingdoms.cmd.description.self"),
     VIEW_ADMIN_COMMAND_HELP("kingdoms.cmd.help.admin"),
+    KINGDOMS_UPDATES_NOTIFY("kingdoms.updates.notify"),
 
 
     ;

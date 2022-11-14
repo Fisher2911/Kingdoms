@@ -1,10 +1,10 @@
 name: Kingdoms
-version: "3.2.0-beta"
+version: "3.2.1-beta"
 main: io.github.fisher2911.kingdoms.Kingdoms
 api-version: 1.16
 authors: [ Fisher2911 ]
-depend: [ FisherLib, Vault ]
-softdepend: [ WorldGuard, PlaceholderAPI ]
+depend: [ Vault ]
+softdepend: [ FisherLib, WorldGuard, PlaceholderAPI ]
 commands:
   kingdom:
     description: test
@@ -34,3 +34,6 @@ permissions:
   kingdoms.cmd.help.admin:
     description: Allows a player to view admin commands
     default: op
+  kingdoms.updates.notify:
+    description: Allows a player to receive update notifications
+    default: true

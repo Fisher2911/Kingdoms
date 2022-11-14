@@ -24,6 +24,7 @@ import io.github.fisher2911.fisherlib.user.CoreUserManager;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.api.event.user.UserLoadEvent;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
+import io.github.fisher2911.kingdoms.command.CommandPermission;
 import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.message.KMessage;
 import org.bukkit.Bukkit;
@@ -89,6 +90,9 @@ public class UserManager implements CoreUserManager<User> {
                     Bukkit.getPluginManager().callEvent(new UserLoadEvent(user));
                     this.addUser(user);
                     user.onJoin(player);
+                    if (player.hasPermission(CommandPermission.KINGDOMS_UPDATES_NOTIFY.getValue())) {
+                        this.plugin.sendUpdateMessage(user);
+                    }
                     return user.getKingdomId();
                 })
                 .consumeAsync(kingdomId -> this.plugin.getKingdomManager().getKingdom(kingdomId, true))

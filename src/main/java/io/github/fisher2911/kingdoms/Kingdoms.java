@@ -19,12 +19,14 @@
 package io.github.fisher2911.kingdoms;
 
 import io.github.fisher2911.fisherlib.FishPlugin;
+import io.github.fisher2911.fisherlib.adventure.text.minimessage.tag.standard.StandardTags;
 import io.github.fisher2911.fisherlib.economy.PriceManager;
 import io.github.fisher2911.fisherlib.gui.GuiListener;
 import io.github.fisher2911.fisherlib.listener.GlobalListener;
 import io.github.fisher2911.fisherlib.message.MessageHandler;
 import io.github.fisher2911.fisherlib.placeholder.Placeholders;
 import io.github.fisher2911.kingdoms.command.kingdom.KingdomCommand;
+import io.github.fisher2911.kingdoms.config.AdminSettings;
 import io.github.fisher2911.kingdoms.config.KingdomsSettings;
 import io.github.fisher2911.kingdoms.confirm.ConfirmationManager;
 import io.github.fisher2911.kingdoms.data.DataManager;
@@ -48,6 +50,7 @@ import io.github.fisher2911.kingdoms.listener.ProtectionListener;
 import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.placeholder.KingdomsPlaceholders;
 import io.github.fisher2911.kingdoms.teleport.TeleportManager;
+import io.github.fisher2911.kingdoms.update.UpdateChecker;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import net.milkbowl.vault.economy.Economy;
@@ -79,6 +82,7 @@ public final class Kingdoms extends FishPlugin<User, Kingdoms> {
     private PriceManager priceManager;
     private RoleManager roleManager;
     private KingdomsSettings kingdomSettings;
+    private AdminSettings adminSettings;
     private WorldManager worldManager;
     private ClaimManager claimManager;
     private RelationManager relationManager;
@@ -90,6 +94,7 @@ public final class Kingdoms extends FishPlugin<User, Kingdoms> {
     private Economy economy;
     private BukkitTask saveTask;
     private boolean disabling;
+    private String latestVersion;
 
     @Override
     public void onLoad() {
@@ -103,11 +108,24 @@ public final class Kingdoms extends FishPlugin<User, Kingdoms> {
             logger.error("Could not find a valid economy plugin! Disabling plugin!");
             return;
         }
-        final int bStatsPluginId = 16799;
-        Metrics metrics = new Metrics(this, bStatsPluginId);
 
         this.placeholders = new KingdomsPlaceholders(this);
         this.messageHandler = MessageHandler.createInstance(this, this.placeholders);
+        this.adminSettings = new AdminSettings(this);
+
+        if (this.getServer().getPluginManager().getPlugin("FisherLib") == null) {
+            this.messageHandler.sendMessage(
+                    User.CONSOLE,
+                    "<red>[ATTENTION - Kingdoms] <reset><red>You are missing the dependency FisherLib! " +
+                            "This is required for the plugin to work! Download it here: https://www.spigotmc.org/resources/fisherlib.106260/ " +
+                            "[ATTENTION - Kingdoms]"
+            );
+            this.getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        final int bStatsPluginId = 16799;
+        Metrics metrics = new Metrics(this, bStatsPluginId);
+
         this.messageHandler.load(KMessage.values());
         // order matters
         this.teleportManager = new TeleportManager(this);
@@ -165,6 +183,11 @@ public final class Kingdoms extends FishPlugin<User, Kingdoms> {
         this.upgradeManager.load();
         this.relationManager.load();
         this.guiManager.load();
+        this.adminSettings.load();
+        new UpdateChecker(this, 106098).getVersion(version -> {
+            this.latestVersion = version;
+            this.sendUpdateMessage(User.CONSOLE);
+        });
         Bukkit.getScheduler().runTaskLater(this, this.worldManager::populate, 20);
     }
 
@@ -188,6 +211,18 @@ public final class Kingdoms extends FishPlugin<User, Kingdoms> {
         if (rsp == null) return false;
         this.economy = rsp.getProvider();
         return this.economy != null;
+    }
+
+    public void sendUpdateMessage(User user) {
+        if (this.getDescription().getVersion().equalsIgnoreCase(this.latestVersion)) return;
+        this.messageHandler.sendMessage(
+                user,
+                "<red>[Kingdoms] You are running an outdated version of Kingdoms! " +
+                        "The latest version is <gold>" + this.latestVersion + " <reset><red>and you are running <gold> " +
+                        this.getDescription().getVersion() + "<reset><red>!<newline>" +
+                        "<aqua>Click here for the latest version: <click:open_url:https://www.spigotmc.org/resources/kingdoms.106098>" +
+                        "https://www.spigotmc.org/resources/kingdoms.106098</click>"
+        );
     }
 
     @Override
@@ -243,6 +278,10 @@ public final class Kingdoms extends FishPlugin<User, Kingdoms> {
         return kingdomSettings;
     }
 
+    public AdminSettings getAdminSettings() {
+        return adminSettings;
+    }
+
     public WorldManager getWorldManager() {
         return worldManager;
     }
@@ -286,4 +325,5 @@ public final class Kingdoms extends FishPlugin<User, Kingdoms> {
     public Hooks getHooks() {
         return hooks;
     }
+
 }

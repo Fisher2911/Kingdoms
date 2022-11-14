@@ -18,6 +18,7 @@
 
 package io.github.fisher2911.kingdoms.user;
 
+import io.github.fisher2911.fisherlib.user.CoreConsoleUser;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.command.CommandPermission;
 import io.github.fisher2911.fisherlib.world.WorldPosition;
@@ -31,7 +32,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
-public class ConsoleUser implements User {
+public class ConsoleUser implements CoreConsoleUser, User {
 
     public static final UUID CONSOLE_ID = UUID.randomUUID();
 

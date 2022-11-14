@@ -18,11 +18,11 @@
 
 package io.github.fisher2911.kingdoms.kingdom.role;
 
+import io.github.fisher2911.fisherlib.config.Config;
 import io.github.fisher2911.fisherlib.configurate.ConfigurationNode;
 import io.github.fisher2911.fisherlib.configurate.yaml.YamlConfigurationLoader;
 import io.github.fisher2911.fisherlib.util.SortedList;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.config.Config;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import org.jetbrains.annotations.Nullable;
