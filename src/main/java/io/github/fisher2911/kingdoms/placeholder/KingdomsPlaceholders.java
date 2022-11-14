@@ -23,6 +23,7 @@ import io.github.fisher2911.fisherlib.economy.Price;
 import io.github.fisher2911.fisherlib.economy.TransactionResult;
 import io.github.fisher2911.fisherlib.gui.BaseGui;
 import io.github.fisher2911.fisherlib.gui.GuiKey;
+import io.github.fisher2911.fisherlib.placeholder.Placeholder;
 import io.github.fisher2911.fisherlib.placeholder.Placeholders;
 import io.github.fisher2911.fisherlib.upgrade.Upgrades;
 import io.github.fisher2911.fisherlib.world.ChunkPos;
@@ -53,6 +54,9 @@ public class KingdomsPlaceholders extends Placeholders {
 
     public KingdomsPlaceholders(final Kingdoms plugin) {
         super.load();
+        this.put(User.class, Placeholder.USER_UUID, u -> castAndParse(User.class, u, User::getId));
+        this.put(User.class, Placeholder.USER_NAME, u -> castAndParse(User.class, u, User::getName));
+        this.put(User.class, Placeholder.USER_BALANCE, u -> castAndParse(User.class, u, User::getMoney));
         this.put(User.class, KPlaceholder.USER_KINGDOM_NAME, u -> castAndParse(User.class, u, user -> plugin.getKingdomManager().
                 getKingdom(user.getKingdomId(), false).
                 map(Kingdom::getName).

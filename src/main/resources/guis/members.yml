@@ -54,7 +54,7 @@ gui-fillers:
                 send_data:
                   click-types: [ RIGHT ]
                   data:
-                    - "kingdom_member"
+                    - "kingdom-member"
               3:
                 open_menu:
                   menu: set-member-role
@@ -73,7 +73,7 @@ gui-fillers:
                 send_data:
                   click-types: [ RIGHT ]
                   data:
-                    - "kingdom_member"
+                    - "kingdom-member"
               2:
                 open_menu:
                   menu: set-member-role
@@ -119,7 +119,7 @@ gui-fillers:
                 send_data:
                   click-types: [ RIGHT ]
                   data:
-                    - "kingdom_member"
+                    - "kingdom-member"
               3:
                 open_menu:
                   menu: set-member-role

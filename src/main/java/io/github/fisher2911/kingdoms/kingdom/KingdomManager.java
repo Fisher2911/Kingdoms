@@ -21,6 +21,7 @@ package io.github.fisher2911.kingdoms.kingdom;
 import io.github.fisher2911.fisherlib.economy.Price;
 import io.github.fisher2911.fisherlib.economy.PriceManager;
 import io.github.fisher2911.fisherlib.message.MessageHandler;
+import io.github.fisher2911.fisherlib.task.TaskChain;
 import io.github.fisher2911.fisherlib.upgrade.Upgrades;
 import io.github.fisher2911.fisherlib.world.WorldPosition;
 import io.github.fisher2911.kingdoms.Kingdoms;
@@ -298,6 +299,10 @@ public class KingdomManager {
         Bukkit.getPluginManager().callEvent(kingdomKickEvent);
         if (kingdomKickEvent.isCancelled()) return;
         kingdom.kick(toKick);
+        TaskChain.create(this.plugin).runAsync(() -> {
+            this.plugin.getDataManager().removeKingdomMember(kingdom.getId(), toKick.getId());
+            this.plugin.getDataManager().saveUser(toKick);
+        }).execute();
         this.messageHandler.sendMessage(kicker, KMessage.KICKED_OTHER, toKick);
         this.messageHandler.sendMessage(toKick, KMessage.KICKED_FROM_KINGDOM, kicker, kingdom);
     }
@@ -352,6 +357,11 @@ public class KingdomManager {
                     Bukkit.getPluginManager().callEvent(kingdomMemberLeaveEvent);
                     if (kingdomMemberLeaveEvent.isCancelled()) return;
                     kingdom.removeMember(user);
+                    TaskChain.create(this.plugin)
+                            .runAsync(() -> {
+                                this.plugin.getDataManager().saveUser(user);
+                                this.plugin.getDataManager().removeKingdomMember(kingdom.getId(), user.getId());
+                            });
                     this.messageHandler.sendMessage(kingdom, KMessage.MEMBER_LEFT_KINGDOM, user);
                     this.messageHandler.sendMessage(user, KMessage.YOU_LEFT_KINGDOM, kingdom);
                 }, () -> this.messageHandler.sendMessage(user, KMessage.NOT_IN_KINGDOM));

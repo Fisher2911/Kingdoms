@@ -16,7 +16,7 @@ gui-fillers:
     conditionals:
       1:
         required-metadata:
-          - PERMISSION
+          - K_PERMISSION
         conditions:
           parse_placeholders:
             - "%permission_value%==true"
@@ -53,7 +53,7 @@ gui-fillers:
                   click-types: [ LEFT, RIGHT ]
       2:
         required-metadata:
-          - PERMISSION
+          - K_PERMISSION
         conditions:
           #          has_k_permissions:
           #            - "mine_block"

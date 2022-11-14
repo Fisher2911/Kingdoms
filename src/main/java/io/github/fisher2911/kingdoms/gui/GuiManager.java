@@ -84,8 +84,7 @@ public class GuiManager extends AbstractGuiManager<User, Kingdoms> {
                     if (!user.isOnline()) return;
                     opt.ifPresent(kingdom -> {
                         for (final GuiKey key : guiOpener.getRequiredMetadata()) {
-                            System.out.println("Looking for: " + key);
-                            System.out.println(this.metadataMap.keySet());
+                            if (builder.getMetadata().get().containsKey(key)) continue;
                             this.metadataMap.get(key).accept(builder, user, kingdom);
                         }
                     });

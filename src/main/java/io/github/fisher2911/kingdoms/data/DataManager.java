@@ -959,6 +959,22 @@ public class DataManager {
         }
     }
 
+    public void removeKingdomMember(int kingdomId, UUID uuid) {
+        try (final Connection connection = this.getConnection()) {
+            removeKingdomMember(connection, kingdomId, uuid);
+        } catch (final SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void removeKingdomMember(Connection connection, int kingdomId, UUID uuid) throws SQLException {
+        DeleteStatement.builder(MEMBER_TABLE)
+                .where(WhereCondition.of(MEMBER_KINGDOM_ID_COLUMN, () -> kingdomId))
+                .where(WhereCondition.of(MEMBER_UUID_COLUMN, () -> uuidToBytes(uuid)))
+                .build()
+                .execute(connection);
+    }
+
     public Optional<User> loadUser(UUID uuid) {
         try (final Connection connection = this.getConnection()) {
             return this.loadUser(connection, uuid);

@@ -29,7 +29,7 @@ gui-fillers:
             send_data:
               click-types: [ LEFT, RIGHT ]
               data:
-                - "role_id"
+                - "role-id"
           2:
             open_menu:
               menu: permissions

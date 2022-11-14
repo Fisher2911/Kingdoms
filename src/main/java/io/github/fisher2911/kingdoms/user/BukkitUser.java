@@ -129,7 +129,7 @@ public class BukkitUser implements User {
     @Override
     public void setKingdomId(int id) {
         this.kingdomId = id;
-        this.dirty = true;
+        this.setDirty(true);
     }
 
     @Override

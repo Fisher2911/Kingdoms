@@ -29,7 +29,6 @@ import io.github.fisher2911.kingdoms.placeholder.wrapper.PermissionWrapper;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UserKingdomWrapper;
 import io.github.fisher2911.kingdoms.user.User;
-import org.bukkit.Bukkit;
 
 import static io.github.fisher2911.fisherlib.gui.GuiKey.key;
 import static io.github.fisher2911.fisherlib.gui.GuiKey.registerPlaceholderAccumulator;
@@ -81,17 +80,8 @@ public class GuiKeys {
             final User user = metadata.get(GuiKey.USER, User.class);
             final User kingdomMember = metadata.get(GuiKeys.KINGDOM_MEMBER, User.class);
             if (kingdomMember != null) {
-                for (int i = 0; i < 5; i++) {
-                    System.out.println("Adding wrapper member");
-                    Bukkit.broadcastMessage(Kingdoms.getPlugin(Kingdoms.class).getPlaceholders().apply(
-                            "%kingdom_member_role_display_name%", new UserKingdomWrapper(kingdomMember, kingdom))
-                    );
-                }
                 placeholders.add(new UserKingdomWrapper(kingdomMember, kingdom));
             } else if (user != null) {
-                for (int i = 0; i < 5; i++) {
-                    System.out.println("Adding wrapper self");
-                }
                 placeholders.add(new UserKingdomWrapper(user, kingdom));
             }
         }));
@@ -104,6 +94,11 @@ public class GuiKeys {
             final ClaimedChunk chunk = metadata.get(GuiKeys.CHUNK, ClaimedChunk.class);
             if (chunk == null) return;
             placeholders.add(chunk);
+        }));
+        registerPlaceholderAccumulator(K_PERMISSION, ((metadata, placeholders) -> {
+            final KPermission permission = metadata.get(GuiKeys.K_PERMISSION, KPermission.class);
+            if (permission == null) return;
+            placeholders.add(permission);
         }));
     }
 
