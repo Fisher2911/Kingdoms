@@ -19,7 +19,7 @@
 package io.github.fisher2911.kingdoms.teleport;
 
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.world.WorldPosition;
+import io.github.fisher2911.fisherlib.world.WorldPosition;
 import org.jetbrains.annotations.Nullable;
 
 public class TeleportInfo {

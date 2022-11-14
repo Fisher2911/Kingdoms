@@ -18,16 +18,16 @@
 
 package io.github.fisher2911.kingdoms.hook.papi;
 
+import io.github.fisher2911.fisherlib.message.MessageHandler;
+import io.github.fisher2911.fisherlib.upgrade.Upgrades;
+import io.github.fisher2911.fisherlib.world.WorldPosition;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WildernessKingdom;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.world.WorldPosition;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -185,12 +185,12 @@ public class KingdomsExpansion extends PlaceholderExpansion {
                 if (parts.length == 1) {
                     if (user == null) yield null;
                     yield kingdomManager.getKingdom(user.getKingdomId(), false)
-                            .map(kingdom -> String.valueOf(kingdom.getMembers().size()))
+                            .map(kingdom -> String.valueOf(kingdom.getUsers().size()))
                             .orElse(null);
                 }
                 final String kingdomName = parts[1];
                 yield kingdomManager.getKingdomByName(kingdomName, false)
-                        .map(kingdom -> String.valueOf(kingdom.getMembers().size()))
+                        .map(kingdom -> String.valueOf(kingdom.getUsers().size()))
                         .orElse(null);
             }
             default -> null;

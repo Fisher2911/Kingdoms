@@ -18,8 +18,8 @@
 
 package io.github.fisher2911.kingdoms.api.event.kingdom;
 
+import io.github.fisher2911.fisherlib.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.user.User;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;

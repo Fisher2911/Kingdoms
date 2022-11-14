@@ -20,22 +20,22 @@ package io.github.fisher2911.kingdoms.kingdom;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import io.github.fisher2911.fisherlib.economy.Bank;
+import io.github.fisher2911.fisherlib.economy.Price;
+import io.github.fisher2911.fisherlib.upgrade.DoubleUpgrades;
+import io.github.fisher2911.fisherlib.upgrade.IntUpgrades;
+import io.github.fisher2911.fisherlib.upgrade.UpgradeHolder;
+import io.github.fisher2911.fisherlib.upgrade.Upgrades;
+import io.github.fisher2911.fisherlib.util.collections.DirtyMap;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.economy.Bank;
-import io.github.fisher2911.kingdoms.economy.Price;
 import io.github.fisher2911.kingdoms.kingdom.location.KingdomLocations;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.DoubleUpgrades;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.IntUpgrades;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeHolder;
 import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeId;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.util.collections.DirtyMap;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -59,7 +59,7 @@ public class KingdomImpl implements Kingdom {
     private final Multimap<Role, UUID> roleUsers;
     private final PermissionContainer permissions;
     private final Set<ClaimedChunk> claims;
-    private final UpgradeHolder upgradeHolder;
+    private final UpgradeHolder<Kingdom, User> upgradeHolder;
     private final DirtyMap<String, Integer> upgradeLevels;
     private final DirtyMap<Integer, RelationInfo> kingdomRelations;
     private final Bank<Kingdom> bank;
@@ -77,7 +77,7 @@ public class KingdomImpl implements Kingdom {
             DirtyMap<UUID, Role> userRoles,
             PermissionContainer permissions,
             Set<ClaimedChunk> claims,
-            UpgradeHolder upgradeHolder,
+            UpgradeHolder<Kingdom, User> upgradeHolder,
             DirtyMap<String, Integer> upgradeLevels,
             DirtyMap<Integer, RelationInfo> kingdomRelations,
             Bank<Kingdom> bank,
@@ -90,7 +90,7 @@ public class KingdomImpl implements Kingdom {
         this.name = name;
         this.description = description;
         this.members = new DirtyMap<>(members);
-        this.userRoles = new DirtyMap(userRoles);
+        this.userRoles = new DirtyMap<>(userRoles);
         this.roleUsers = Multimaps.newSetMultimap(new HashMap<>(), HashSet::new);
         for (var entry : this.userRoles.entrySet()) {
             this.roleUsers.put(entry.getValue(), entry.getKey());
@@ -123,7 +123,7 @@ public class KingdomImpl implements Kingdom {
     }
 
     @Override
-    public Collection<User> getMembers() {
+    public Collection<User> getUsers() {
         return this.members.values();
     }
 
@@ -261,11 +261,11 @@ public class KingdomImpl implements Kingdom {
 
     @Override
     public boolean isFull() {
-        return this.getMaxMembers() <= this.getMembers().size();
+        return this.getMaxMembers() <= this.getUsers().size();
     }
 
     @Override
-    public UpgradeHolder getUpgradeHolder() {
+    public UpgradeHolder<Kingdom, User> getUpgradeHolder() {
         return this.upgradeHolder;
     }
 
@@ -300,6 +300,11 @@ public class KingdomImpl implements Kingdom {
         final Integer level = upgradeLevels.get(id);
         if (level == null) return null;
         return upgrades.getValueAtLevel(level);
+    }
+
+    @Override
+    public void tryLevelUpUpgrade(User user, Upgrades<?> upgrades) {
+        this.plugin.getKingdomManager().tryLevelUpUpgrade(this, user, upgrades);
     }
 
     @Override
@@ -419,7 +424,7 @@ public class KingdomImpl implements Kingdom {
     @Override
     public boolean canBeUnloaded(Kingdoms plugin) {
         final WorldManager worldManager = plugin.getWorldManager();
-        for (User user : this.getMembers()) {
+        for (User user : this.getUsers()) {
             if (user.isOnline()) return false;
         }
         for (ClaimedChunk chunk : this.claims) {

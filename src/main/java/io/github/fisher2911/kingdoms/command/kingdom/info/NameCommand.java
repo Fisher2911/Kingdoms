@@ -18,13 +18,13 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.info;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
+import io.github.fisher2911.fisherlib.message.MessageHandler;
+import io.github.fisher2911.fisherlib.task.TaskChain;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
-import io.github.fisher2911.kingdoms.message.Message;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
-import io.github.fisher2911.kingdoms.task.TaskChain;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,8 +44,8 @@ public class NameCommand extends KCommand {
         if (args.length == 0) {
             TaskChain.create(this.plugin)
                     .runAsync(() -> this.kingdomManager.getKingdom(user.getKingdomId(), true)
-                            .ifPresentOrElse(kingdom -> MessageHandler.sendMessage(user, Message.KINGDOM_NAME_INFO, kingdom),
-                                    () -> MessageHandler.sendNotInKingdom(user)))
+                            .ifPresentOrElse(kingdom -> this.messageHandler.sendMessage(user, KMessage.KINGDOM_NAME_INFO, kingdom),
+                                    () -> this.messageHandler.sendMessage(user, KMessage.NOT_IN_KINGDOM)))
                     .execute();
             return;
         }

@@ -18,14 +18,14 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.teleport;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.location.KingdomLocations;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.user.User;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 

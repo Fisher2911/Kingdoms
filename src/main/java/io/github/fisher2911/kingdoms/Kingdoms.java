@@ -18,13 +18,17 @@
 
 package io.github.fisher2911.kingdoms;
 
+import io.github.fisher2911.fisherlib.FishPlugin;
+import io.github.fisher2911.fisherlib.economy.PriceManager;
+import io.github.fisher2911.fisherlib.gui.GuiListener;
+import io.github.fisher2911.fisherlib.listener.GlobalListener;
+import io.github.fisher2911.fisherlib.message.MessageHandler;
+import io.github.fisher2911.fisherlib.placeholder.Placeholders;
 import io.github.fisher2911.kingdoms.command.kingdom.KingdomCommand;
 import io.github.fisher2911.kingdoms.config.KingdomsSettings;
 import io.github.fisher2911.kingdoms.confirm.ConfirmationManager;
 import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.economy.EconomyManager;
-import io.github.fisher2911.kingdoms.economy.PriceManager;
-import io.github.fisher2911.kingdoms.gui.GuiListener;
 import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.hook.Hooks;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
@@ -35,15 +39,16 @@ import io.github.fisher2911.kingdoms.kingdom.invite.InviteManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationManager;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeManager;
+import io.github.fisher2911.kingdoms.kingdom.upgrade.KUpgradeManager;
 import io.github.fisher2911.kingdoms.listener.ChatListener;
 import io.github.fisher2911.kingdoms.listener.ClaimEnterListener;
 import io.github.fisher2911.kingdoms.listener.ClaimLoadListener;
-import io.github.fisher2911.kingdoms.listener.GlobalListener;
 import io.github.fisher2911.kingdoms.listener.PlayerJoinListener;
 import io.github.fisher2911.kingdoms.listener.ProtectionListener;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.message.KMessage;
+import io.github.fisher2911.kingdoms.placeholder.KingdomsPlaceholders;
 import io.github.fisher2911.kingdoms.teleport.TeleportManager;
+import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import net.milkbowl.vault.economy.Economy;
 import org.apache.logging.log4j.LogManager;
@@ -52,20 +57,21 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.List;
 
-public final class Kingdoms extends JavaPlugin {
+public final class Kingdoms extends FishPlugin<User, Kingdoms> {
 
     private final Logger logger = LogManager.getLogger(Kingdoms.class);
 
+    private Placeholders placeholders;
+    private MessageHandler messageHandler;
     private Hooks hooks;
     private TeleportManager teleportManager;
     private GlobalListener globalListener;
-    private UpgradeManager upgradeManager;
+    private KUpgradeManager upgradeManager;
     private KingdomManager kingdomManager;
     private InviteManager inviteManager;
     private UserManager userManager;
@@ -100,11 +106,14 @@ public final class Kingdoms extends JavaPlugin {
         final int bStatsPluginId = 16799;
         Metrics metrics = new Metrics(this, bStatsPluginId);
 
+        this.placeholders = new KingdomsPlaceholders(this);
+        this.messageHandler = MessageHandler.createInstance(this, this.placeholders);
+        this.messageHandler.load(KMessage.values());
         // order matters
         this.teleportManager = new TeleportManager(this);
         this.dataManager = new DataManager(this);
         this.globalListener = new GlobalListener(this);
-        this.upgradeManager = new UpgradeManager(this);
+        this.upgradeManager = new KUpgradeManager(this);
         this.userManager = new UserManager(this, new HashMap<>());
         this.priceManager = new PriceManager();
         this.roleManager = new RoleManager(this, new HashMap<>());
@@ -149,7 +158,6 @@ public final class Kingdoms extends JavaPlugin {
 
     public void load() {
         this.saveDefaultConfig();
-        MessageHandler.load();
         KPermission.load();
         this.dataManager.load();
         this.roleManager.load();
@@ -164,7 +172,7 @@ public final class Kingdoms extends JavaPlugin {
         new ProtectionListener(this).init();
         new PlayerJoinListener(this).init();
         new ClaimEnterListener(this).init();
-        new GuiListener(this.globalListener).init();
+        new GuiListener(this).init();
         new ChatListener(this).init();
         new ClaimLoadListener(this).init();
         List.of(this.globalListener).forEach(this::registerListener);
@@ -182,6 +190,16 @@ public final class Kingdoms extends JavaPlugin {
         return this.economy != null;
     }
 
+    @Override
+    public MessageHandler getMessageHandler() {
+        return this.messageHandler;
+    }
+
+    @Override
+    public Placeholders getPlaceholders() {
+        return this.placeholders;
+    }
+
     public TeleportManager getTeleportManager() {
         return teleportManager;
     }
@@ -191,13 +209,13 @@ public final class Kingdoms extends JavaPlugin {
     }
 
     public void reload() {
-        MessageHandler.reload();
+        this.messageHandler.reload(KMessage.values());
         this.roleManager.reload();
         this.upgradeManager.reload();
         this.guiManager.reload();
     }
 
-    public UpgradeManager getUpgradeManager() {
+    public KUpgradeManager getUpgradeManager() {
         return upgradeManager;
     }
 

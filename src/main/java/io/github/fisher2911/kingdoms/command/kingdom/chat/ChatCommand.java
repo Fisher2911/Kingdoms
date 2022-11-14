@@ -18,15 +18,14 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.chat;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
+import io.github.fisher2911.fisherlib.util.EnumUtil;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import io.github.fisher2911.kingdoms.message.Message;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
-import io.github.fisher2911.kingdoms.util.EnumUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -47,7 +46,7 @@ public class ChatCommand extends KCommand {
     public void execute(User user, String[] args, String[] previousArgs) {
         final ChatChannel chatChannel = EnumUtil.valueOf(ChatChannel.class, args[0].toUpperCase(Locale.ROOT));
         if (chatChannel == null) {
-            MessageHandler.sendMessage(user, Message.CHAT_CHANNEL_NOT_FOUND);
+            this.messageHandler.sendMessage(user, KMessage.CHAT_CHANNEL_NOT_FOUND);
             return;
         }
         this.userManager.changeChatChannel(user, chatChannel);

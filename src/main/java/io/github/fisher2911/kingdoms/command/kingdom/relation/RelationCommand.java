@@ -18,12 +18,12 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.relation;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
+import io.github.fisher2911.fisherlib.task.TaskChain;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationManager;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
-import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
 

@@ -18,14 +18,13 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.invite;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
+import io.github.fisher2911.fisherlib.task.TaskChain;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.invite.InviteManager;
-import io.github.fisher2911.kingdoms.message.Message;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
-import io.github.fisher2911.kingdoms.task.TaskChain;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.bukkit.Bukkit;
@@ -56,10 +55,10 @@ public class InviteCommand extends KCommand {
                 .ifPresentOrElse(invited -> TaskChain.create(this.plugin)
                                 .supplyAsync(() -> this.kingdomManager.getKingdom(user.getKingdomId(), true))
                                 .consumeSync(opt -> opt.ifPresentOrElse(kingdom -> this.inviteManager.invite(kingdom, user, invited),
-                                        () -> MessageHandler.sendNotInKingdom(user)
+                                        () -> this.messageHandler.sendMessage(user, KMessage.NOT_IN_KINGDOM)
                                 ))
                                 .execute(),
-                        () -> MessageHandler.sendMessage(user, Message.PLAYER_NOT_FOUND));
+                        () -> this.messageHandler.sendMessage(user, KMessage.PLAYER_NOT_FOUND));
     }
 
     @Override

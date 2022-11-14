@@ -18,6 +18,9 @@
 
 package io.github.fisher2911.kingdoms.kingdom.claim;
 
+import io.github.fisher2911.fisherlib.message.MessageHandler;
+import io.github.fisher2911.fisherlib.task.TaskChain;
+import io.github.fisher2911.fisherlib.world.ChunkPos;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.api.event.chunk.ChunkClaimEvent;
 import io.github.fisher2911.kingdoms.api.event.chunk.ChunkUnclaimEvent;
@@ -26,11 +29,8 @@ import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
-import io.github.fisher2911.kingdoms.message.Message;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
-import io.github.fisher2911.kingdoms.task.TaskChain;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.world.KChunk;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 
@@ -41,12 +41,14 @@ import java.util.UUID;
 public class ClaimManager {
 
     private final Kingdoms plugin;
+    private final MessageHandler messageHandler;
     private final KingdomManager kingdomManager;
     private final WorldManager worldManager;
     private final Map<UUID, ClaimMode> playerClaimModes;
 
     public ClaimManager(Kingdoms plugin) {
         this.plugin = plugin;
+        this.messageHandler = plugin.getMessageHandler();
         this.kingdomManager = this.plugin.getKingdomManager();
         this.worldManager = this.plugin.getWorldManager();
         this.playerClaimModes = new HashMap<>();
@@ -61,7 +63,7 @@ public class ClaimManager {
     public void tryClaim(User user, UUID world, int chunkX, int chunkZ, boolean searchDatabase) {
         this.kingdomManager.getKingdom(user.getKingdomId(), searchDatabase).
                 ifPresentOrElse(k -> this.tryClaim(user, k, world, chunkX, chunkZ),
-                        () -> MessageHandler.sendNotInKingdom(user)
+                        () -> this.messageHandler.sendMessage(user, KMessage.NOT_IN_KINGDOM)
                 );
     }
 
@@ -79,19 +81,19 @@ public class ClaimManager {
 
     public void tryClaim(User user, Kingdom kingdom, ClaimedChunk chunk) {
         if (!this.plugin.getHooks().canClaimAt(chunk.getChunk().getCenter().toLocation())) {
-            MessageHandler.sendMessage(user, Message.CANNOT_CLAIM_HERE);
+            this.messageHandler.sendMessage(user, KMessage.CANNOT_CLAIM_HERE);
             return;
         }
         if (!kingdom.hasPermission(user, KPermission.CLAIM_LAND)) {
-            MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
+            this.messageHandler.sendMessage(user, KMessage.NO_KINGDOM_PERMISSION);
             return;
         }
         if (!chunk.isWilderness()) {
-            MessageHandler.sendMessage(user, Message.ALREADY_CLAIMED, chunk.getChunk());
+            this.messageHandler.sendMessage(user, KMessage.ALREADY_CLAIMED, chunk.getChunk());
             return;
         }
         if (kingdom.getAvailableChunks() <= 0) {
-            MessageHandler.sendMessage(user, Message.NO_AVAILABLE_CHUNKS);
+            this.messageHandler.sendMessage(user, KMessage.NO_AVAILABLE_CHUNKS);
             return;
         }
         final ClaimedChunk claimedChunk = new ClaimedChunk(
@@ -106,7 +108,7 @@ public class ClaimManager {
         if (event.isCancelled()) return;
         this.worldManager.setChunk(claimedChunk);
         kingdom.addClaimedChunk(claimedChunk);
-        MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_CLAIM, claimedChunk.getChunk());
+        this.messageHandler.sendMessage(user, KMessage.SUCCESSFUL_CHUNK_CLAIM, claimedChunk.getChunk());
     }
 
     public void tryUnClaim(User user, Chunk chunk, boolean searchDatabase) {
@@ -118,11 +120,11 @@ public class ClaimManager {
     public void tryUnClaim(User user, UUID world, int chunkX, int chunkZ, boolean searchDatabase) {
         this.kingdomManager.getKingdom(user.getKingdomId(), searchDatabase).
                 ifPresentOrElse(k -> this.tryUnClaim(user, k, world, chunkX, chunkZ),
-                        () -> MessageHandler.sendNotInKingdom(user)
+                        () -> this.messageHandler.sendMessage(user, KMessage.NOT_IN_KINGDOM)
                 );
     }
 
-    public void tryUnClaim(User user, Kingdom kingdom, KChunk chunk) {
+    public void tryUnClaim(User user, Kingdom kingdom, ChunkPos chunk) {
         this.tryUnClaim(user, kingdom, chunk.world(), chunk.x(), chunk.z());
     }
 
@@ -139,11 +141,11 @@ public class ClaimManager {
 
     public void tryUnClaim(User user, Kingdom kingdom, ClaimedChunk chunk) {
         if (chunk.getKingdomId() != kingdom.getId()) {
-            MessageHandler.sendMessage(user, Message.NOT_CLAIMED_BY_KINGDOM, chunk.getChunk());
+            this.messageHandler.sendMessage(user, KMessage.NOT_CLAIMED_BY_KINGDOM, chunk.getChunk());
             return;
         }
         if (!kingdom.hasPermission(user, KPermission.UNCLAIM_LAND, chunk)) {
-            MessageHandler.sendMessage(user, Message.NO_KINGDOM_PERMISSION);
+            this.messageHandler.sendMessage(user, KMessage.NO_KINGDOM_PERMISSION);
             return;
         }
         final ClaimedChunk claimedChunk = new ClaimedChunk(
@@ -160,7 +162,7 @@ public class ClaimManager {
         TaskChain.create(this.plugin)
                 .runAsync(() -> this.plugin.getDataManager().deleteChunk(claimedChunk.getChunk()))
                 .execute();
-        MessageHandler.sendMessage(user, Message.SUCCESSFUL_CHUNK_UNCLAIM, claimedChunk.getChunk());
+        this.messageHandler.sendMessage(user, KMessage.SUCCESSFUL_CHUNK_UNCLAIM, claimedChunk.getChunk());
     }
 
     public void setClaimMode(UUID player, ClaimMode claimMode) {

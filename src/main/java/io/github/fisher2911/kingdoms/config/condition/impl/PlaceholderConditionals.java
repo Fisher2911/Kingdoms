@@ -18,25 +18,26 @@
 
 package io.github.fisher2911.kingdoms.config.condition.impl;
 
-import io.github.fisher2911.kingdoms.config.condition.ConditionOperation;
-import io.github.fisher2911.kingdoms.config.condition.MetadataPredicate;
-import io.github.fisher2911.kingdoms.gui.GuiKeys;
-import io.github.fisher2911.kingdoms.kingdom.Kingdom;
-import io.github.fisher2911.kingdoms.placeholder.PlaceholderBuilder;
-import io.github.fisher2911.kingdoms.util.Metadata;
+import io.github.fisher2911.fisherlib.config.condition.ConditionOperation;
+import io.github.fisher2911.fisherlib.gui.GuiKey;
+import io.github.fisher2911.fisherlib.placeholder.Placeholders;
+import io.github.fisher2911.fisherlib.util.Metadata;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-public class PlaceholderConditionals implements MetadataPredicate {
+public class PlaceholderConditionals implements Predicate<Metadata> {
 
+    private final Placeholders placeholders;
     private final String toParse;
     private final List<Function<Metadata, List<Object>>> placeholderFunctions;
     private final ConditionOperation operation;
     private final String value;
 
-    public PlaceholderConditionals(String toParse, List<Function<Metadata, List<Object>>> placeholderFunctions, ConditionOperation operation, String value) {
+    public PlaceholderConditionals(Placeholders placeholders, String toParse, List<Function<Metadata, List<Object>>> placeholderFunctions, ConditionOperation operation, String value) {
+        this.placeholders = placeholders;
         this.toParse = toParse;
         this.placeholderFunctions = placeholderFunctions;
         this.operation = operation;
@@ -44,12 +45,12 @@ public class PlaceholderConditionals implements MetadataPredicate {
     }
 
     public boolean test(Metadata possible) {
-        final Object[] placeholders = GuiKeys.toPlaceholders(possible).toArray();
-        final String parsed = PlaceholderBuilder.apply(
+        final Object[] placeholders = GuiKey.toPlaceholders(possible).toArray();
+        final String parsed = this.placeholders.apply(
                 this.toParse,
                 placeholders
         );
-        final String parsedValue = PlaceholderBuilder.apply(
+        final String parsedValue = this.placeholders.apply(
                 this.value,
                 placeholders
         );
@@ -79,7 +80,7 @@ public class PlaceholderConditionals implements MetadataPredicate {
             '<', o -> (o == '=') ? ConditionOperation.LESS_THAN_OR_EQUALS : ConditionOperation.LESS_THAN
     );
 
-    public static PlaceholderConditionals parse(String string, List<Function<Metadata, List<Object>>> placeholderFunctions) {
+    public static PlaceholderConditionals parse(Placeholders placeholders, String string, List<Function<Metadata, List<Object>>> placeholderFunctions) {
         final char[] chars = string.toCharArray();
         for (int i = 0; i < chars.length; i++) {
             final char previous = i > 0 ? chars[i - 1] : ' ';
@@ -92,7 +93,7 @@ public class PlaceholderConditionals implements MetadataPredicate {
                 if (operation != null) {
                     final String toParse = string.substring(0, i);
                     final String value = string.substring(i + (next == '=' ? 2 : 1));
-                    return new PlaceholderConditionals(toParse, placeholderFunctions, operation, value);
+                    return new PlaceholderConditionals(placeholders, toParse, placeholderFunctions, operation, value);
                 }
             }
         }

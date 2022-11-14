@@ -18,11 +18,11 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.help;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
+import io.github.fisher2911.fisherlib.util.NumberUtil;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.util.NumberUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;

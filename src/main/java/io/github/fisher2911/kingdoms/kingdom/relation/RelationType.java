@@ -22,7 +22,7 @@ import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
-import io.github.fisher2911.kingdoms.util.StringUtils;
+import io.github.fisher2911.fisherlib.util.StringUtils;
 
 import java.util.function.BiFunction;
 

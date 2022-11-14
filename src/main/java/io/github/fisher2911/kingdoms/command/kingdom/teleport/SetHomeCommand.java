@@ -18,16 +18,15 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.teleport;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
+import io.github.fisher2911.fisherlib.task.TaskChain;
+import io.github.fisher2911.fisherlib.world.WorldPosition;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
-import io.github.fisher2911.kingdoms.message.Message;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
-import io.github.fisher2911.kingdoms.task.TaskChain;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.world.WorldPosition;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -44,7 +43,7 @@ public class SetHomeCommand extends KCommand {
     public void execute(User user, String[] args, String[] previousArgs) {
         final WorldPosition position = user.getPosition();
         if (position == null) {
-            MessageHandler.sendMessage(user, Message.INVALID_POSITION);
+            this.messageHandler.sendMessage(user, KMessage.INVALID_POSITION);
             return;
         }
         TaskChain.create(this.plugin)

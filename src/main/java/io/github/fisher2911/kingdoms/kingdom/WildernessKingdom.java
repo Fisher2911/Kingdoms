@@ -18,19 +18,20 @@
 
 package io.github.fisher2911.kingdoms.kingdom;
 
+import io.github.fisher2911.fisherlib.economy.Bank;
+import io.github.fisher2911.fisherlib.economy.Price;
+import io.github.fisher2911.fisherlib.upgrade.UpgradeHolder;
+import io.github.fisher2911.fisherlib.upgrade.Upgrades;
+import io.github.fisher2911.fisherlib.util.collections.DirtyMap;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.economy.Bank;
-import io.github.fisher2911.kingdoms.economy.Price;
+import io.github.fisher2911.kingdoms.economy.EconomyManager;
 import io.github.fisher2911.kingdoms.kingdom.location.KingdomLocations;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeHolder;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.util.collections.DirtyMap;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -45,7 +46,7 @@ public class WildernessKingdom implements Kingdom {
     private final int id = Kingdom.WILDERNESS_ID;
     private final String name = "Wilderness";
     private final PermissionContainer empty = PermissionContainer.empty();
-    private final Bank<Kingdom> bank = Bank.createKingdomBank(0);
+    private final Bank<Kingdom> bank = EconomyManager.createKingdomBank(0);
     private final Instant creationDate = Instant.MIN;
     private final DirtyMap<String, Role> roles = new DirtyMap<>(Collections.unmodifiableMap(new HashMap<>()));
     private final DirtyMap<UUID, Role> userRoles = new DirtyMap<>(Collections.unmodifiableMap(new HashMap<>()));
@@ -92,7 +93,7 @@ public class WildernessKingdom implements Kingdom {
     }
 
     @Override
-    public Collection<User> getMembers() {
+    public Collection<User> getUsers() {
         return Collections.emptyList();
     }
 
@@ -272,7 +273,7 @@ public class WildernessKingdom implements Kingdom {
     }
 
     @Override
-    public UpgradeHolder getUpgradeHolder() {
+    public UpgradeHolder<Kingdom, User> getUpgradeHolder() {
         return null;
     }
 
@@ -299,6 +300,11 @@ public class WildernessKingdom implements Kingdom {
     @Override
     public DirtyMap<String, Integer> getUpgradeLevels() {
         return null;
+    }
+
+    @Override
+    public void tryLevelUpUpgrade(User user, Upgrades<?> upgrades) {
+
     }
 
     @Override

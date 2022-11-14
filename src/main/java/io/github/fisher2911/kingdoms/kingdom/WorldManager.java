@@ -19,8 +19,8 @@
 package io.github.fisher2911.kingdoms.kingdom;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.world.KChunk;
-import io.github.fisher2911.kingdoms.world.WorldPosition;
+import io.github.fisher2911.fisherlib.world.ChunkPos;
+import io.github.fisher2911.fisherlib.world.WorldPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -65,11 +65,11 @@ public class WorldManager {
 
     public ClaimedChunk getAt(UUID world, int chunkX, int chunkZ) {
         final WorldMap worldMap = this.getWorldMap(world);
-        if (worldMap == null) return ClaimedChunk.wilderness(this.plugin, KChunk.at(world, chunkX, chunkZ));
+        if (worldMap == null) return ClaimedChunk.wilderness(this.plugin, ChunkPos.at(world, chunkX, chunkZ));
         return worldMap.getAt(chunkX, chunkZ);
     }
 
-    public ClaimedChunk getAt(KChunk chunk) {
+    public ClaimedChunk getAt(ChunkPos chunk) {
         return this.getAt(chunk.world(), chunk.x(), chunk.z());
     }
 
@@ -89,7 +89,7 @@ public class WorldManager {
         worldMap.setChunk(chunk);
     }
 
-    public void setToWilderness(KChunk at) {
+    public void setToWilderness(ChunkPos at) {
         final WorldMap worldMap = this.getWorldMap(at.world());
         if (worldMap == null) return;
         worldMap.setToWilderness(at);
@@ -101,7 +101,7 @@ public class WorldManager {
         worldMap.setToWilderness(chunkX, chunkZ);
     }
 
-    public boolean isChunkLoaded(KChunk at) {
+    public boolean isChunkLoaded(ChunkPos at) {
         final WorldMap worldMap = this.getWorldMap(at.world());
         if (worldMap == null) return false;
         return worldMap.isChunkLoaded(at);

@@ -18,14 +18,14 @@
 
 package io.github.fisher2911.kingdoms.kingdom.role;
 
+import io.github.fisher2911.fisherlib.configurate.ConfigurationNode;
+import io.github.fisher2911.fisherlib.configurate.yaml.YamlConfigurationLoader;
+import io.github.fisher2911.fisherlib.util.SortedList;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.config.Config;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
-import io.github.fisher2911.kingdoms.util.SortedList;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.IOException;
 import java.util.ArrayList;

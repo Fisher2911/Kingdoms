@@ -18,12 +18,12 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.map;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.kingdom.claim.MapVisualizer;
 import io.github.fisher2911.kingdoms.user.User;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 

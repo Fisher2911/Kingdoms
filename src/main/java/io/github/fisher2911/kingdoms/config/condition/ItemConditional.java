@@ -18,10 +18,12 @@
 
 package io.github.fisher2911.kingdoms.config.condition;
 
-import io.github.fisher2911.kingdoms.gui.ConditionalItem;
-import io.github.fisher2911.kingdoms.util.Metadata;
+import io.github.fisher2911.fisherlib.gui.ConditionalItem;
+import io.github.fisher2911.fisherlib.util.Metadata;
 
-public interface ItemConditional extends MetadataPredicate {
+import java.util.function.Predicate;
+
+public interface ItemConditional extends Predicate<Metadata> {
 
     boolean test(Metadata metadata);
     ConditionalItem getItem();

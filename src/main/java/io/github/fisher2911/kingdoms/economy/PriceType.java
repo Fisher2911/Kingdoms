@@ -18,8 +18,8 @@
 
 package io.github.fisher2911.kingdoms.economy;
 
-public enum PriceType {
+public class PriceType {
 
-    KINGDOM_CREATION;
+    public static final String KINGDOM_CREATION = "kingdom-creation";
 
 }

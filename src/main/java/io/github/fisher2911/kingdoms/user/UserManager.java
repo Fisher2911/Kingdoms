@@ -18,13 +18,14 @@
 
 package io.github.fisher2911.kingdoms.user;
 
+import io.github.fisher2911.fisherlib.message.MessageHandler;
+import io.github.fisher2911.fisherlib.task.TaskChain;
+import io.github.fisher2911.fisherlib.user.CoreUserManager;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.api.event.user.UserLoadEvent;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
 import io.github.fisher2911.kingdoms.data.DataManager;
-import io.github.fisher2911.kingdoms.message.Message;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
-import io.github.fisher2911.kingdoms.task.TaskChain;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -36,15 +37,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class UserManager {
+public class UserManager implements CoreUserManager<User> {
 
     private final Kingdoms plugin;
+    private final MessageHandler messageHandler;
     private final DataManager dataManager;
     private final Map<UUID, User> userMap;
     private final Map<String, User> byName;
 
     public UserManager(Kingdoms plugin, Map<UUID, User> userMap) {
         this.plugin = plugin;
+        this.messageHandler = plugin.getMessageHandler();
         this.dataManager = this.plugin.getDataManager();
         this.userMap = userMap;
         this.byName = new HashMap<>();
@@ -99,11 +102,11 @@ public class UserManager {
 
     public void changeChatChannel(User user, ChatChannel channel) {
         if (!user.hasKingdom()) {
-            MessageHandler.sendMessage(user, Message.MUST_BE_IN_KINGDOM_TO_CHANGE_CHAT);
+            this.messageHandler.sendMessage(user, KMessage.MUST_BE_IN_KINGDOM_TO_CHANGE_CHAT);
             return;
         }
         user.setChatChannel(channel);
-        MessageHandler.sendMessage(user, Message.CHAT_CHANNEL_CHANGED, channel);
+        this.messageHandler.sendMessage(user, KMessage.CHAT_CHANNEL_CHANGED, channel);
     }
 
     public Optional<User> getUserByName(String name, boolean searchDatabase) {

@@ -20,7 +20,7 @@ package io.github.fisher2911.kingdoms.kingdom;
 
 import io.github.fisher2911.kingdoms.api.metadata.MetadataKey;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermissible;
-import io.github.fisher2911.kingdoms.world.KChunk;
+import io.github.fisher2911.fisherlib.world.ChunkPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -33,6 +33,6 @@ public interface Claim extends KPermissible {
     <T> T getData(MetadataKey key, Class<T> clazz);
     void setData(MetadataKey key, Object value);
     UUID getWorld();
-    KChunk getChunk();
+    ChunkPos getChunk();
 
 }

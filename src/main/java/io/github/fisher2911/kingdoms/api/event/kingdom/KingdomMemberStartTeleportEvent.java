@@ -19,7 +19,7 @@
 package io.github.fisher2911.kingdoms.api.event.kingdom;
 
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.world.WorldPosition;
+import io.github.fisher2911.fisherlib.world.WorldPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;

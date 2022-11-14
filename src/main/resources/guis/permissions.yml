@@ -2,9 +2,9 @@ title: <blue>Permissions
 id: permissions
 rows: 5
 required-metadata:
-  - KINGDOM
-  - ROLE
-  - USER
+  - kingdom
+  - role-id
+  - user
 border:
   1:
     item:

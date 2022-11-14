@@ -7,8 +7,8 @@ border:
       material: BLACK_STAINED_GLASS_PANE
       name: " "
 required-metadata:
-  - KINGDOM
-  - USER
+  - kingdom
+  - user
 items:
   10:
     item:

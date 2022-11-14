@@ -18,12 +18,12 @@
 
 package io.github.fisher2911.kingdoms.kingdom.permission;
 
-import io.github.fisher2911.kingdoms.data.Saveable;
+import io.github.fisher2911.fisherlib.configurate.ConfigurationNode;
+import io.github.fisher2911.fisherlib.data.Saveable;
+import io.github.fisher2911.fisherlib.util.MapOfMaps;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
-import io.github.fisher2911.kingdoms.util.MapOfMaps;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.configurate.ConfigurationNode;
 
 import java.util.Collections;
 import java.util.HashMap;

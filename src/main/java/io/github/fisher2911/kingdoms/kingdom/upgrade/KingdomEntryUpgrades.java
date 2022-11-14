@@ -16,12 +16,15 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.fisher2911.kingdoms.config.condition;
+package io.github.fisher2911.kingdoms.kingdom.upgrade;
 
-import io.github.fisher2911.kingdoms.util.Metadata;
+import io.github.fisher2911.fisherlib.upgrade.EntryUpgrades;
+import io.github.fisher2911.kingdoms.kingdom.Kingdom;
+import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
+import io.github.fisher2911.kingdoms.user.User;
 
-import java.util.function.Predicate;
+public interface KingdomEntryUpgrades<T> extends EntryUpgrades<T, Kingdom, User> {
 
-public interface MetadataPredicate extends Predicate<Metadata> {
+    boolean appliesTo(RelationType relationType);
 
 }

@@ -18,6 +18,8 @@
 
 package io.github.fisher2911.kingdoms.data;
 
+import io.github.fisher2911.fisherlib.data.DelayedLoader;
+import io.github.fisher2911.fisherlib.world.ChunkPos;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.api.event.chunk.ClaimedChunkLoadEvent;
 import io.github.fisher2911.kingdoms.api.event.chunk.ClaimedChunkUnloadEvent;
@@ -26,8 +28,7 @@ import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WildernessKingdom;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
-import io.github.fisher2911.kingdoms.task.TaskChain;
-import io.github.fisher2911.kingdoms.world.KChunk;
+import io.github.fisher2911.fisherlib.task.TaskChain;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -42,15 +43,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-public class ChunkDelayedLoader implements DelayedLoader<KChunk> {
+public class ChunkDelayedLoader implements DelayedLoader<ChunkPos> {
 
     private final Kingdoms plugin;
-    private final Collection<KChunk> chunks;
+    private final Collection<ChunkPos> chunks;
     private final int sizeUntilLoad;
     private final int maxTicksUntilLoad;
     private final int interval;
     // if should save on the main thread
-    private BiConsumer<Boolean, Collection<KChunk>> queuedConsumer;
+    private BiConsumer<Boolean, Collection<ChunkPos>> queuedConsumer;
 
     private BukkitTask saveTask;
     private Instant taskStartTime;
@@ -60,7 +61,7 @@ public class ChunkDelayedLoader implements DelayedLoader<KChunk> {
             int sizeUntilLoad,
             int maxTicksUntilLoad,
             int interval,
-            BiConsumer<Boolean, Collection<KChunk>> queuedConsumer
+            BiConsumer<Boolean, Collection<ChunkPos>> queuedConsumer
     ) {
         this.plugin = plugin;
         this.chunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -137,7 +138,7 @@ public class ChunkDelayedLoader implements DelayedLoader<KChunk> {
         }
     }
 
-    private static void unloadClaimedChunks(Kingdoms plugin, Collection<KChunk> queued) {
+    private static void unloadClaimedChunks(Kingdoms plugin, Collection<ChunkPos> queued) {
         final KingdomManager kingdomManager = plugin.getKingdomManager();
         plugin.getDataManager().saveClaimedChunks(queued.stream()
                 .map(plugin.getWorldManager()::getAt)
@@ -159,7 +160,7 @@ public class ChunkDelayedLoader implements DelayedLoader<KChunk> {
     }
 
     @Override
-    public void addToQueue(KChunk chunk, boolean startTaskIfNotRunning) {
+    public void addToQueue(ChunkPos chunk, boolean startTaskIfNotRunning) {
         this.chunks.add(chunk);
         if (this.saveTask == null || this.saveTask.isCancelled() && startTaskIfNotRunning) {
             this.saveTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this.plugin, () -> {
@@ -170,10 +171,10 @@ public class ChunkDelayedLoader implements DelayedLoader<KChunk> {
                 if (this.chunks.size() < this.sizeUntilLoad && Duration.between(this.taskStartTime, Instant.now()).toMillis() * 50 < this.maxTicksUntilLoad) {
                     return;
                 }
-                final Set<KChunk> copy = new HashSet<>();
-                final Iterator<KChunk> iterator = this.chunks.iterator();
+                final Set<ChunkPos> copy = new HashSet<>();
+                final Iterator<ChunkPos> iterator = this.chunks.iterator();
                 while (iterator.hasNext()) {
-                    final KChunk next = iterator.next();
+                    final ChunkPos next = iterator.next();
                     copy.add(next);
                     iterator.remove();
                 }
@@ -189,16 +190,16 @@ public class ChunkDelayedLoader implements DelayedLoader<KChunk> {
     }
 
     @Override
-    public Collection<KChunk> getToLoad() {
+    public Collection<ChunkPos> getToLoad() {
         return null;
     }
 
     @Override
     public void forceLoadAll(boolean onMainThread) {
-        final Set<KChunk> copy = new HashSet<>();
-        final Iterator<KChunk> iterator = this.chunks.iterator();
+        final Set<ChunkPos> copy = new HashSet<>();
+        final Iterator<ChunkPos> iterator = this.chunks.iterator();
         while (iterator.hasNext()) {
-            final KChunk next = iterator.next();
+            final ChunkPos next = iterator.next();
             copy.add(next);
             iterator.remove();
         }

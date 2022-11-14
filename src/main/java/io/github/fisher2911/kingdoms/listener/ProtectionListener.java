@@ -18,6 +18,7 @@
 
 package io.github.fisher2911.kingdoms.listener;
 
+import io.github.fisher2911.fisherlib.listener.CoreListener;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.api.event.chunk.BreakBlockInClaimEvent;
 import io.github.fisher2911.kingdoms.api.event.chunk.InteractInClaimEvent;
@@ -40,7 +41,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.Optional;
 
-public class ProtectionListener extends KListener {
+public class ProtectionListener extends CoreListener {
 
     private final Kingdoms plugin;
     private final KingdomManager kingdomManager;
@@ -48,7 +49,7 @@ public class ProtectionListener extends KListener {
     private final WorldManager worldManager;
 
     public ProtectionListener(Kingdoms plugin) {
-        super(plugin.getGlobalListener());
+        super(plugin);
         this.plugin = plugin;
         this.kingdomManager = this.plugin.getKingdomManager();
         this.userManager = this.plugin.getUserManager();

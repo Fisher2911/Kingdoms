@@ -18,12 +18,12 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.permission;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import org.jetbrains.annotations.Nullable;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.user.User;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class PermissionCommand extends KCommand {
     @Override
     public void execute(User user, String[] args, String[] previous) {
         if (!user.hasKingdom()) {
-            MessageHandler.sendNotInKingdom(user);
+            this.messageHandler.sendMessage(user, KMessage.NOT_IN_KINGDOM);
             return;
         }
         this.sendHelp(user);

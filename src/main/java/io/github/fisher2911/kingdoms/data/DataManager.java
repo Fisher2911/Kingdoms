@@ -20,25 +20,34 @@ package io.github.fisher2911.kingdoms.data;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.github.fisher2911.fisherlib.data.DelayedLoader;
+import io.github.fisher2911.fisherlib.data.sql.SQLType;
+import io.github.fisher2911.fisherlib.data.sql.condition.WhereCondition;
+import io.github.fisher2911.fisherlib.data.sql.dialect.SQLDialect;
+import io.github.fisher2911.fisherlib.data.sql.dialect.SystemDialect;
+import io.github.fisher2911.fisherlib.data.sql.field.ForeignKeyAction;
+import io.github.fisher2911.fisherlib.data.sql.field.SQLField;
+import io.github.fisher2911.fisherlib.data.sql.field.SQLForeignField;
+import io.github.fisher2911.fisherlib.data.sql.field.SQLIdField;
+import io.github.fisher2911.fisherlib.data.sql.field.SQLKeyType;
+import io.github.fisher2911.fisherlib.data.sql.statement.DeleteStatement;
+import io.github.fisher2911.fisherlib.data.sql.statement.SQLJoinType;
+import io.github.fisher2911.fisherlib.data.sql.statement.SQLQuery;
+import io.github.fisher2911.fisherlib.data.sql.statement.SQLStatement;
+import io.github.fisher2911.fisherlib.data.sql.table.SQLTable;
+import io.github.fisher2911.fisherlib.economy.Bank;
+import io.github.fisher2911.fisherlib.task.TaskChain;
+import io.github.fisher2911.fisherlib.util.MapOfMaps;
+import io.github.fisher2911.fisherlib.util.Pair;
+import io.github.fisher2911.fisherlib.util.collections.DirtyMap;
+import io.github.fisher2911.fisherlib.world.ChunkPos;
+import io.github.fisher2911.fisherlib.world.Position;
+import io.github.fisher2911.fisherlib.world.WorldPosition;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomSaveEvent;
 import io.github.fisher2911.kingdoms.api.event.user.UserSaveEvent;
 import io.github.fisher2911.kingdoms.chat.ChatChannel;
-import io.github.fisher2911.kingdoms.data.sql.SQLType;
-import io.github.fisher2911.kingdoms.data.sql.condition.WhereCondition;
-import io.github.fisher2911.kingdoms.data.sql.dialect.SQLDialect;
-import io.github.fisher2911.kingdoms.data.sql.dialect.SystemDialect;
-import io.github.fisher2911.kingdoms.data.sql.field.ForeignKeyAction;
-import io.github.fisher2911.kingdoms.data.sql.field.SQLField;
-import io.github.fisher2911.kingdoms.data.sql.field.SQLForeignField;
-import io.github.fisher2911.kingdoms.data.sql.field.SQLIdField;
-import io.github.fisher2911.kingdoms.data.sql.field.SQLKeyType;
-import io.github.fisher2911.kingdoms.data.sql.statement.DeleteStatement;
-import io.github.fisher2911.kingdoms.data.sql.statement.SQLJoinType;
-import io.github.fisher2911.kingdoms.data.sql.statement.SQLQuery;
-import io.github.fisher2911.kingdoms.data.sql.statement.SQLStatement;
-import io.github.fisher2911.kingdoms.data.sql.table.SQLTable;
-import io.github.fisher2911.kingdoms.economy.Bank;
+import io.github.fisher2911.kingdoms.economy.EconomyManager;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.KingdomImpl;
@@ -49,15 +58,8 @@ import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
-import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.BukkitUser;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.util.MapOfMaps;
-import io.github.fisher2911.kingdoms.util.Pair;
-import io.github.fisher2911.kingdoms.util.collections.DirtyMap;
-import io.github.fisher2911.kingdoms.world.KChunk;
-import io.github.fisher2911.kingdoms.world.Position;
-import io.github.fisher2911.kingdoms.world.WorldPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -284,8 +286,8 @@ public class DataManager {
 
     private final Kingdoms plugin;
     private final Path databasePath;
-    private final DelayedLoader<KChunk> onChunkLoadDelayedLoader;
-    private final DelayedLoader<KChunk> onChunkUnloadDelayedLoader;
+    private final DelayedLoader<ChunkPos> onChunkLoadDelayedLoader;
+    private final DelayedLoader<ChunkPos> onChunkUnloadDelayedLoader;
     private final Supplier<Connection> dataSource;
 
     public DataManager(Kingdoms plugin) {
@@ -364,7 +366,7 @@ public class DataManager {
                     this.plugin.getUpgradeManager().getUpgradeHolder(),
                     new DirtyMap<>(new HashMap<>()),
                     new DirtyMap<>(new HashMap<>()),
-                    Bank.createKingdomBank(0),
+                    EconomyManager.createKingdomBank(0),
                     new DirtyMap<>(roleManager.createKingdomRoles()),
                     new KingdomLocations(new DirtyMap<>(new HashMap<>())),
                     now
@@ -451,7 +453,7 @@ public class DataManager {
             values.add(role.id());
             suppliers.add(() -> values);
         }
-        statement.insert(connection, suppliers, kingdom.getMembers().size());
+        statement.insert(connection, suppliers, kingdom.getUsers().size());
         roles.setDirty(false);
     }
 
@@ -536,8 +538,8 @@ public class DataManager {
         final List<Supplier<List<Object>>> values = new ArrayList<>();
         for (ClaimedChunk chunk : chunks) {
             if (chunk.isWilderness() || !chunk.isDirty()) continue;
-            final KChunk kChunk = chunk.getChunk();
-            values.add(() -> List.of(chunk.getChunk().getChunkKey(), chunk.getKingdomId(), uuidToBytes(chunk.getWorld()), kChunk.x(), kChunk.z()));
+            final ChunkPos ChunkPos = chunk.getChunk();
+            values.add(() -> List.of(chunk.getChunk().getChunkKey(), chunk.getKingdomId(), uuidToBytes(chunk.getWorld()), ChunkPos.x(), ChunkPos.z()));
         }
         final SQLStatement statement = SQLStatement.insert(CHUNK_TABLE_NAME)
                 .add(CHUNK_KEY_COLUMN)
@@ -629,7 +631,7 @@ public class DataManager {
                 final UUID world = bytesToUUID(results.getBytes(CHUNK_WORLD_UUID_COLUMN.getName()));
                 final int x = results.getInt(CHUNK_X_COLUMN.getName());
                 final int z = results.getInt(CHUNK_Z_COLUMN.getName());
-                final KChunk chunk = new KChunk(world, x, z);
+                final ChunkPos chunk = new ChunkPos(world, x, z);
                 final PermissionContainer permissions = this.loadChunkPermissions(connection, world, chunkKey, kingdomId);
                 final ClaimedChunk claimedChunk = new ClaimedChunk(this.plugin, kingdomId, chunk, permissions);
                 chunks.add(claimedChunk);
@@ -638,7 +640,7 @@ public class DataManager {
         });
     }
 
-    public void queueChunkToLoad(KChunk chunk, boolean startTaskIfNotRunning) {
+    public void queueChunkToLoad(ChunkPos chunk, boolean startTaskIfNotRunning) {
         this.onChunkLoadDelayedLoader.addToQueue(chunk, startTaskIfNotRunning);
     }
 
@@ -646,7 +648,7 @@ public class DataManager {
         this.onChunkLoadDelayedLoader.forceLoadAll(onMainThread);
     }
 
-    public void queueChunkToUnload(KChunk chunk, boolean startTaskIfNotRunning) {
+    public void queueChunkToUnload(ChunkPos chunk, boolean startTaskIfNotRunning) {
         this.onChunkUnloadDelayedLoader.addToQueue(chunk, startTaskIfNotRunning);
     }
 
@@ -654,7 +656,7 @@ public class DataManager {
         this.onChunkUnloadDelayedLoader.forceLoadAll(onMainThread);
     }
 
-    protected Collection<ClaimedChunk> loadClaimedChunks(Collection<KChunk> chunks) {
+    protected Collection<ClaimedChunk> loadClaimedChunks(Collection<ChunkPos> chunks) {
         try (final Connection connection = this.getConnection()) {
             return this.loadClaimedChunks(connection, chunks);
         } catch (SQLException e) {
@@ -663,9 +665,9 @@ public class DataManager {
         return Collections.emptySet();
     }
 
-    protected Collection<ClaimedChunk> loadClaimedChunks(Connection connection, Collection<KChunk> chunks) throws SQLException {
+    protected Collection<ClaimedChunk> loadClaimedChunks(Connection connection, Collection<ChunkPos> chunks) throws SQLException {
         final Set<ClaimedChunk> loaded = new HashSet<>();
-        for (KChunk chunk : chunks) {
+        for (ChunkPos chunk : chunks) {
             final long chunkKey = chunk.getChunkKey();
             final UUID world = chunk.world();
             final SQLQuery<ClaimedChunk> statement = SQLQuery.<ClaimedChunk>select(CHUNK_TABLE_NAME)
@@ -681,7 +683,7 @@ public class DataManager {
                 final int x = results.getInt(CHUNK_X_COLUMN.getName());
                 final int z = results.getInt(CHUNK_Z_COLUMN.getName());
                 final PermissionContainer container = this.loadChunkPermissions(connection, world, chunkKey, kingdomId);
-                return new ClaimedChunk(this.plugin, kingdomId, KChunk.at(world, x, z), container);
+                return new ClaimedChunk(this.plugin, kingdomId, ChunkPos.at(world, x, z), container);
             });
             if (claimedChunk == null) continue;
             loaded.add(claimedChunk);
@@ -763,9 +765,9 @@ public class DataManager {
                 )))
                 .build();
         return query.mapTo(connection, results -> {
-            if (!results.next()) return Bank.createKingdomBank(0);
+            if (!results.next()) return EconomyManager.createKingdomBank(0);
             final double money = results.getDouble(BANK_MONEY_COLUMN.getName());
-            return Bank.createKingdomBank(money);
+            return EconomyManager.createKingdomBank(money);
         });
     }
 
@@ -1109,11 +1111,11 @@ public class DataManager {
                 .execute(connection);
     }
 
-    public void deleteChunk(KChunk chunk) {
+    public void deleteChunk(ChunkPos chunk) {
         this.deleteChunks(Collections.singleton(chunk));
     }
 
-    public void deleteChunks(Collection<KChunk> chunks) {
+    public void deleteChunks(Collection<ChunkPos> chunks) {
         try (final Connection connection = this.getConnection()) {
             this.deleteChunks(connection, chunks);
         } catch (SQLException e) {
@@ -1121,8 +1123,8 @@ public class DataManager {
         }
     }
 
-    private void deleteChunks(Connection connection, Collection<KChunk> chunks) throws SQLException {
-        for (KChunk chunk : chunks) {
+    private void deleteChunks(Connection connection, Collection<ChunkPos> chunks) throws SQLException {
+        for (ChunkPos chunk : chunks) {
             DeleteStatement.builder(CHUNK_TABLE)
                     .where(new WhereCondition(List.of(
                             Pair.of(CHUNK_WORLD_UUID_COLUMN, () -> this.uuidToBytes(chunk.world())),

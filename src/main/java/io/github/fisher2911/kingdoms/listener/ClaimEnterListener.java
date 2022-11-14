@@ -18,6 +18,9 @@
 
 package io.github.fisher2911.kingdoms.listener;
 
+import io.github.fisher2911.fisherlib.listener.CoreListener;
+import io.github.fisher2911.fisherlib.message.MessageHandler;
+import io.github.fisher2911.fisherlib.task.TaskChain;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.api.event.user.UserChangeChunksEvent;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
@@ -26,9 +29,7 @@ import io.github.fisher2911.kingdoms.kingdom.WorldManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimManager;
 import io.github.fisher2911.kingdoms.kingdom.claim.ClaimMode;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
-import io.github.fisher2911.kingdoms.message.Message;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
-import io.github.fisher2911.kingdoms.task.TaskChain;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.bukkit.Bukkit;
@@ -36,17 +37,19 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-public class ClaimEnterListener extends KListener {
+public class ClaimEnterListener extends CoreListener {
 
     private final Kingdoms plugin;
+    private final MessageHandler messageHandler;
     private final WorldManager worldManager;
     private final KingdomManager kingdomManager;
     private final ClaimManager claimManager;
     private final UserManager userManager;
 
     public ClaimEnterListener(Kingdoms plugin) {
-        super(plugin.getGlobalListener());
+        super(plugin);
         this.plugin = plugin;
+        this.messageHandler = plugin.getMessageHandler();
         this.worldManager = this.plugin.getWorldManager();
         this.kingdomManager = this.plugin.getKingdomManager();
         this.claimManager = this.plugin.getClaimManager();
@@ -95,7 +98,7 @@ public class ClaimEnterListener extends KListener {
         TaskChain.create(this.plugin)
                 .supplyAsync(() -> this.kingdomManager.getKingdom(chunk.getKingdomId(), true))
                 .consumeSync(opt -> opt.ifPresent(kingdom -> {
-                            MessageHandler.sendMessage(user, Message.ENTERED_KINGDOM_LAND, kingdom);
+                            this.messageHandler.sendMessage(user, KMessage.ENTERED_KINGDOM_LAND, kingdom);
                             final ClaimMode claimMode = this.claimManager.getClaimMode(player.getUniqueId());
                             if (claimMode == ClaimMode.UNCLAIM && kingdom.hasPermission(user, KPermission.UNCLAIM_LAND, chunk)) {
                                 this.claimManager.tryUnClaim(user, kingdom, chunk);
@@ -112,8 +115,8 @@ public class ClaimEnterListener extends KListener {
             TaskChain.create(this.plugin)
                     .supplyAsync(() -> this.kingdomManager.getKingdom(previous.getKingdomId(), true))
                     .consumeSync(opt -> {
-                        opt.ifPresent(kingdom -> MessageHandler.sendMessage(user, Message.LEFT_KINGDOM_LAND, kingdom));
-                        MessageHandler.sendMessage(user, Message.ENTERED_WILDERNESS_LAND);
+                        opt.ifPresent(kingdom -> this.messageHandler.sendMessage(user, KMessage.LEFT_KINGDOM_LAND, kingdom));
+                        this.messageHandler.sendMessage(user, KMessage.ENTERED_WILDERNESS_LAND);
                     })
                     .execute();
             return;

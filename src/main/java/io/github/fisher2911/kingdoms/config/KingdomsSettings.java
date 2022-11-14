@@ -18,12 +18,14 @@
 
 package io.github.fisher2911.kingdoms.config;
 
+import io.github.fisher2911.fisherlib.config.BaseSettings;
+import io.github.fisher2911.fisherlib.configurate.yaml.YamlConfigurationLoader;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
+import io.github.fisher2911.kingdoms.command.CommandPermission;
 
 import java.io.IOException;
 
-public class KingdomsSettings extends Config {
+public class KingdomsSettings extends BaseSettings {
 
     public KingdomsSettings(Kingdoms plugin) {
         super(plugin, "config.yml");
@@ -166,4 +168,10 @@ public class KingdomsSettings extends Config {
     public int getCommandsPerHelpPage() {
         return commandsPerHelpPage;
     }
+
+    @Override
+    public String getAdminHelpPermission() {
+        return CommandPermission.VIEW_ADMIN_COMMAND_HELP.getValue();
+    }
+
 }

@@ -20,7 +20,7 @@ package io.github.fisher2911.kingdoms.kingdom;
 
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.data.DataManager;
-import io.github.fisher2911.kingdoms.world.KChunk;
+import io.github.fisher2911.fisherlib.world.ChunkPos;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +46,7 @@ public class WorldMap {
     }
 
     public ClaimedChunk getAt(int x, int z) {
-        return this.chunks.computeIfAbsent(KChunk.chunkKeyAt(x, z), k -> ClaimedChunk.wilderness(this.plugin, KChunk.at(this.world, x, z)));
+        return this.chunks.computeIfAbsent(ChunkPos.chunkKeyAt(x, z), k -> ClaimedChunk.wilderness(this.plugin, ChunkPos.at(this.world, x, z)));
     }
 
     public void setChunk(ClaimedChunk chunk) {
@@ -56,24 +56,24 @@ public class WorldMap {
     }
 
     public void setToWilderness(int x, int z) {
-        this.setToWilderness(KChunk.at(this.world, x, z));
+        this.setToWilderness(ChunkPos.at(this.world, x, z));
     }
 
-    public void setToWilderness(KChunk chunk) {
+    public void setToWilderness(ChunkPos chunk) {
         this.setChunk(ClaimedChunk.wilderness(this.plugin, chunk));
     }
 
     public ClaimedChunk remove(int x, int z) {
-        final ClaimedChunk chunk = this.chunks.remove(KChunk.chunkKeyAt(x, z));
-        return chunk == null ? ClaimedChunk.wilderness(this.plugin, KChunk.at(this.world, x, z)) : chunk;
+        final ClaimedChunk chunk = this.chunks.remove(ChunkPos.chunkKeyAt(x, z));
+        return chunk == null ? ClaimedChunk.wilderness(this.plugin, ChunkPos.at(this.world, x, z)) : chunk;
     }
 
-    public boolean isChunkLoaded(KChunk chunk) {
+    public boolean isChunkLoaded(ChunkPos chunk) {
         return this.isChunkLoaded(chunk.x(), chunk.z());
     }
 
     public boolean isChunkLoaded(int x, int z) {
-        final long chunkKey = KChunk.chunkKeyAt(x, z);
+        final long chunkKey = ChunkPos.chunkKeyAt(x, z);
         final ClaimedChunk claimed = this.chunks.get(chunkKey);
         if (claimed == null) return false;
         final World world = Bukkit.getWorld(this.world);

@@ -18,6 +18,7 @@
 
 package io.github.fisher2911.kingdoms.listener;
 
+import io.github.fisher2911.fisherlib.listener.CoreListener;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
@@ -30,14 +31,14 @@ import org.bukkit.event.world.WorldUnloadEvent;
 
 import java.util.UUID;
 
-public class ClaimLoadListener extends KListener {
+public class ClaimLoadListener extends CoreListener {
 
     private final Kingdoms plugin;
     private final WorldManager worldManager;
     private final DataManager dataManager;
 
     public ClaimLoadListener(Kingdoms plugin) {
-        super(plugin.getGlobalListener());
+        super(plugin);
         this.plugin = plugin;
         this.worldManager = this.plugin.getWorldManager();
         this.dataManager = this.plugin.getDataManager();

@@ -2,9 +2,9 @@ title: <blue>Set %kingdom_member_name%'s role
 id: set-member-role
 rows: 5
 required-metadata:
-  - KINGDOM
-  - ROLE
-  - USER
+  - kingdom
+  - role-id
+  - user
 border:
   1:
     item:

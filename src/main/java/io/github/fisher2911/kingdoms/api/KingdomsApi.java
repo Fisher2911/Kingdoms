@@ -18,19 +18,19 @@
 
 package io.github.fisher2911.kingdoms.api;
 
+import io.github.fisher2911.fisherlib.gui.GuiOpener;
+import io.github.fisher2911.fisherlib.listener.GlobalListener;
+import io.github.fisher2911.fisherlib.task.TaskChain;
+import io.github.fisher2911.fisherlib.upgrade.UpgradeHolder;
+import io.github.fisher2911.fisherlib.upgrade.Upgrades;
+import io.github.fisher2911.fisherlib.world.ChunkPos;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import io.github.fisher2911.kingdoms.gui.GuiOpener;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContext;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.UpgradeHolder;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
-import io.github.fisher2911.kingdoms.listener.GlobalListener;
-import io.github.fisher2911.kingdoms.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.world.KChunk;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -111,7 +111,7 @@ public class KingdomsApi {
      * have the {@link io.github.fisher2911.kingdoms.kingdom.WildernessKingdom} id as the owner
      */
     @NotNull
-    public ClaimedChunk getClaimAt(@NotNull KChunk chunk) {
+    public ClaimedChunk getClaimAt(@NotNull ChunkPos chunk) {
         return this.plugin.getWorldManager().getAt(chunk);
     }
 
@@ -178,14 +178,14 @@ public class KingdomsApi {
      * @return the {@link Upgrades} if it exists, or else null
      */
     @Nullable
-    public GuiOpener getGuiOpener(@NotNull String id) {
+    public GuiOpener<User> getGuiOpener(@NotNull String id) {
         return this.plugin.getGuiManager().getGuiOpener(id);
     }
 
     /**
      * @param guiOpener the {@link GuiOpener} to register
      */
-    public void addGuiOpener(@NotNull GuiOpener guiOpener) {
+    public void addGuiOpener(@NotNull GuiOpener<User> guiOpener) {
         this.plugin.getGuiManager().addGuiOpener(guiOpener);
     }
 

@@ -18,15 +18,14 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.info;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
+import io.github.fisher2911.fisherlib.task.TaskChain;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
-import io.github.fisher2911.kingdoms.message.Message;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
-import io.github.fisher2911.kingdoms.task.TaskChain;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.user.User;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -51,7 +50,7 @@ public class InfoCommand extends KCommand {
         TaskChain.create(this.plugin)
                 .runAsync(() -> this.kingdomManager.getKingdomByName(kingdomName, true).ifPresentOrElse(k ->
                                 this.kingdomManager.sendKingdomInfo(user, k),
-                        () -> MessageHandler.sendMessage(user, Message.KINGDOM_NOT_FOUND)
+                        () -> this.messageHandler.sendMessage(user, KMessage.KINGDOM_NOT_FOUND)
                 ))
                 .execute();
 

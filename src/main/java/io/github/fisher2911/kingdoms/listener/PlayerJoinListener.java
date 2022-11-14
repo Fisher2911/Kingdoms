@@ -18,24 +18,25 @@
 
 package io.github.fisher2911.kingdoms.listener;
 
+import io.github.fisher2911.fisherlib.listener.CoreListener;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.data.DataManager;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
-import io.github.fisher2911.kingdoms.task.TaskChain;
+import io.github.fisher2911.fisherlib.task.TaskChain;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class PlayerJoinListener extends KListener {
+public class PlayerJoinListener extends CoreListener {
 
     private final Kingdoms plugin;
     private final UserManager userManager;
     private final DataManager dataManager;
 
     public PlayerJoinListener(Kingdoms plugin) {
-        super(plugin.getGlobalListener());
+        super(plugin);
         this.plugin = plugin;
         this.userManager = this.plugin.getUserManager();
         this.dataManager = this.plugin.getDataManager();

@@ -3,7 +3,7 @@ version: "3.1.0-beta"
 main: io.github.fisher2911.kingdoms.Kingdoms
 api-version: 1.16
 authors: [ Fisher2911 ]
-depend: [ Vault ]
+depend: [ FisherLib, Vault ]
 softdepend: [ WorldGuard, PlaceholderAPI ]
 commands:
   kingdom:

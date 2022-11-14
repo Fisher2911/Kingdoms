@@ -18,13 +18,12 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.kick;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
+import io.github.fisher2911.fisherlib.task.TaskChain;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
-import io.github.fisher2911.kingdoms.message.Message;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
-import io.github.fisher2911.kingdoms.task.TaskChain;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.user.User;
 import io.github.fisher2911.kingdoms.user.UserManager;
 import org.jetbrains.annotations.Nullable;
@@ -49,7 +48,7 @@ public class KickCommand extends KCommand {
         TaskChain.create(this.plugin).
                 supplyAsync(() -> this.userManager.getUserByName(playerName, true))
                 .consumeAsync(opt -> opt.ifPresentOrElse(toKick -> this.kingdomManager.tryKick(user, toKick, true),
-                        () -> MessageHandler.sendMessage(user, Message.NOT_IN_KINGDOM)))
+                        () -> this.messageHandler.sendMessage(user, KMessage.NOT_IN_KINGDOM)))
                 .execute();
 
     }

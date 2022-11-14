@@ -18,15 +18,16 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.permission;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
+import io.github.fisher2911.fisherlib.gui.GuiKey;
+import io.github.fisher2911.fisherlib.task.TaskChain;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.gui.GuiKeys;
 import io.github.fisher2911.kingdoms.gui.GuiManager;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.role.RoleManager;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
-import io.github.fisher2911.kingdoms.task.TaskChain;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,12 +60,12 @@ public class EditPermissionsCommand extends KCommand {
                                 GuiManager.PERMISSIONS_GUI,
                                 user,
                                 Map.of(
-                                        GuiKeys.USER, user,
+                                        GuiKey.USER, user,
                                         GuiKeys.KINGDOM, kingdom,
                                         GuiKeys.ROLE_ID, args[0]
                                 ),
                                 Set.of()
-                        ), () -> MessageHandler.sendNotInKingdom(user)))
+                        ), () -> this.messageHandler.sendMessage(user, KMessage.NOT_IN_KINGDOM)))
                 .execute();
     }
 

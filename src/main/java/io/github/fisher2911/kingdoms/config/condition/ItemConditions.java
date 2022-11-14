@@ -18,8 +18,9 @@
 
 package io.github.fisher2911.kingdoms.config.condition;
 
-import io.github.fisher2911.kingdoms.gui.ConditionalItem;
-import io.github.fisher2911.kingdoms.util.Metadata;
+import io.github.fisher2911.fisherlib.config.condition.MetadataPredicate;
+import io.github.fisher2911.fisherlib.gui.ConditionalItem;
+import io.github.fisher2911.fisherlib.util.Metadata;
 
 import java.util.List;
 

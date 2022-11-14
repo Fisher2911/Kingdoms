@@ -18,12 +18,12 @@
 
 package io.github.fisher2911.kingdoms.teleport;
 
+import io.github.fisher2911.fisherlib.message.MessageHandler;
+import io.github.fisher2911.fisherlib.world.WorldPosition;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.api.event.kingdom.KingdomMemberTeleportEvent;
-import io.github.fisher2911.kingdoms.message.Message;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.world.WorldPosition;
 import org.bukkit.Bukkit;
 
 import java.util.HashMap;
@@ -33,10 +33,12 @@ import java.util.UUID;
 public class TeleportManager {
 
     private final Kingdoms plugin;
+    private final MessageHandler messageHandler;
     private final Map<UUID, TeleportInfo> teleporting = new HashMap<>();
 
     public TeleportManager(Kingdoms plugin) {
         this.plugin = plugin;
+        this.messageHandler = plugin.getMessageHandler();
     }
 
     public void tryTeleport(TeleportInfo info) {
@@ -64,17 +66,17 @@ public class TeleportManager {
                 }
                 user.getPlayer().teleport(info.getTo().toLocation());
                 this.teleporting.remove(uuid);
-                MessageHandler.sendMessage(user, Message.TELEPORT_SUCCESS);
+                this.messageHandler.sendMessage(user, KMessage.TELEPORT_SUCCESS);
                 return;
             }
             final WorldPosition lastPosition = user.getPosition();
             if (lastPosition == null) return;
             if (!lastPosition.isSameBlock(info.getStartPosition())) {
-                MessageHandler.sendMessage(user, Message.TELEPORT_CANCELLED_MOVEMENT);
+                this.messageHandler.sendMessage(user, KMessage.TELEPORT_CANCELLED_MOVEMENT);
                 this.teleporting.remove(uuid);
                 return;
             }
-            MessageHandler.sendMessage(user, Message.TELEPORT_COUNTDOWN, info);
+            this.messageHandler.sendMessage(user, KMessage.TELEPORT_COUNTDOWN, info);
             info.decSeconds();
             this.doTeleportTask(uuid, 20);
         }, delay);

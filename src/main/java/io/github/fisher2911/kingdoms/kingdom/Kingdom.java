@@ -18,9 +18,12 @@
 
 package io.github.fisher2911.kingdoms.kingdom;
 
+import io.github.fisher2911.fisherlib.data.Saveable;
+import io.github.fisher2911.fisherlib.economy.Bank;
+import io.github.fisher2911.fisherlib.upgrade.Upgradeable;
+import io.github.fisher2911.fisherlib.user.UserGroup;
+import io.github.fisher2911.fisherlib.util.collections.DirtyMap;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.data.Saveable;
-import io.github.fisher2911.kingdoms.economy.Bank;
 import io.github.fisher2911.kingdoms.kingdom.location.KingdomLocations;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermissible;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
@@ -29,9 +32,7 @@ import io.github.fisher2911.kingdoms.kingdom.permission.PermissionContainer;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationInfo;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgradeable;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.util.collections.DirtyMap;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -39,7 +40,7 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder, Saveable {
+public interface Kingdom extends UserGroup<User>, KPermissible, Upgradeable<User, Kingdom>, KPermissionHolder, Saveable {
 
     int WILDERNESS_ID = -1;
 
@@ -48,7 +49,6 @@ public interface Kingdom extends KPermissible, Upgradeable, KPermissionHolder, S
     void setName(String name);
     String getDescription();
     void setDescription(String description);
-    Collection<User> getMembers();
     int getMaxMembers();
     DirtyMap<UUID, Role> getUserRoles();
     void consumeRoles(Consumer<User> consumer, Role... roles);

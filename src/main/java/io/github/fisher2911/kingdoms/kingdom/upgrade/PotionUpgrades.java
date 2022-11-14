@@ -18,21 +18,23 @@
 
 package io.github.fisher2911.kingdoms.kingdom.upgrade;
 
+import io.github.fisher2911.fisherlib.configurate.ConfigurationNode;
+import io.github.fisher2911.fisherlib.exp4j.Expression;
+import io.github.fisher2911.fisherlib.upgrade.IntUpgrades;
+import io.github.fisher2911.fisherlib.upgrade.NumberUpgrades;
+import io.github.fisher2911.fisherlib.util.EnumUtil;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.util.EnumUtil;
-import net.objecthunter.exp4j.Expression;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
-import org.spongepowered.configurate.ConfigurationNode;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PotionUpgrades extends IntUpgrades implements EntryUpgrade<Integer> {
+public class PotionUpgrades extends IntUpgrades implements KingdomEntryUpgrades<Integer> {
 
     private final Set<PotionEffectType> potionEffectTypes;
     private final Set<RelationType> appliesTo;
@@ -55,7 +57,7 @@ public class PotionUpgrades extends IntUpgrades implements EntryUpgrade<Integer>
     }
 
     public PotionUpgrades(IntUpgrades upgrades, Set<PotionEffectType> potionEffectTypes, Set<RelationType> appliesTo, boolean appliesToSelf) {
-        super(upgrades.id, upgrades.displayName, upgrades.expression, upgrades.moneyPriceExpression, upgrades.getMaxLevel());
+        super(upgrades.getId(), upgrades.getDisplayName(), upgrades.getExpression(), upgrades.getMoneyPriceExpression(), upgrades.getMaxLevel());
         this.potionEffectTypes = potionEffectTypes;
         this.appliesTo = appliesTo;
         this.appliesToSelf = appliesToSelf;
@@ -89,9 +91,18 @@ public class PotionUpgrades extends IntUpgrades implements EntryUpgrade<Integer>
         }
     }
 
-    @Override
     public Set<RelationType> appliesTo() {
         return this.appliesTo;
+    }
+
+    @Override
+    public boolean appliesTo(Kingdom kingdom, User user) {
+        return this.appliesTo.contains(kingdom.getKingdomRelation(user.getKingdomId()));
+    }
+
+    @Override
+    public boolean appliesTo(RelationType relationType) {
+        return false;
     }
 
     @Override

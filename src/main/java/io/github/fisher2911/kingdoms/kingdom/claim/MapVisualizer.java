@@ -18,30 +18,32 @@
 
 package io.github.fisher2911.kingdoms.kingdom.claim;
 
+import io.github.fisher2911.fisherlib.adventure.text.Component;
+import io.github.fisher2911.fisherlib.message.MessageHandler;
+import io.github.fisher2911.fisherlib.world.ChunkPos;
+import io.github.fisher2911.fisherlib.world.Position;
+import io.github.fisher2911.fisherlib.world.WorldPosition;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.config.KingdomsSettings;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
 import io.github.fisher2911.kingdoms.kingdom.WildernessKingdom;
 import io.github.fisher2911.kingdoms.kingdom.WorldManager;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.world.KChunk;
-import io.github.fisher2911.kingdoms.world.Position;
-import io.github.fisher2911.kingdoms.world.WorldPosition;
-import net.kyori.adventure.text.Component;
 
 import java.util.UUID;
 
 public class MapVisualizer {
 
     private final Kingdoms plugin;
+    private final MessageHandler messageHandler;
     private final KingdomsSettings settings;
     private final KingdomManager kingdomManager;
     private final WorldManager worldManager;
 
     public MapVisualizer(Kingdoms plugin) {
         this.plugin = plugin;
+        this.messageHandler = plugin.getMessageHandler();
         this.settings = plugin.getKingdomSettings();
         this.kingdomManager = plugin.getKingdomManager();
         this.worldManager = plugin.getWorldManager();
@@ -64,38 +66,38 @@ public class MapVisualizer {
             }
             builder = builder.append(Component.newline());
         }
-        MessageHandler.sendMessage(
+        this.messageHandler.sendMessage(
                 user,
                 builder
         );
     }
 
     private Component getChunkMessage(ClaimedChunk chunk, User viewer, int viewerX, int viewerZ) {
-        final KChunk kChunk = chunk.getChunk();
-        final boolean isStandingInChunk = kChunk.x() == viewerX && kChunk.z() == viewerZ;
+        final ChunkPos ChunkPos = chunk.getChunk();
+        final boolean isStandingInChunk = ChunkPos.x() == viewerX && ChunkPos.z() == viewerZ;
         if (chunk.isWilderness()) {
             if (isStandingInChunk) {
-                return MessageHandler.deserialize(this.settings.getKingdomMapStandingInSymbol(), kChunk, WildernessKingdom.INSTANCE);
+                return this.messageHandler.deserialize(this.settings.getKingdomMapStandingInSymbol(), ChunkPos, WildernessKingdom.INSTANCE);
             }
-            return MessageHandler.deserialize(this.settings.getKingdomMapWildernessSymbol(), kChunk);
+            return this.messageHandler.deserialize(this.settings.getKingdomMapWildernessSymbol(), ChunkPos);
         }
         final int ownedBy = chunk.getKingdomId();
         final boolean ownedBySelf = ownedBy == viewer.getKingdomId();
         return this.kingdomManager.getKingdom(ownedBy, false)
                 .map(kingdom -> {
                     if (isStandingInChunk) {
-                        return MessageHandler.deserialize(this.settings.getKingdomMapStandingInSymbol(), kChunk, kingdom);
+                        return this.messageHandler.deserialize(this.settings.getKingdomMapStandingInSymbol(), ChunkPos, kingdom);
                     }
                     if (ownedBySelf) {
-                        return MessageHandler.deserialize(this.settings.getKingdomMapSelfClaimedLandSymbol(), kingdom, kChunk);
+                        return this.messageHandler.deserialize(this.settings.getKingdomMapSelfClaimedLandSymbol(), kingdom, ChunkPos);
                     }
-                    return MessageHandler.deserialize(this.settings.getKingdomMapClaimedLandSymbol(), kingdom, kChunk);
+                    return this.messageHandler.deserialize(this.settings.getKingdomMapClaimedLandSymbol(), kingdom, ChunkPos);
                 })
                 .orElseGet(() -> {
                     if (isStandingInChunk) {
-                        return MessageHandler.deserialize(this.settings.getKingdomMapStandingInSymbol(), kChunk, WildernessKingdom.INSTANCE);
+                        return this.messageHandler.deserialize(this.settings.getKingdomMapStandingInSymbol(), ChunkPos, WildernessKingdom.INSTANCE);
                     }
-                    return MessageHandler.deserialize(this.settings.getKingdomMapWildernessSymbol(), kChunk);
+                    return this.messageHandler.deserialize(this.settings.getKingdomMapWildernessSymbol(), ChunkPos);
                 });
     }
 

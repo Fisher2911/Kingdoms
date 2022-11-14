@@ -18,9 +18,9 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom.admin;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.command.CommandPermission;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.user.User;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +35,7 @@ public class AdminCommand extends KCommand {
                 plugin,
                 parent,
                 "admin",
-                CommandPermission.ADMIN_COMMAND,
+                CommandPermission.ADMIN_COMMAND.getValue(),
                 CommandSenderType.ANY,
                 -1,
                 -1,

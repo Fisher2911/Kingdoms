@@ -18,15 +18,15 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
+import io.github.fisher2911.fisherlib.message.MessageHandler;
+import io.github.fisher2911.fisherlib.task.TaskChain;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
-import org.jetbrains.annotations.Nullable;
 import io.github.fisher2911.kingdoms.kingdom.KingdomManager;
-import io.github.fisher2911.kingdoms.message.Message;
-import io.github.fisher2911.kingdoms.message.MessageHandler;
-import io.github.fisher2911.kingdoms.task.TaskChain;
+import io.github.fisher2911.kingdoms.message.KMessage;
 import io.github.fisher2911.kingdoms.user.User;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -52,7 +52,7 @@ public class CreateCommand extends KCommand {
     @Override
     public void execute(User user, String[] args, String[] previous) {
         if (user.hasKingdom()) {
-            MessageHandler.sendMessage(user, Message.ALREADY_IN_KINGDOM);
+            this.messageHandler.sendMessage(user, KMessage.ALREADY_IN_KINGDOM);
             return;
         }
         final String name = args[0];

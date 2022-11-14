@@ -18,8 +18,8 @@
 
 package io.github.fisher2911.kingdoms.command.kingdom;
 
+import io.github.fisher2911.fisherlib.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.command.CommandSenderType;
 import io.github.fisher2911.kingdoms.command.KCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.admin.AdminCommand;
 import io.github.fisher2911.kingdoms.command.kingdom.bank.BankCommand;

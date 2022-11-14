@@ -21,7 +21,7 @@ package io.github.fisher2911.kingdoms.chat;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.relation.RelationType;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.util.StringUtils;
+import io.github.fisher2911.fisherlib.util.StringUtils;
 
 import java.util.function.BiPredicate;
 

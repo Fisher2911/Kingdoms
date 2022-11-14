@@ -2,10 +2,10 @@ title: "<blue>Permissions %chunk_x%, %chunk_z%"
 id: chunk-permissions
 rows: 5
 required-metadata:
-  - KINGDOM
-  - ROLE
-  - USER
-  - CHUNK
+  - kingdom
+  - role-id
+  - user
+  - chunk
 border:
   1:
     item:

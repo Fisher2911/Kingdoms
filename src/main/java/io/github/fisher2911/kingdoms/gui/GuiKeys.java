@@ -18,86 +18,93 @@
 
 package io.github.fisher2911.kingdoms.gui;
 
+import io.github.fisher2911.fisherlib.gui.GuiKey;
+import io.github.fisher2911.fisherlib.upgrade.Upgrades;
+import io.github.fisher2911.kingdoms.Kingdoms;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.kingdom.permission.KPermission;
 import io.github.fisher2911.kingdoms.kingdom.role.Role;
-import io.github.fisher2911.kingdoms.kingdom.upgrade.Upgrades;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.PermissionWrapper;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UpgradesWrapper;
 import io.github.fisher2911.kingdoms.placeholder.wrapper.UserKingdomWrapper;
 import io.github.fisher2911.kingdoms.user.User;
-import io.github.fisher2911.kingdoms.util.Metadata;
+import org.bukkit.Bukkit;
 
-import java.util.ArrayList;
-import java.util.List;
+import static io.github.fisher2911.fisherlib.gui.GuiKey.key;
+import static io.github.fisher2911.fisherlib.gui.GuiKey.registerPlaceholderAccumulator;
 
-public enum GuiKeys {
+public class GuiKeys {
 
-    GUI,
-    PERMISSION,
-    KINGDOM,
-    USER,
-    ROLE_ID,
-    CHUNK,
-    UPGRADE_ID,
-    DELETE_CONSUMER,
-    INCREASE_LEVEL_CONSUMER,
-    SWAP_VALUE_CONSUMER,
-    MAX_LEVEL_ITEM,
-    SEND_DATA_KEYS,
-    PREVIOUS_MENU_ID,
-    KINGDOM_MEMBER,
-    USER_KINGDOM_WRAPPER,
+    private static final Kingdoms PLUGIN = Kingdoms.getPlugin(Kingdoms.class);
 
+    public static final GuiKey KINGDOM = key(PLUGIN, "kingdom", true);
+    public static final GuiKey ROLE_ID = key(PLUGIN, "role-id", true);
+    public static final GuiKey CHUNK = key(PLUGIN, "chunk", true);
+    public static final GuiKey DELETE_CONSUMER = key(PLUGIN, "delete-consumer", true);
+    public static final GuiKey SWAP_VALUE_CONSUMER = key(PLUGIN, "swap-value-consumer", true);
+    public static final GuiKey KINGDOM_MEMBER = key(PLUGIN, "kingdom-member", true);
+    public static final GuiKey USER_KINGDOM_WRAPPER = key(PLUGIN, "user-kingdom-wrapper", true);
+    public static final GuiKey K_PERMISSION = key(PLUGIN, "k-permission", true);
 
-    ;
-
-    // I'll clean this up later - probably
-    public static List<Object> toPlaceholders(Metadata metadata) {
-        final List<Object> placeholders = new ArrayList<>();
-        final Kingdom kingdom = metadata.get(GuiKeys.KINGDOM, Kingdom.class);
-        final User user = metadata.get(GuiKeys.USER, User.class);
-        final String roleId = metadata.get(GuiKeys.ROLE_ID, String.class);
-        final String upgradeId = metadata.get(GuiKeys.UPGRADE_ID, String.class);
-        final KPermission permission = metadata.get(GuiKeys.PERMISSION, KPermission.class);
-        final User kingdomMember = metadata.get(GuiKeys.KINGDOM_MEMBER, User.class);
-        final ClaimedChunk chunk = metadata.get(GuiKeys.CHUNK, ClaimedChunk.class);
-        final BaseGui gui = metadata.get(GuiKeys.GUI, BaseGui.class);
-        if (gui != null) placeholders.add(gui);
-        if (kingdom != null) placeholders.add(kingdom);
-        if (user != null) placeholders.add(user);
-        if (roleId != null && kingdom != null) {
-            final Role role = kingdom.getRole(roleId);
-            placeholders.add(role);
-        }
-        if (chunk != null) {
-            placeholders.add(chunk.getChunk());
-        }
-        if (upgradeId != null && kingdom != null) {
-            final Upgrades<?> upgrades = kingdom.getUpgradeHolder().getUpgrades(upgradeId);
-            final Integer upgradeLevel = kingdom.getUpgradeLevel(upgradeId);
-            if (upgradeLevel != null && upgrades != null) {
-                placeholders.add(new UpgradesWrapper(upgrades, upgradeLevel));
-            } else if (upgrades != null) {
-                placeholders.add(upgrades);
+    static {
+        registerPlaceholderAccumulator(KINGDOM, ((metadata, placeholders) -> {
+            final Kingdom kingdom = metadata.get(GuiKeys.KINGDOM, Kingdom.class);
+            if (kingdom == null) return;
+            placeholders.add(kingdom);
+            final String roleId = metadata.get(GuiKeys.ROLE_ID, String.class);
+            if (roleId != null) {
+                final Role role = kingdom.getRole(roleId);
+                placeholders.add(role);
             }
-        }
-        if (permission != null && kingdom != null && roleId != null) {
-            final Role role = kingdom.getRole(roleId);
-            if (chunk != null && chunk.getKingdomId() == kingdom.getId()) {
-                placeholders.add(new PermissionWrapper(permission, chunk.hasPermission(role, permission)));
-            } else if (role != null) {
-                placeholders.add(new PermissionWrapper(permission, kingdom.hasPermission(role, permission)));
+            final String upgradeId = metadata.get(GuiKey.UPGRADE_ID, String.class);
+            if (upgradeId != null) {
+                final Upgrades<?> upgrades = kingdom.getUpgradeHolder().getUpgrades(upgradeId);
+                final Integer upgradeLevel = kingdom.getUpgradeLevel(upgradeId);
+                if (upgradeLevel != null && upgrades != null) {
+                    placeholders.add(new UpgradesWrapper(upgrades, upgradeLevel));
+                } else if (upgrades != null) {
+                    placeholders.add(upgrades);
+                }
             }
-        }
-        if (kingdomMember != null && kingdom != null) {
-            placeholders.add(new UserKingdomWrapper(kingdomMember, kingdom));
-        } else if (user != null && kingdom != null) {
-            placeholders.add(new UserKingdomWrapper(user, kingdom));
-        }
+            final KPermission permission = metadata.get(GuiKeys.K_PERMISSION, KPermission.class);
+            final ClaimedChunk chunk = metadata.get(GuiKeys.CHUNK, ClaimedChunk.class);
+            if (permission != null && roleId != null) {
+                final Role role = kingdom.getRole(roleId);
+                if (chunk != null && chunk.getKingdomId() == kingdom.getId()) {
+                    placeholders.add(new PermissionWrapper(permission, chunk.hasPermission(role, permission)));
+                } else if (role != null) {
+                    placeholders.add(new PermissionWrapper(permission, kingdom.hasPermission(role, permission)));
+                }
+            }
 
-        return placeholders;
+            final User user = metadata.get(GuiKey.USER, User.class);
+            final User kingdomMember = metadata.get(GuiKeys.KINGDOM_MEMBER, User.class);
+            if (kingdomMember != null) {
+                for (int i = 0; i < 5; i++) {
+                    System.out.println("Adding wrapper member");
+                    Bukkit.broadcastMessage(Kingdoms.getPlugin(Kingdoms.class).getPlaceholders().apply(
+                            "%kingdom_member_role_display_name%", new UserKingdomWrapper(kingdomMember, kingdom))
+                    );
+                }
+                placeholders.add(new UserKingdomWrapper(kingdomMember, kingdom));
+            } else if (user != null) {
+                for (int i = 0; i < 5; i++) {
+                    System.out.println("Adding wrapper self");
+                }
+                placeholders.add(new UserKingdomWrapper(user, kingdom));
+            }
+        }));
+        registerPlaceholderAccumulator(CHUNK, ((metadata, placeholders) -> {
+            final ClaimedChunk chunk = metadata.get(GuiKeys.CHUNK, ClaimedChunk.class);
+            if (chunk == null) return;
+            placeholders.add(chunk);
+        }));
+        registerPlaceholderAccumulator(CHUNK, ((metadata, placeholders) -> {
+            final ClaimedChunk chunk = metadata.get(GuiKeys.CHUNK, ClaimedChunk.class);
+            if (chunk == null) return;
+            placeholders.add(chunk);
+        }));
     }
 
 }

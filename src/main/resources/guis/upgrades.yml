@@ -1,10 +1,10 @@
-title: <blue>Roles
+title: <blue>Upgrades
 id: upgrades
 rows: 5
 required-metadata:
-  - KINGDOM
-  - ROLE
-  - USER
+  - kingdom
+  - role-id
+  - user
 border:
   1:
     item:
@@ -29,7 +29,7 @@ gui-fillers:
           - "<blue>%upgrade_display_name%: %upgrade_display_value%"
     actions:
       1:
-        increase_level:
+        increase_upgrade_level:
           click-types: [ LEFT, RIGHT ]
 items:
   36:

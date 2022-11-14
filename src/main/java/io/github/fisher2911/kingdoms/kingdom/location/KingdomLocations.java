@@ -18,9 +18,9 @@
 
 package io.github.fisher2911.kingdoms.kingdom.location;
 
-import io.github.fisher2911.kingdoms.data.Saveable;
-import io.github.fisher2911.kingdoms.util.collections.DirtyMap;
-import io.github.fisher2911.kingdoms.world.WorldPosition;
+import io.github.fisher2911.fisherlib.data.Saveable;
+import io.github.fisher2911.fisherlib.util.collections.DirtyMap;
+import io.github.fisher2911.fisherlib.world.WorldPosition;
 import org.jetbrains.annotations.Nullable;
 
 public class KingdomLocations implements Saveable {

@@ -16,12 +16,18 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.fisher2911.kingdoms.data.sql.dialect;
+package io.github.fisher2911.kingdoms.kingdom.upgrade;
 
-public enum SQLDialect {
+import io.github.fisher2911.fisherlib.FishPlugin;
+import io.github.fisher2911.fisherlib.upgrade.UpgradeManager;
+import io.github.fisher2911.kingdoms.Kingdoms;
+import io.github.fisher2911.kingdoms.kingdom.Kingdom;
+import io.github.fisher2911.kingdoms.user.User;
 
-    SQLITE,
-    MYSQL;
+public class KUpgradeManager extends UpgradeManager<Kingdom, User> {
 
+    public KUpgradeManager(FishPlugin<User, Kingdoms> plugin) {
+        super(plugin, "kingdom-defaults", "upgrades.yml");
+    }
 
 }

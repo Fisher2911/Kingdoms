@@ -18,10 +18,10 @@
 
 package io.github.fisher2911.kingdoms.kingdom.permission;
 
+import io.github.fisher2911.fisherlib.configurate.yaml.YamlConfigurationLoader;
+import io.github.fisher2911.fisherlib.util.StringUtils;
 import io.github.fisher2911.kingdoms.Kingdoms;
-import io.github.fisher2911.kingdoms.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
 import java.io.IOException;

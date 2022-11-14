@@ -21,10 +21,10 @@ package io.github.fisher2911.kingdoms.api.event.chunk;
 import io.github.fisher2911.kingdoms.kingdom.ClaimedChunk;
 import io.github.fisher2911.kingdoms.kingdom.Kingdom;
 import io.github.fisher2911.kingdoms.user.User;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.jetbrains.annotations.NotNull;
 
 public class BreakBlockInClaimEvent extends ClaimedChunkEvent implements Cancellable {
 
