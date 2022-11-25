@@ -1,10 +1,11 @@
 plugins {
     id("java")
     id("com.github.johnrengelman.shadow") version "7.1.1"
+    id("maven-publish")
 }
 
 group = "io.github.fisher2911"
-version = "3.2.1-beta"
+version = "3.2.2-beta"
 
 repositories {
     mavenCentral()
@@ -30,6 +31,20 @@ dependencies {
     compileOnly("org.jetbrains:annotations:23.0.0")
     implementation("com.zaxxer:HikariCP:3.3.0")
     implementation("org.bstats:bstats-bukkit:3.0.0")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 tasks {
