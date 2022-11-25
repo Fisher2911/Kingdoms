@@ -27,7 +27,6 @@ dependencies {
     compileOnly("me.clip:placeholderapi:2.11.2")
     compileOnly("org.xerial:sqlite-jdbc:3.39.2.0")
     compileOnly("com.github.Fisher2911:FisherLib:-SNAPSHOT")
-    compileOnly(files("libs/FisherLib-1.0.0-beta.jar"))
     compileOnly("org.jetbrains:annotations:23.0.0")
     implementation("com.zaxxer:HikariCP:3.3.0")
     implementation("org.bstats:bstats-bukkit:3.0.0")
